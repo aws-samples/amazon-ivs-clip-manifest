@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Amazon IVS Clip Manisfest
+
+Globals:
+  Function:
+    Runtime: nodejs12.x
+    Timeout: 30
+    MemorySize: 128
+    Environment:
+      Variables:
+        STORAGE_IVSRECORDINGS_BUCKETNAME: !Ref IVSRecordingBucket
+
+Resources:
+  ClipManifestLambda:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.handler
+      CodeUri: lambda/
+      Policies:
+        - S3WritePolicy:
+            BucketName: !Ref IVSRecordingBucket
+      Events:
+        Api1:
+          Type: Api
+          Properties:
+            Path: /clipmanifest
+            Method: POST # Workaround for CORS; should be PUT method on '/'
+  IVSRecordingBucket:
+    Type: AWS::S3::Bucket
+
+Outputs:
+  ApiURL:
+    Description: "API endpoint URL for Dev environment"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

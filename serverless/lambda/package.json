@@ -1,0 +1,10 @@
+{
+  "name": "manifestclip",
+  "version": "2.0.0",
+  "description": "Lambda for clip IVS Manifest based on the PDT",
+  "main": "index.js",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "m3u8-parser": "^4.8.0"
+  }
+}
