@@ -35,8 +35,13 @@ curl -X POST <API Gateway Endpoint>/clipmanifest -H "Content-Type: application/j
 
 example: 
 ```sh
-curl -X POST https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/ -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://d2a3twh6jpilo1.cloudfront.net/ivs/v1/098435415742/2rrcA103rn67/2022/9/9/22/21/volmNDWXmzSo/media/hls/master.m3u8\"}" 
+curl -X POST https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/ -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://d33pec9ri0pzqq.cloudfront.net/ivs/v1/098435415742/2rrcA103rn67/2022/10/15/2/11/X5JJ9FegmZiq/media/hls/master.m3u8\"}" 
 ```
+
+### Test the clip
+The new manifest follows the the path URL of the recording with the object called clip_master.m3u8
+**Example:** 
+  https://d33pec9ri0pzqq.cloudfront.net/ivs/v1/098435415742/2rrcA103rn67/2022/10/15/2/11/X5JJ9FegmZiq/media/hls/clip_master.m3u8
 
 ### API Endpoints
 
