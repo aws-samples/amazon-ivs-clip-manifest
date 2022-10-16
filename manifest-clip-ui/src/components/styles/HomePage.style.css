@@ -1,0 +1,179 @@
+body {
+  color: rgb(0, 0, 0);
+}
+
+.Home{
+  margin: auto;
+  margin: auto;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.page-container {
+  justify-content: center;
+  margin: auto;
+  background-color: #fff;
+  width: 65%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 0px 0px 10px 10px;;
+  box-shadow: 0 10px 60px rgba(0, 0, 0, 0.15);
+}
+
+.selector-container {
+  padding-top: 10px;
+  display: flex;
+  margin: auto;
+}
+
+.large {
+  display: flex;
+  max-width: 800px;
+  width: 100%;
+}
+
+.video-container {
+  margin-top: 10px;
+  background-color: #fff;
+  border: 0rem;
+}
+
+.stream-container {
+  position: relative;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  border-radius: 6px;
+}
+
+.controls-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  opacity: 0.5;
+  transition: opacity 150ms ease-in-out;
+  outline: none;
+  max-height: 100%;
+  height: auto; 
+}
+
+.rounded-btn {
+  border-radius: 100%;
+  height: 80px;
+  width: 80px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background-color: #9146FF;
+  opacity: 0.9;
+  border: none;
+  outline: none; 
+}
+
+.controls-container:hover,
+.rounded-start-btn:hover {
+  opacity: 1;
+  outline: none; 
+}
+
+.rounded-btn.stop {
+  background-color: #ff4646;
+  outline: none; 
+}
+
+.placeholder-container{
+  position: relative;
+  left: 0;
+  top: 10px;
+  right: 0;
+  bottom: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+  max-width: 800px;
+  margin-bottom: 10px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.30);
+}
+
+.placeholder-content {
+  position: relative;
+  flex-shrink: 0;
+  margin: center;
+  word-break: break-all;
+  transition: all 0.15s ease-in-out;
+  animation: fadeIn 0.25s 1;
+  width: 70%;
+  padding: 40px;
+  height: 100px;
+  color: #4a4a4a;
+  color: #4a4a4a;
+  font-family: monospace;
+  font-size:large;
+}
+
+.debug-container {
+  padding-top: 10px;
+  position: relative;
+  max-width: 1000px;
+  padding-bottom: 20px;
+}
+
+.debug-data {
+  width: 80%;
+  height: 150px;
+  margin: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.30);
+  justify-content: center;
+  flex-direction: column;
+  border: 0rem;
+  color: #4a4a4a;
+  font-family: monospace;
+  background: #fff;
+  border-radius: 0 0 6px 6px;
+  display: flex;
+  flex-shrink: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  flex-direction: column;
+}
+
+.data-line {
+  display: flex;
+  flex-shrink: 0;
+  margin: 0 5px 0 0;
+  padding: 3px 5px 5px 10px;
+  word-break: break-all;
+  transition: all 0.15s ease-in-out;
+  animation: fadeIn 0.25s 1;
+}
+
+.data-line:last-child {
+  padding-bottom: 2px;
+}
+
+.debug-data__time {
+  min-width: 5rem;
+  font-weight: 300;
+  font-size: 12px;
+  padding-right: 5px;
+}
+
+.debug-data__value {
+  font-weight: bold;
+  font-size: 12px;
+}
+
+
+rounded-btn:focus { outline: none; }
+
+
+
+
+
+
+

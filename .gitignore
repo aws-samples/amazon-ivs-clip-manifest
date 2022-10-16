@@ -1,6 +1,8 @@
 */node_modules
+node_modules/*
 */package-lock.json
 serverless/lambda/node_modules
+manifest-clip-ui/node_modules
 
 
 # production
