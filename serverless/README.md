@@ -16,6 +16,8 @@ aws s3api create-bucket --bucket <my-bucket-name> --region <my-region>
 ```sh
 sam package \
 --template-file template.yaml \
+--s3-bucket <S3_BUCKET> \
+--output-template-file output.yaml
 ```
 
 ### Deploy the package 
