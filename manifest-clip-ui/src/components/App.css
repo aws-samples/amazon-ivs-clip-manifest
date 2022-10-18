@@ -4,60 +4,6 @@
 }
 
 
-.debug-container {
-  padding-top: 10px;
-  position: relative;
-  max-width: 1000px;
-  padding-bottom: 20px;
-}
-
-.debug-data {
-  width: 80%;
-  height: 150px;
-  margin: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.30);
-  justify-content: center;
-  flex-direction: column;
-  border: 0rem;
-  color: #4a4a4a;
-  font-family: monospace;
-  background: #fff;
-  border-radius: 0 0 6px 6px;
-  display: flex;
-  flex-shrink: 0;
-  overflow-x: hidden;
-  overflow-y: scroll;
-  flex-direction: column;
-}
-
-.data-line {
-  display: flex;
-  flex-shrink: 0;
-  margin: 0 5px 0 0;
-  padding: 3px 5px 5px 10px;
-  word-break: break-all;
-  transition: all 0.15s ease-in-out;
-  animation: fadeIn 0.25s 1;
-}
-
-.data-line:last-child {
-  padding-bottom: 2px;
-}
-
-.debug-data__time {
-  min-width: 5rem;
-  font-weight: 300;
-  font-size: 12px;
-  padding-right: 5px;
-}
-
-.debug-data__value {
-  font-weight: bold;
-  font-size: 12px;
-}
-
-
-
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

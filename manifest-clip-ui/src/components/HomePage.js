@@ -64,7 +64,7 @@ export default function HomePage() {
         <div className='selector-container '>
           <form>
             <div className='row'>
-              <div className='col-100'>
+              <div className='col-xl'>
                 <div class='form-group'>
                   <select className='custom-select large' required>
                     <option value=''>Open this select menu</option>
@@ -74,7 +74,7 @@ export default function HomePage() {
                   </select>
                 </div>
               </div>
-              <div class='col'>
+              <div class='col-sm-1'>
                 <button className='btn btn-primary'>Load</button>
               </div>
             </div>
@@ -86,6 +86,121 @@ export default function HomePage() {
             options={videoJsOptions}
             onReady={handlePlayerReady}
           />
+        </div>
+        <div className='controls-container'>
+          Clip Controls
+          <form>
+            <div class='form-group'>
+              <div className='row'>
+                <div className='col-sm-1'>
+                  <button className='btn btn-primary'>Set Start</button>
+                </div>
+                <div className='col-xl'>
+                  <input
+                    type='range'
+                    value='20'
+                    class='form-control-range'
+                    id='formControlRange'
+                  />
+                </div>
+                <div className='col-sm-1'>
+                  <input
+                    type='text'
+                    class='form-control'
+                    id='formGroupExampleInput2'
+                    placeholder='20'
+                  />
+                </div>
+              </div>
+            </div>
+            <div class='form-group'>
+              <div className='row'>
+                <div className='col-sm-1'>
+                  <button className='btn btn-primary'>Set Stop</button>
+                </div>
+                <div className='col-xl'>
+                  <input
+                    type='range'
+                    value='100'
+                    class='form-control-range'
+                    id='formControlRange'
+                  />
+                </div>
+                <div className='col-sm-1'>
+                  <input
+                    type='text'
+                    class='form-control'
+                    id='formGroupExampleInput2'
+                    placeholder='100'
+                  />
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div className='clips-container'>
+          <div className='clips-inline'>
+            <div className='card col-sm-3'>
+              <img
+                class='card-img-top'
+                src='https://i.ytimg.com/vi/l_tHgIVfk_8/maxresdefault.jpg'
+                alt='Card image cap'
+                width='100'
+                height='200'
+              />
+              <div class='card-body'>
+                <p class='card-text'>Clip 1</p>
+              </div>
+            </div>
+            <div className='card col-sm-3'>
+              <img
+                class='card-img-top'
+                src='https://i.ytimg.com/vi/l_tHgIVfk_8/maxresdefault.jpg'
+                alt='Card image cap'
+                width='100'
+                height='200'
+              />
+              <div class='card-body'>
+                <p class='card-text'>Clip 1</p>
+              </div>
+            </div>
+            <div className='card col-sm-3'>
+              <img
+                class='card-img-top'
+                src='https://i.ytimg.com/vi/l_tHgIVfk_8/maxresdefault.jpg'
+                alt='Card image cap'
+                width='100'
+                height='200'
+              />
+              <div class='card-body'>
+                <p class='card-text'>Clip 1</p>
+              </div>
+            </div>
+            <div className='card col-sm-3'>
+              <img
+                class='card-img-top'
+                src='https://i.ytimg.com/vi/l_tHgIVfk_8/maxresdefault.jpg'
+                alt='Card image cap'
+                width='100'
+                height='200'
+              />
+              <div class='card-body'>
+                <p class='card-text'>Clip 1</p>
+              </div>
+            </div>
+            <div className='card col-sm-3'>
+              <img
+                class='card-img-top'
+                src='https://i.ytimg.com/vi/l_tHgIVfk_8/maxresdefault.jpg'
+                alt='Card image cap'
+                width='100'
+                height='200'
+              />
+              <div class='card-body'>
+                <p class='card-text'>Clip 1</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className='debug-container'>

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import './App.css'
-import Player from './PlayerView'
 import Home from './HomePage'
+import Fetch from './apis/GetRecordings'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 export default function App(props) {
@@ -33,7 +33,7 @@ export default function App(props) {
       <Router>
         <Routes>
           <Route path='/' element={<Home {...props} />} />
-          <Route path='/Player' element={<Player {...props} />} />
+          <Route path='/Recordings' element={<Fetch {...props} />} />
         </Routes>
       </Router>
     </div>

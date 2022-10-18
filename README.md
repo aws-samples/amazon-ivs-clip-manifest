@@ -13,7 +13,7 @@ Deploy the backend lambda that clips the content based on the URL
 ### 2. Run the local web interface 
 
 **NOTE:** 🚧 UNDER DEVELOPMENT 🚧
-Whant to contribute, check [CONTRIBUTING.md](CONTRIBUTING.md)
+Want to contribute, check [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ```sh
 cd web-ui
