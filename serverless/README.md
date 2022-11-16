@@ -5,7 +5,7 @@
 cd lambda ; npm install ; cd ..
 ```
 
-### Create a deployment bucket or use a existing bucket
+### Create a deployment bucket or use an existing bucket
 If you already have a deployment bucket, jump this step.
 
 ```sh
@@ -16,8 +16,8 @@ aws s3api create-bucket --bucket <my-bucket-name> --region <my-region>
 ```sh
 sam package \
 --template-file template.yaml \
---s3-bucket <S3_BUCKET> \
---output-template-file output.yaml
+--s3-bucket <my-bucket-name> \
+--output-template-file packaged.yaml
 ```
 
 ### Deploy the package 
@@ -29,11 +29,23 @@ sam deploy \
 ```
 
 ### API Usage
-To test you content  use:
 
+#### Get recordings API
+```sh
+curl -X GET <API Gateway Endpoint>/getrecordings
+```
+
+#### Get clips API
+```sh
+curl -X GET <API Gateway Endpoint>/getclips
+```
+
+#### Create clips API
 ```sh
 curl -X POST <API Gateway Endpoint>/clipmanifest -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://<url of the ivs recording>\"}"
 ```
+
+
 
 example: 
 ```sh

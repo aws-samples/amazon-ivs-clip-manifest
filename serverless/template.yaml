@@ -5,18 +5,21 @@ Description: Amazon IVS Clip Manisfest
 Globals:
   Function:
     Runtime: nodejs12.x
-    Timeout: 30
+    Timeout: 40
     MemorySize: 128
     Environment:
       Variables:
         STORAGE_IVSRECORDINGS_BUCKETNAME: !Ref IVSRecordingBucket
+        CLOUDFRONT_DOMAIN_NAME: !Sub "https://${CloudfrontDistribution.DomainName}"
+        ACCOUNT_ID: !Ref AWS::AccountId
 
 Resources:
+  # Post create clips API
   ClipManifestLambda:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: index.handler
-      CodeUri: lambda/
+      CodeUri: lambdas/clipmanifest
       Policies:
         - S3WritePolicy:
             BucketName: !Ref IVSRecordingBucket
@@ -26,10 +29,102 @@ Resources:
           Properties:
             Path: /clipmanifest
             Method: POST # Workaround for CORS; should be PUT method on '/'
+  # Get recordings API
+  GetRecordingsLambda:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.handler
+      CodeUri: lambdas/getrecordings
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref IVSRecordingBucket
+      Events:
+        Api1:
+          Type: Api
+          Properties:
+            Path: /getrecordings
+            Method: GET # Workaround for CORS; should be PUT method on '/'
+  # Get clips API
+  GetClipsLambda:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.handler
+      CodeUri: lambdas/getclips
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref IVSRecordingBucket
+      Events:
+        Api1:
+          Type: Api
+          Properties:
+            Path: /getclips
+            Method: GET # Workaround for CORS; should be PUT method on '/'
+  ## CloudFront Block
+  CloudFrontOriginAccessIdentity:
+    Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: 'Serverless website OA'
+  
+  CloudfrontDistribution:
+    Type: "AWS::CloudFront::Distribution"
+    Properties:
+      DistributionConfig:
+        Comment: "Cloudfront distribution for IVS Manifest Clip"
+        DefaultRootObject: "index.html"
+        Enabled: true
+        HttpVersion: http2
+        # List of origins that Cloudfront will connect to
+        Origins:
+          - Id: s3-website
+            DomainName: !GetAtt IVSRecordingBucket.DomainName
+            S3OriginConfig:
+              # Restricting Bucket access through an origin access identity
+              OriginAccessIdentity: 
+                Fn::Sub: 'origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}'
+        # To connect the CDN to the origins you need to specify behaviours
+        DefaultCacheBehavior:
+          # Compress resources automatically ( gzip )
+          Compress: 'true'
+          AllowedMethods:
+            - HEAD
+            - GET
+            - OPTIONS
+          ForwardedValues:
+            QueryString: false
+          TargetOriginId: s3-website
+          ViewerProtocolPolicy : redirect-to-https
+  
+  ## Create S3 Bucket
   IVSRecordingBucket:
     Type: AWS::S3::Bucket
+    Properties:
+      # Change bucket name if you want to have a custom name
+      BucketName: !Sub "my-new-ivs-recording-bucket-${AWS::AccountId}" ## add account is !GetAtt AWS::AccountId
+  
+  # S3 Bucket Policy
+  IVSRecordingBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref IVSRecordingBucket
+      PolicyDocument:
+      # Restricting access to cloudfront only.
+        Statement:
+          -
+            Effect: Allow
+            Action: 's3:GetObject'
+            Resource:
+              - !Sub "arn:aws:s3:::${IVSRecordingBucket}/*"
+            Principal:
+              AWS: !Sub "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}"
 
 Outputs:
-  ApiURL:
-    Description: "API endpoint URL for Dev environment"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  ApiURLGetRecordings:
+    Description: "API endpoint get recordings available"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/getrecordings/"
+  ApiURLCreateClip:
+    Description: "API endpoint post create clips"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/clipmanifest/" 
+  CloudfrontDistribution:
+    Description: "Amazon CloudFront Domain Name"
+    Value: !Sub "https://${CloudfrontDistribution.DomainName}"

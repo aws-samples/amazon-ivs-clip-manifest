@@ -6,7 +6,9 @@ export default function GetRecordings() {
   useEffect(
     () => {
       ;(async function () {
-        recordings = await getAPI('https://dog.ceo/api/breeds/image/random')
+        recordings = await getAPI(
+          'https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/getrecordings/'
+        )
       })()
     },
     [recordings],

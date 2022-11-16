@@ -15,6 +15,7 @@ exports.handler = async (event) => {
   let location = `${process.env.STORAGE_IVSRECORDINGS_BUCKETNAME}${path}`
   let start_time = body.start_time
   let end_time = body.end_time
+  let excutionTime = Date.now()
 
   // (2) get manifest and parse and create a list use as obj
   if (!master_url) return
@@ -78,7 +79,7 @@ ${chunks.trim()}
   }
 
   // (4) write to S3
-  await writeToS3(newMaster, 'clip_master.m3u8', location)
+  await writeToS3(newMaster, `${excutionTime}_clip_master.m3u8`, location)
   // (4.1) Loop write to S3 the Adaptative Manifest
   await loopWrite(clipManifest, masterManifest, location)
 
