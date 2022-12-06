@@ -25,7 +25,7 @@
     - [ ] front get recordings
     - [ ] call from Home to api module
     - [ ] map each item
-(4) post generate clip
+### (4) post generate clip
 - [x] lambda
 - [x] sam
 - [x] change clip to have an ID
@@ -34,20 +34,20 @@
 - [ ] front api
 - [ ] call from home 
 
-(5) Create the config file and import
+### (5) Create the config file and import
 - [ ] .env or .config
 - [ ] import in each api
 
-(6) code review
+### (6) code review
 - [ ] front
 - [ ] lamb get recordings
 - [ ] lamb get clips
 
-(6) Documentation
+### (6) Documentation
 - [ ] front
 - [ ] back
 
-(6) open sourcing process https://w.amazon.com/bin/view/Open_Source/Open_Sourcing/
+### (6) open sourcing process https://w.amazon.com/bin/view/Open_Source/Open_Sourcing/
 
-(7) testing
+### (7) testing
 [test doc](tests.md)
