@@ -29,6 +29,7 @@
     [x] lambda
     [x] sam
     [x] change clip to have an ID
+    [x] change the playlist to have a version
     [] change from Request to S3  https://stackoverflow.com/questions/30651502/how-to-get-contents-of-a-text-file-from-aws-s3-using-a-lambda-function
     [] front api
     [] call from home 
