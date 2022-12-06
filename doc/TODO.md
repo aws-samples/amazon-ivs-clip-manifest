@@ -47,7 +47,9 @@
 - [ ] front
 - [ ] back
 
-### (6) open sourcing process https://w.amazon.com/bin/view/Open_Source/Open_Sourcing/
+### (7) open sourcing process https://w.amazon.com/bin/view/Open_Source/Open_Sourcing/
+- Ticket: https://t.corp.amazon.com/V766122117
+- [ ] Create the repo in private
 
-### (7) testing
+### (8) testing
 [test doc](tests.md)
