@@ -1,9 +1,11 @@
-import React, { useRef } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import './styles/HomePage.style.css'
 import VideoPlayer from './player/playerJS'
+import getRecordings from './apis/GetRecordings'
 
 export default function HomePage() {
   const playerRef = useRef(null)
+  const [recData, setRecData] = useState({})
 
   const videoURL =
     'https://3d26876b73d7.us-west-2.playback.live-video.net/api/video/v1/us-west-2.913157848533.channel.rkCBS9iD1eyd.m3u8'
@@ -22,6 +24,16 @@ export default function HomePage() {
       }
     ]
   }
+
+  useEffect(() => {
+    console.log('Effect')
+    getRecordings((response) => console.log('!!!!', response))
+    return () => {
+      //second
+    }
+  }, [])
+
+  console.log('Response!!!!', recData)
 
   const handlePlayerReady = (player) => {
     player.on('waiting', () => {

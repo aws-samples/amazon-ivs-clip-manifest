@@ -1,41 +1,23 @@
-import React, { useState, useEffect } from 'react'
+//import React, { useState, useEffect } from 'react'
+// you should import .env or .config instead of
 
 export default function GetRecordings() {
-  let recordings = useState(null)
+  const url =
+    'https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/getrecordings/'
 
-  useEffect(
-    () => {
-      ;(async function () {
-        recordings = await getAPI(
-          'https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/getrecordings/'
-        )
-      })()
-    },
-    [recordings],
-    console.log(recordings)
-  )
-
-  async function getAPI(url, requestOptions) {
-    let result
-
-    await fetch(url, requestOptions)
-      .then((response) => response.json())
-      .then((response) => (result = response))
-      .catch((error) => console.error('Error:', error))
-    console.log(result)
-    return result
-  }
-
-  if (recordings) {
-    console.log('here', recordings.message)
-  }
-
-  return recordings != undefined ? (
-    <div>
-      {recordings.message}
-      <>{recordings}</>
-    </div>
-  ) : (
-    <div>loading</div>
-  )
+  fetch(url, {
+    method: 'GET',
+    headers: new Headers({
+      Accept: 'application/json'
+    })
+  })
+    .then((response) => response.json())
+    .then((response) => {
+      console.log('success', response)
+      return response
+    })
+    .catch((error) => {
+      console.error('Error', error)
+      return error
+    })
 }

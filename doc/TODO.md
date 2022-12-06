@@ -33,7 +33,11 @@
     [] front api
     [] call from home 
 
-(5) code review
+(5) Create the config file and import
+    [] .env or .config
+    [] import in each api
+
+(6) code review
     [] front
     [] lamb get recordings
     [] lamb get clips
@@ -49,3 +53,8 @@
 
 
 s3://my-new-ivs-recording-bucket-098435415742/ivs/v1/098435415742/2rrcA103rn67/2022/11/16/1/8/lFOBQr3Hdzlg/media/hls/master.m3u8
+
+
+```sh
+aws ivs create-recording-configuration --destination-configuration s3={bucketName=ivs-blog-borasio-ireland} --name=ivsrecording --thumbnail-configuration '{"\recordingMode"\:"\INTERVAL"\,"\targetIntervalSeconds"\:5}' --region eu-east-1
+```
