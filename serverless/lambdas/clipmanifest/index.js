@@ -24,7 +24,9 @@ exports.handler = async (event) => {
   async function parseMaster(url) {
     console.log('parseMaster')
     let manifest = await getRequest(url)
-    newMaster = manifest.toString().replace(/playlist/g, 'clip')
+    newMaster = manifest
+      .toString()
+      .replace(/playlist/g, `${excutionTime}_clip_playlist`)
     var parser = new m3u8Parser.Parser()
     parser.push(manifest)
     parser.end()
@@ -87,7 +89,11 @@ ${chunks.trim()}
     let playlists = master.playlists
     for await (const playlist of playlists) {
       let newLocation = `${local}/${playlist.attributes.VIDEO}`
-      await writeToS3(clipBody, 'clip.m3u8', newLocation)
+      await writeToS3(
+        clipBody,
+        `${excutionTime}_clip_playlist.m3u8`,
+        newLocation
+      )
     }
   }
 

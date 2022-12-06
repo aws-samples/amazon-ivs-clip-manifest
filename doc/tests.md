@@ -32,7 +32,6 @@ sam deploy \
 ```
 
 ## Manifest Before Clipping:
-
 **Source Master Manifest**
 Object URL:https://my-new-ivs-recording-bucket-098435415742.s3.amazonaws.com/ivs/v1/098435415742/2rrcA103rn67/2022/11/16/1/8/lFOBQr3Hdzlg/media/hls/master.m3u8
 ```
@@ -172,6 +171,8 @@ Object URL: https://my-new-ivs-recording-bucket-098435415742.s3.amazonaws.com/iv
 #EXT-X-ENDLIST
 ```
 
+[Play the Source VOD](https://d1vzkjoets0sdc.cloudfront.net/ivs/v1/098435415742/2rrcA103rn67/2022/11/16/1/8/lFOBQr3Hdzlg/media/hls/master.m3u8)
+
 ## Using the Clip Manifest API:
 ```sh
 curl -X POST https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/ -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://d1vzkjoets0sdc.cloudfront.net/ivs/v1/098435415742/2rrcA103rn67/2022/11/16/1/8/lFOBQr3Hdzlg/media/hls/master.m3u8\"}" 
@@ -200,7 +201,7 @@ Object URL: https://my-new-ivs-recording-bucket-098435415742.s3.amazonaws.com/iv
 
 **Output Playlist Manifest**
 Object URL: https://my-new-ivs-recording-bucket-098435415742.s3.amazonaws.com/ivs/v1/098435415742/2rrcA103rn67/2022/11/16/1/8/lFOBQr3Hdzlg/media/hls/720p30/clip.m3u8
-[]bug to be fixed, playlist manifest supposed to have version.
+[x]bug to be fixed, playlist manifest supposed to have version.
 ```
 #EXTM3U
 #EXT-X-VERSION:3
@@ -218,3 +219,5 @@ Object URL: https://my-new-ivs-recording-bucket-098435415742.s3.amazonaws.com/iv
 1.ts
 #EXT-X-ENDLIST
 ```
+
+[Play the Output Clip](https://d1vzkjoets0sdc.cloudfront.net/ivs/v1/098435415742/2rrcA103rn67/2022/11/16/1/8/lFOBQr3Hdzlg/media/hls/1670362582722_clip_master.m3u8)
