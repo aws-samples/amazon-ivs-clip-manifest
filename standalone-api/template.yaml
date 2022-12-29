@@ -88,9 +88,6 @@ Resources:
               AWS: !Sub "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}"
 
 Outputs:
-  ApiURLGetRecordings:
-    Description: "API endpoint get recordings available"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/getrecordings/"
   ApiURLCreateClip:
     Description: "API endpoint post create clips"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/clipmanifest/" 
