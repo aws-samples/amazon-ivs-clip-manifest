@@ -94,3 +94,6 @@ Outputs:
   CloudfrontDistribution:
     Description: "Amazon CloudFront Domain Name"
     Value: !Sub "https://${CloudfrontDistribution.DomainName}"
+  RecordConfiguration:
+    Description: "Reconding Bucket Name"
+    Value: !Ref IVSRecordingSAPIBucket
