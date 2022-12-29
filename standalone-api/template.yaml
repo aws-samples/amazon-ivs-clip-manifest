@@ -1,0 +1,99 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Amazon IVS Clip Manisfest Standalone API
+
+Globals:
+  Function:
+    Runtime: nodejs12.x
+    Timeout: 40
+    MemorySize: 128
+    Environment:
+      Variables:
+        STORAGE_IVSRECORDINGS_BUCKETNAME: !Ref IVSRecordingSAPIBucket
+        CLOUDFRONT_DOMAIN_NAME: !Sub "https://${CloudfrontDistribution.DomainName}"
+        ACCOUNT_ID: !Ref AWS::AccountId
+
+Resources:
+  # Post create clips API
+  ClipManifestLambdaStandAlone:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.handler
+      CodeUri: clipmanifest
+      Policies:
+        - S3WritePolicy:
+            BucketName: !Ref IVSRecordingSAPIBucket
+      Events:
+        Api1:
+          Type: Api
+          Properties:
+            Path: /clipmanifest
+            Method: POST 
+  ## CloudFront Block
+  CloudFrontOriginAccessIdentity:
+    Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: 'Serverless website OA'
+  
+  CloudfrontDistribution:
+    Type: "AWS::CloudFront::Distribution"
+    Properties:
+      DistributionConfig:
+        Comment: "Cloudfront distribution for IVS Manifest Clip Standalone API"
+        DefaultRootObject: "index.html"
+        Enabled: true
+        HttpVersion: http2
+        # List of origins that Cloudfront will connect to
+        Origins:
+          - Id: s3-website
+            DomainName: !GetAtt IVSRecordingSAPIBucket.DomainName
+            S3OriginConfig:
+              # Restricting Bucket access through an origin access identity
+              OriginAccessIdentity: 
+                Fn::Sub: 'origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}'
+        # To connect the CDN to the origins you need to specify behaviours
+        DefaultCacheBehavior:
+          # Compress resources automatically ( gzip )
+          Compress: 'true'
+          AllowedMethods:
+            - HEAD
+            - GET
+            - OPTIONS
+          ForwardedValues:
+            QueryString: false
+          TargetOriginId: s3-website
+          ViewerProtocolPolicy : redirect-to-https
+  
+  ## Create S3 Bucket
+  IVSRecordingSAPIBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      # Change bucket name if you want to have a custom name
+      BucketName: !Sub "my-new-ivs-recording-bucket-standalone-api${AWS::AccountId}" ## add account is !GetAtt AWS::AccountId
+  # S3 Bucket Policy
+  IVSRecordingSAPIBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref IVSRecordingSAPIBucket
+      PolicyDocument:
+      # Restricting access to cloudfront only.
+        Statement:
+          -
+            Effect: Allow
+            Action: 's3:GetObject'
+            Resource:
+              - !Sub "arn:aws:s3:::${IVSRecordingSAPIBucket}/*"
+            Principal:
+              AWS: !Sub "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}"
+
+Outputs:
+  ApiURLGetRecordings:
+    Description: "API endpoint get recordings available"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/getrecordings/"
+  ApiURLCreateClip:
+    Description: "API endpoint post create clips"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/clipmanifest/" 
+  CloudfrontDistribution:
+    Description: "Amazon CloudFront Domain Name"
+    Value: !Sub "https://${CloudfrontDistribution.DomainName}"

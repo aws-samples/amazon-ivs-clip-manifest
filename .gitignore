@@ -3,6 +3,7 @@ node_modules/*
 */package-lock.json
 serverless/lambdas/*/node_modules
 manifest-clip-ui/node_modules
+standalone-api/clipmanifest/node_modules
 
 
 # production
