@@ -76,12 +76,18 @@ Resources:
       CorsConfiguration:
         CorsRules : [
           {
+            "AllowedHeaders": [
+                "Authorization",
+                "Content-Length"
+            ],
             "AllowedMethods": [
-              "GET"
+                "GET"
             ],
             "AllowedOrigins": [
-              "*"
-            ]
+                "*"
+            ],
+            "ExposeHeaders": [],
+            "MaxAgeSeconds": 3000
           }
         ]
   # S3 Bucket Policy
