@@ -87,7 +87,25 @@ Resources:
               - !Sub "arn:aws:s3:::${IVSRecordingSAPIBucket}/*"
             Principal:
               AWS: !Sub "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}"
-
+    # S3 Bucket Cors Policy
+    IVSRecordingCorsBucketPolicy:
+      Type: AWS::S3::BucketCorsConfiguration
+      CorsRules : [
+        {
+          "AllowedHeaders": [
+              "Authorization",
+              "Content-Length"
+          ],
+          "AllowedMethods": [
+              "GET"
+          ],
+          "AllowedOrigins": [
+              "*"
+          ],
+          "ExposeHeaders": [],
+          "MaxAgeSeconds": 3000
+        }
+      ]
 Outputs:
   ApiURLCreateClip:
     Description: "API endpoint post create clips"
