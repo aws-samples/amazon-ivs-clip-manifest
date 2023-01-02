@@ -76,17 +76,16 @@ Resources:
       CorsConfiguration:
         CorsRules : [
           {
-            "AllowedHeaders": [
-                "Authorization",
-                "Content-Length"
-            ],
             "AllowedMethods": [
-                "GET"
+              "GET"
             ],
             "AllowedOrigins": [
-                "*"
+              "*"
             ],
-            "ExposeHeaders": [],
+            "AllowedHeaders": [
+              "Authorization",
+              "Content-Length"
+            ],
             "MaxAgeSeconds": 3000
           }
         ]
