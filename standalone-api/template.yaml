@@ -62,6 +62,7 @@ Resources:
             - OPTIONS
           ForwardedValues:
             QueryString: false
+            Headers: ["Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"]
           TargetOriginId: s3-website
           ViewerProtocolPolicy : redirect-to-https
   
