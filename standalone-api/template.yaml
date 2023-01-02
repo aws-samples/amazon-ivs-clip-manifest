@@ -76,6 +76,9 @@ Resources:
       CorsConfiguration:
         CorsRules : [
           {
+            "AllowedMethods": [
+              "GET"
+            ],
             "AllowedOrigins": [
               "*"
             ]
