@@ -73,22 +73,10 @@ Resources:
       # Change bucket name if you want to have a custom name
       BucketName: !Sub "my-new-ivs-recording-bucket-standalone-api${AWS::AccountId}" ## add account is !GetAtt AWS::AccountId
        # S3 Bucket Cors Policy
-      CorsRules : [
-        {
-          "AllowedHeaders": [
-              "Authorization",
-              "Content-Length"
-          ],
-          "AllowedMethods": [
-              "GET"
-          ],
-          "AllowedOrigins": [
-              "*"
-          ],
-          "ExposeHeaders": [],
-          "MaxAgeSeconds": 3000
-        }
-      ]
+      CorsConfiguration:
+        CorsRules : [
+          AllowedOrigins: "*"
+        ]
   # S3 Bucket Policy
   IVSRecordingSAPIBucketPolicy:
     Type: AWS::S3::BucketPolicy
