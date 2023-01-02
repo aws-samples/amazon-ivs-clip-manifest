@@ -85,7 +85,8 @@ Resources:
             "AllowedHeaders": [
               "Authorization",
               "Content-Length"
-            ]
+            ],
+            "MaxAge" : 300
           }
         ]
   # S3 Bucket Policy
