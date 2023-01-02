@@ -86,7 +86,7 @@ Resources:
               "Authorization",
               "Content-Length"
             ],
-            "MaxAge" : 300
+            "MaxAge" : 3000
           }
         ]
   # S3 Bucket Policy
