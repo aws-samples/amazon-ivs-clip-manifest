@@ -75,7 +75,9 @@ Resources:
        # S3 Bucket Cors Policy
       CorsConfiguration:
         CorsRules : [
-          AllowedOrigins: "*"
+          {
+            "AllowedOrigins": "*"
+          }
         ]
   # S3 Bucket Policy
   IVSRecordingSAPIBucketPolicy:
