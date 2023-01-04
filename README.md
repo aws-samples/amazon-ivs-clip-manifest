@@ -5,9 +5,12 @@ This is a serverless web application leveraging [Amazon IVS](https://aws.amazon.
 
 ## Solution Architecture
 
+
+
 ## Deployment Steps
 
 ### Prerequisites
+
 
 - AWS CLI ([Installing or updating the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html))
 - AWS SAM CLI ([Installing the AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html))
