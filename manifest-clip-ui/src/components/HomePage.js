@@ -1,11 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react'
 import './styles/HomePage.style.css'
 import VideoPlayer from './player/playerJS'
-import getRecordings from './apis/GetRecordings'
+import ClipPoster from './../img/clipposter.svg'
 
-export default function HomePage() {
+export default function HomePage(props) {
   const playerRef = useRef(null)
-  const [recData, setRecData] = useState({})
 
   const videoURL =
     'https://3d26876b73d7.us-west-2.playback.live-video.net/api/video/v1/us-west-2.913157848533.channel.rkCBS9iD1eyd.m3u8'
@@ -25,15 +24,22 @@ export default function HomePage() {
     ]
   }
 
-  useEffect(() => {
-    console.log('Effect')
-    getRecordings((response) => console.log('!!!!', response))
-    return () => {
-      //second
-    }
-  }, [])
+  let [listofRec, setListofRec] = useState([])
+  let [listofClips, setListofClips] = useState([])
 
-  console.log('Response!!!!', recData)
+  useEffect(
+    () => {
+      console.log('Effect')
+      if (props.recordings) setListofRec(props.recordings)
+      if (props.clips) setListofClips(props.clips)
+
+      return () => {
+        //second
+      }
+    },
+    [props],
+    console.log('PROPS', props, listofClips)
+  )
 
   const handlePlayerReady = (player) => {
     player.on('waiting', () => {
@@ -79,10 +85,9 @@ export default function HomePage() {
               <div className='col-xl'>
                 <div class='form-group'>
                   <select className='custom-select large' required>
-                    <option value=''>Open this select menu</option>
-                    <option value='1'>Video One</option>
-                    <option value='2'>Video Two</option>
-                    <option value='3'>Video Three</option>
+                    {listofRec.map((items, index) => (
+                      <option value={index}>{items.assetID}</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -150,68 +155,23 @@ export default function HomePage() {
             </div>
           </form>
         </div>
+
         <div className='clips-container'>
           <div className='clips-inline'>
-            <div className='card col-sm-3'>
-              <img
-                class='card-img-top'
-                src='https://i.ytimg.com/vi/l_tHgIVfk_8/maxresdefault.jpg'
-                alt='Card image cap'
-                width='100'
-                height='200'
-              />
-              <div class='card-body'>
-                <p class='card-text'>Clip 1</p>
+            {listofClips.map((items, index) => (
+              <div className='card col-sm-3' key={index}>
+                <img
+                  class='card-img-top'
+                  src={ClipPoster}
+                  alt={items.assetID}
+                  width='200'
+                  height='150'
+                />
+                <div class='card-body'>
+                  <p class='card-text'>Rec ID: {items.recording}</p>
+                </div>
               </div>
-            </div>
-            <div className='card col-sm-3'>
-              <img
-                class='card-img-top'
-                src='https://i.ytimg.com/vi/l_tHgIVfk_8/maxresdefault.jpg'
-                alt='Card image cap'
-                width='100'
-                height='200'
-              />
-              <div class='card-body'>
-                <p class='card-text'>Clip 1</p>
-              </div>
-            </div>
-            <div className='card col-sm-3'>
-              <img
-                class='card-img-top'
-                src='https://i.ytimg.com/vi/l_tHgIVfk_8/maxresdefault.jpg'
-                alt='Card image cap'
-                width='100'
-                height='200'
-              />
-              <div class='card-body'>
-                <p class='card-text'>Clip 1</p>
-              </div>
-            </div>
-            <div className='card col-sm-3'>
-              <img
-                class='card-img-top'
-                src='https://i.ytimg.com/vi/l_tHgIVfk_8/maxresdefault.jpg'
-                alt='Card image cap'
-                width='100'
-                height='200'
-              />
-              <div class='card-body'>
-                <p class='card-text'>Clip 1</p>
-              </div>
-            </div>
-            <div className='card col-sm-3'>
-              <img
-                class='card-img-top'
-                src='https://i.ytimg.com/vi/l_tHgIVfk_8/maxresdefault.jpg'
-                alt='Card image cap'
-                width='100'
-                height='200'
-              />
-              <div class='card-body'>
-                <p class='card-text'>Clip 1</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 

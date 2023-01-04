@@ -92,6 +92,7 @@ Resources:
             - OPTIONS
           ForwardedValues:
             QueryString: false
+            Headers: ["Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"]
           TargetOriginId: s3-website
           ViewerProtocolPolicy : redirect-to-https
   
@@ -101,6 +102,22 @@ Resources:
     Properties:
       # Change bucket name if you want to have a custom name
       BucketName: !Sub "my-new-ivs-recording-bucket-${AWS::AccountId}" ## add account is !GetAtt AWS::AccountId
+      CorsConfiguration:
+        CorsRules : [
+          {
+            "AllowedMethods": [
+              "GET"
+            ],
+            "AllowedOrigins": [
+              "*"
+            ],
+            "AllowedHeaders": [
+              "Authorization",
+              "Content-Length"
+            ],
+            "MaxAge" : 3000
+          }
+        ]
   
   # S3 Bucket Policy
   IVSRecordingBucketPolicy:
@@ -122,6 +139,9 @@ Outputs:
   ApiURLGetRecordings:
     Description: "API endpoint get recordings available"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/getrecordings/"
+  ApiURLGetClips:
+    Description: "API endpoint get clips available"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/getclips/"
   ApiURLCreateClip:
     Description: "API endpoint post create clips"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/clipmanifest/" 

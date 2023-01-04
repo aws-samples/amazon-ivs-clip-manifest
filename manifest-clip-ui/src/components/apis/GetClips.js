@@ -7,7 +7,7 @@ export default function GetRecordings(props) {
   useEffect(() => {
     console.log('get Recordings')
     const url =
-      'https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/getrecordings/'
+      'https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/getclips/'
 
     fetch(url, {
       method: 'GET',
@@ -19,7 +19,7 @@ export default function GetRecordings(props) {
       .then((response) => {
         console.log('success', response)
         setData(response)
-        props.onRecFetched(response)
+        props.onClipsFetched(response)
       })
       .catch((error) => {
         console.error('Error', error)

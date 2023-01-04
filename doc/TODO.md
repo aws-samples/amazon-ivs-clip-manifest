@@ -12,13 +12,15 @@
 - [x] update sam temple with CF https://izifortune.com/serverless-website-sam-aws/
     - [x] update env vars
     - [x] reference the env vars
+    - [ ] CF forward headers
+    - [ ] S3 Cors Policy
 ### (2) API get
 #### (2.1) get recordings
 - [x] lambda get recordings
     - [x] update sam package
-    - [ ] front get recordings
-    - [ ] call from Home to api module
-    - [ ] map each item
+    - [x] front get recordings
+    - [x] call from Home to api module
+    - [x] map each item
 #### (2.2) get clips
 - [x] lambda get clips
     - [x] update sam package

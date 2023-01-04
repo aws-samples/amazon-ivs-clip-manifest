@@ -5,89 +5,48 @@ const s3 = new AWS.S3()
 
 exports.handler = async (event, context) => {
   console.log('Initializing Function Get S3 Recordings')
-  let channelID = event.path.split('/')[1]
-  let year = event.path.split('/')[2]
-  let mo = event.path.split('/')[3]
-  let day = event.path.split('/')[4]
-  let hours = event.path.split('/')[5]
-  let minutes = event.path.split('/')[6]
-  let recordingID = event.path.substring(event.path.lastIndexOf('/') + 1)
+  const accountID = process.env.ACCOUNT_ID
+  let clipjson = []
+  const cfURL = process.env.CLOUDFRONT_DOMAIN_NAME
 
-  console.log(channelID, year, mo, day, hours, minutes, recordingID)
-
-  let accountID = process.env.ACCOUNT_ID
-  let vodjson = []
-  let CFDistrib = process.env.CLOUDFRONT_DOMAIN_NAME
-
-  async function getClips() {
+  async function getRecordings() {
     const params = {
       Bucket: process.env.STORAGE_IVSRECORDINGS_BUCKETNAME,
-      Prefix: `ivs/v1/${accountID}/${channelID}/${year}/${mo}/${day}/${hours}/${minutes}/${recordingID}`
+      Prefix: `ivs/v1/${accountID}/`
     }
-    let recordings = await s3.listObjects(params).promise()
-    return recordings
+    try {
+      const recordings = await s3.listObjects(params).promise()
+      return recordings
+    } catch (error) {
+      console.log(error)
+      return
+    }
   }
 
-  const clips = await getClips()
-  //console.log('Recordings', recordings)
+  const recordings = await getRecordings()
 
-  clips.Contents.forEach((element) => {
-    // push only the elements that we need
-    let file = element.Key.substring(element.Key.lastIndexOf('/') + 1)
-    const target = new RegExp('clip_master*')
-    if (target.test(file)) {
-      console.log('MASTER', element.Key)
-      let ch = element.Key.split('/')[3]
-      let yr = element.Key.split('/')[4]
-      let mo = element.Key.split('/')[5]
-      let dy = element.Key.split('/')[6]
-      let hr = element.Key.split('/')[7]
-      let mi = element.Key.split('/')[8]
-      let pd = `${yr}-${mo}`
-      let fd = `${yr}-${mo}-${dy}-${hr}-${mi}`
-      let rid = element.Key.split('/')[9]
-      let mplay = `${CFDistrib}/${element.Key}`
-      let tumb = `${CFDistrib}/${element.Key.split('/')[0]}/${
-        element.Key.split('/')[1]
-      }/${element.Key.split('/')[2]}/${element.Key.split('/')[3]}/${
-        element.Key.split('/')[4]
-      }/${element.Key.split('/')[5]}/${element.Key.split('/')[6]}/${
-        element.Key.split('/')[7]
-      }/${element.Key.split('/')[8]}/${element.Key.split('/')[9]}/${
-        element.Key.split('/')[10]
-      }/thumbnails/thumb5.jpg`
-      let splay = `${CFDistrib}/${element.Key.split('/')[0]}/${
-        element.Key.split('/')[1]
-      }/${element.Key.split('/')[2]}/${element.Key.split('/')[3]}/${
-        element.Key.split('/')[4]
-      }/${element.Key.split('/')[5]}/${element.Key.split('/')[6]}/${
-        element.Key.split('/')[7]
-      }/${element.Key.split('/')[8]}/${element.Key.split('/')[9]}/${
-        element.Key.split('/')[10]
-      }/hls/480p30/playlist.m3u8`
-
-      console.log('TUMB', tumb)
-      let il = 'NO'
-
-      vodjson.push({
-        channel: ch,
-        year: yr,
-        month: mo,
-        day: dy,
-        hour: hr,
-        minute: mi,
-        pardate: pd,
-        fulldate: fd,
-        recordingid: rid,
-        masterplaylist: mplay,
-        subplaylist: splay,
-        islive: il,
-        thumbnails: tumb
-      })
-    }
-  })
-
-  console.log('This has to be a JSON', vodjson)
+  if (recordings) {
+    recordings.Contents.forEach((element) => {
+      let file = element.Key.substring(element.Key.lastIndexOf('/') + 1)
+      const target = new RegExp('clip_master*')
+      if (target.test(file)) {
+        console.log('Loop de clips', element)
+        let s3pathParsed = element.Key.split('/')
+        let assetName = `Channel: ${s3pathParsed[3]} - Date: ${s3pathParsed[4]}-${s3pathParsed[5]}-${s3pathParsed[6]} ${s3pathParsed[7]}:${s3pathParsed[8]} - ID: ${s3pathParsed[9]}`
+        clipjson.push({
+          channel: s3pathParsed[3],
+          year: s3pathParsed[4],
+          month: s3pathParsed[5],
+          day: s3pathParsed[6],
+          hour: s3pathParsed[7],
+          minute: s3pathParsed[8],
+          recording: s3pathParsed[9],
+          assetID: assetName,
+          master: `${cfURL}/${element.Key}`
+        })
+      }
+    })
+  }
 
   const response = {
     statusCode: 200,
@@ -95,7 +54,7 @@ exports.handler = async (event, context) => {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': '*'
     },
-    body: JSON.stringify(vodjson)
+    body: JSON.stringify(clipjson)
   }
   return response
 }
