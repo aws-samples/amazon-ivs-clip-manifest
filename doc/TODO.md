@@ -12,8 +12,8 @@
 - [x] update sam temple with CF https://izifortune.com/serverless-website-sam-aws/
     - [x] update env vars
     - [x] reference the env vars
-    - [ ] CF forward headers
-    - [ ] S3 Cors Policy
+    - [x] CF forward headers
+    - [x] S3 Cors Policy
 ### (2) API get
 #### (2.1) get recordings
 - [x] lambda get recordings
@@ -21,21 +21,24 @@
     - [x] front get recordings
     - [x] call from Home to api module
     - [x] map each item
+    - [ ] onClick 
+    - [ ] onSelect
 #### (2.2) get clips
 - [x] lambda get clips
     - [x] update sam package
-    - [ ] front get recordings
-    - [ ] call from Home to api module
-    - [ ] map each item
-### (4) post generate clip
+    - [x] front get recordings
+    - [x] call from Home to api module
+    - [x] map each item
+    - [ ] onSelect
+### (4) manifestclip
 - [x] lambda
 - [x] sam
 - [x] change clip to have an ID
 - [x] change the playlist to have a version
-- [ ] change from Request to S3  https://stackoverflow.com/questions/3065150- how-to-get-contents-of-a-text-file-from-aws-s3-using-a-lambda-function
+- [ ] change from Request to S3 https://stackoverflow.com/questions/30651502/how-to-get-contents-of-a-text-file-from-aws-s3-using-a-lambda-function#:~:text=You%20can%20use%20data.,encoding%20types%20to%20the%20function.
 - [ ] front api
 - [ ] call from home 
-
+- [ ] onClick
 ### (5) Create the config file and import
 - [ ] .env or .config
 - [ ] import in each api
