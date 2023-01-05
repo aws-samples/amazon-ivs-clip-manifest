@@ -5,9 +5,9 @@ import ClipPoster from './../img/clipposter.svg'
 
 export default function HomePage(props) {
   const playerRef = useRef(null)
+  const [vodData, setVodData] = useState('')
 
-  const videoURL =
-    'https://3d26876b73d7.us-west-2.playback.live-video.net/api/video/v1/us-west-2.913157848533.channel.rkCBS9iD1eyd.m3u8'
+  const [videoURL, setVideoURL] = useState('')
 
   const videoJsOptions = {
     autoplay: 'muted', //mute audio when page loads, but auto play video
@@ -30,7 +30,10 @@ export default function HomePage(props) {
   useEffect(
     () => {
       console.log('Effect')
-      if (props.recordings) setListofRec(props.recordings)
+      if (props.recordings) {
+        setListofRec(props.recordings)
+        setVideoURL(props.recordings[0].master)
+      }
       if (props.clips) setListofClips(props.clips)
 
       return () => {
@@ -76,6 +79,12 @@ export default function HomePage(props) {
     debugData.appendChild(dataLine)
   }
 
+  const handleVODChange = (event) => {
+    event.preventDefault()
+    console.log(event.target.value)
+    setVideoURL(event.target.value)
+  }
+
   return (
     <div className='Home'>
       <div className='page-container'>
@@ -84,25 +93,36 @@ export default function HomePage(props) {
             <div className='row'>
               <div className='col-xl'>
                 <div class='form-group'>
-                  <select className='custom-select large' required>
+                  <select
+                    value={videoURL}
+                    className='custom-select large'
+                    required
+                    onChange={handleVODChange}
+                  >
                     {listofRec.map((items, index) => (
-                      <option value={index}>{items.assetID}</option>
+                      <option key={index} value={items.master}>
+                        {' '}
+                        Select the VOD: {items.assetID}
+                      </option>
                     ))}
                   </select>
                 </div>
-              </div>
-              <div class='col-sm-1'>
-                <button className='btn btn-primary'>Load</button>
               </div>
             </div>
           </form>
         </div>
         <div className='video-container'>
-          <VideoPlayer
-            className='videoplayer'
-            options={videoJsOptions}
-            onReady={handlePlayerReady}
-          />
+          {videoURL ? (
+            <VideoPlayer
+              className='videoplayer'
+              options={videoJsOptions}
+              onReady={handlePlayerReady}
+            />
+          ) : (
+            <div className='videoplayer'>
+              No VOD Selected or No Live recorded Yet...
+            </div>
+          )}
         </div>
         <div className='controls-container'>
           Clip Controls
@@ -155,7 +175,6 @@ export default function HomePage(props) {
             </div>
           </form>
         </div>
-
         <div className='clips-container'>
           <div className='clips-inline'>
             {listofClips.map((items, index) => (
@@ -164,8 +183,8 @@ export default function HomePage(props) {
                   class='card-img-top'
                   src={ClipPoster}
                   alt={items.assetID}
-                  width='200'
-                  height='150'
+                  maxwidth='200'
+                  maxheight='150'
                 />
                 <div class='card-body'>
                   <p class='card-text'>Rec ID: {items.recording}</p>
