@@ -1,159 +1,141 @@
 /// Author: Osmar Bento da Silva Junior - osmarb@amazon.com
+'use strict'
 const AWS = require('aws-sdk')
 const s3 = new AWS.S3()
-const https = require('https')
 const m3u8Parser = require('m3u8-parser')
 const url = require('url')
-let newMaster = ''
+const s3Bucket = process.env.STORAGE_IVSRECORDINGS_BUCKETNAME
 
 exports.handler = async (event) => {
   // (1) parse event body
   const body = JSON.parse(event.body)
-  const masterURL = body.master_url
-  const startTime = body.start_time
-  const endTime = body.end_time
   const excutionTime = Date.now()
-  const s3Bucket = process.env.STORAGE_IVSRECORDINGS_BUCKETNAME
-  const masterKey = url.parse(masterURL).pathname
-
-  console.log(masterKey)
+  const masterKey = url.parse(body.master_url).pathname
+  let rawMasterManifest,
+    parsedMasterManifest,
+    rawPlaylistManifest,
+    parsedPlaylistManifest,
+    pathLocation,
+    s3BucketFolder,
+    clippedRawPlaylistManifest,
+    clippedRawMasterManifest
 
   // (2) get master manifest from S3
+  rawMasterManifest = await getManifestFile(masterKey)
 
-  async function getManifestFile(file) {
-    const params = {
-      Bucket: process.env.STORAGE_IVSRECORDINGS_BUCKETNAME,
-      Key: file.slice(1)
-    }
+  // (3) Parse Manifest Function
+  async function parseM3U8Manifest(manifest) {
     try {
-      const masterManifest = await s3.getObject(params).promise()
-      return masterManifest.Body.toString('ascii')
+      let parser = new m3u8Parser.Parser()
+      parser.push(manifest)
+      parser.end()
+      return parser.manifest
     } catch (error) {
       console.error(error)
-      throw new Error('Error on getting the manifest file')
+      return
     }
   }
-  // (3) Parse the master manifest
 
-  const rawMasterManifest = await getManifestFile(masterKey)
+  // (4) get master parsed
+  parsedMasterManifest = await parseM3U8Manifest(rawMasterManifest)
 
-  async function parseManifest(manifest) {
-    let parser = new m3u8Parser.Parser()
-    parser.push(manifest)
-    parser.end()
-    return parser.manifest
-  }
-
-  const parsedMasterManifest = await parseManifest(rawMasterManifest)
-
-  // (4) get the playlist manifest
+  // (5) get the playlist manifest
   async function getPlaylistManifest(parsed_master) {
-    const playlistURI = JSON.stringify(parsed_master.playlists[0].uri)
-    const playlistURL = masterKey.replace(
-      'master.m3u8',
-      playlistURI.replace(/"/g, '')
-    )
-    const playlistManifest = await getManifestFile(playlistURL)
-    return playlistManifest
+    try {
+      const playlistURI = JSON.stringify(parsed_master.playlists[0].uri)
+      const playlistURL = masterKey.replace(
+        'master.m3u8',
+        playlistURI.replace(/"/g, '')
+      )
+      const playlistManifest = await getManifestFile(playlistURL)
+      return playlistManifest
+    } catch (error) {
+      console.error(error)
+      return
+    }
   }
 
-  const rawPlaylistManifest = await getPlaylistManifest(parsedMasterManifest)
+  rawPlaylistManifest = await getPlaylistManifest(parsedMasterManifest)
 
   // (5) Parse the playlist manifest
-  const parsedPlaylistManifest = await parseManifest(rawPlaylistManifest)
+  parsedPlaylistManifest = await parseM3U8Manifest(rawPlaylistManifest)
 
   // (6) Clip the content
+  async function clipPlaylistManifest(parsed_manifest) {
+    if (!parsed_manifest) return
+    const startTime = body.start_time
+    const endTime = body.end_time
+    const streamStart =
+      parsedPlaylistManifest.segments[0].dateTimeObject.getTime()
+    const clipStartAt = Math.floor(startTime * 1000 + streamStart)
+    const clipEndAt = Math.floor(streamStart + endTime * 1000)
 
-  /*
-  let master_url = body.master_url
-  let path = url.parse(master_url).pathname.replace('/master.m3u8', '')
-  let location = `${process.env.STORAGE_IVSRECORDINGS_BUCKETNAME}${path}`
-  let start_time = body.start_time
-  let end_time = body.end_time
-  let excutionTime = Date.now()
-
-  // (2) get manifest and parse and create a list use as obj
-  if (!master_url) return
-  const masterManifest = await parseMaster(master_url)
-
-  async function parseMaster(url) {
-    console.log('parseMaster')
-    let manifest = await getRequest(url)
-    newMaster = manifest
-      .toString()
-      .replace(/playlist/g, `${excutionTime}_clip_playlist`)
-    var parser = new m3u8Parser.Parser()
-    parser.push(manifest)
-    parser.end()
-    return parser.manifest
-  }
-
-  // (3) get the manifest and fiter the date time interval, create the new adaptative manifest
-  const clipManifest = await clipAdaptative(masterManifest)
-
-  async function clipAdaptative(master) {
-    console.log('parseAdaptative')
-    let clipMaifest = []
-    let adaptativeURI = JSON.stringify(master.playlists[0].uri)
-    let adaptativeURL = master_url.replace(
-      'master.m3u8',
-      adaptativeURI.replace(/"/g, '')
-    )
-    let manifest = await getRequest(adaptativeURL)
-    var parser = new m3u8Parser.Parser()
-    parser.push(manifest)
-    parser.end()
-    let parsedManifest = parser.manifest
-    let streamStart = parsedManifest.segments[0].dateTimeObject.getTime()
-    let clipStartAt = Math.floor(start_time * 1000 + streamStart)
-    let clipEndAt = Math.floor(streamStart + end_time * 1000)
-
-    clipMaifest = parsedManifest.segments.filter((item) => {
+    const clippedPlaylistManifest = parsed_manifest.segments.filter((item) => {
       let date = item.dateTimeObject.getTime()
       let endDate = date + item.duration * 1000
       return endDate >= clipStartAt && date <= clipEndAt
     })
 
-    let chunks = ''
+    const chunks = constructChunkString(clippedPlaylistManifest)
+    let bodyPlaylistManifest = `#EXTM3U
+#EXT-X-VERSION:${parsed_manifest.version}
+#EXT-X-TARGETDURATION:${parsed_manifest.targetDuration}
+#ID3-EQUIV-TDTG:${parsed_manifest.dateTimeString.toString().slice(0, 19)}
+#EXT-X-PLAYLIST-TYPE:${parsed_manifest.playlistType}
+#EXT-X-MEDIA-SEQUENCE:${parsed_manifest.mediaSequence}
+#EXT-X-TWITCH-ELAPSED-SECS:${startTime}.000
+#EXT-X-TWITCH-TOTAL-SECS:${endTime}.000`
 
-    clipMaifest.forEach((element) => {
-      chunks += `#EXT-X-PROGRAM-DATE-TIME:${element.dateTimeString}
-#EXTINF:${element.duration},
-${element.uri}\n`
-    })
-
-    let bodyAdptativeManifest = `#EXTM3U
-#EXT-X-VERSION:${parsedManifest.version}
-#EXT-X-TARGETDURATION:${parsedManifest.targetDuration}
-#ID3-EQUIV-TDTG:${parsedManifest.dateTimeString.toString().slice(0, 19)}
-#EXT-X-PLAYLIST-TYPE:${parsedManifest.playlistType}
-#EXT-X-MEDIA-SEQUENCE:${parsedManifest.mediaSequence}
-#EXT-X-TWITCH-ELAPSED-SECS:${start_time}.000
-#EXT-X-TWITCH-TOTAL-SECS:${end_time}.000
-${chunks.trim()}
-#EXT-X-ENDLIST`
-    return bodyAdptativeManifest.trim()
+    return Buffer.concat([
+      Buffer.from(bodyPlaylistManifest),
+      ...chunks,
+      Buffer.from('#EXT-X-ENDLIST')
+    ])
   }
 
-  // (4) write to S3
-  await writeToS3(newMaster, `${excutionTime}_clip_master.m3u8`, location)
-  // (4.1) Loop write to S3 the Adaptative Manifest
-  await loopWrite(clipManifest, masterManifest, location)
-
-  async function loopWrite(clipBody, master, local) {
-    let playlists = master.playlists
-    for await (const playlist of playlists) {
-      let newLocation = `${local}/${playlist.attributes.VIDEO}`
-      await writeToS3(
-        clipBody,
-        `${excutionTime}_clip_playlist.m3u8`,
-        newLocation
+  function constructChunkString(clipped_manifest) {
+    let chunks = []
+    for (const segments of clipped_manifest) {
+      chunks.push(
+        Buffer.from(`#EXT-X-PROGRAM-DATE-TIME:${segments.dateTimeString}
+#EXTINF:${segments.duration},
+${segments.uri}\n`)
       )
     }
+    return chunks
+  }
+
+  clippedRawPlaylistManifest = await clipPlaylistManifest(
+    parsedPlaylistManifest
+  )
+
+  clippedRawMasterManifest = rawMasterManifest
+    .toString()
+    .replace(/playlist/g, `${excutionTime}_clip_playlist`)
+
+  pathLocation = masterKey.replace('/master.m3u8', '')
+  s3BucketFolder = s3Bucket + pathLocation
+
+  // (7) Write to S3, the Clipped Master Manifest
+  await writeToS3(
+    clippedRawMasterManifest,
+    `${excutionTime}_clip_master.m3u8`,
+    s3BucketFolder
+  )
+
+  // (8) Write to S3 the Clipped Playlist Manifest
+  const playlists = parsedMasterManifest.playlists
+  for await (const playlist of playlists) {
+    const newLocation = `${s3BucketFolder}/${playlist.attributes.VIDEO}`
+    await writeToS3(
+      clippedRawPlaylistManifest,
+      `${excutionTime}_clip_playlist.m3u8`,
+      newLocation
+    )
   }
 
   async function writeToS3(body, filename, location) {
-    let params = {
+    const params = {
       Body: body,
       Bucket: location,
       Key: filename,
@@ -164,11 +146,22 @@ ${chunks.trim()}
         if (err) {
           console.log('Error uploading data: ', err)
         } else {
-          resp = data
+          return data
         }
       })
       .promise()
   }
+
+  // (7) Send the response
+  const responseBody = [
+    {
+      execution: excutionTime,
+      path: pathLocation,
+      bucket: s3Bucket,
+      clip_master: `${s3BucketFolder}${excutionTime}_clip_master.m3u8`,
+      master_url: `${process.env.CLOUDFRONT_DOMAIN_NAME}${pathLocation}/${excutionTime}_clip_master.m3u8`
+    }
+  ]
 
   const response = {
     statusCode: 200,
@@ -176,36 +169,22 @@ ${chunks.trim()}
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': '*'
     },
-    body: clipManifest
+    body: JSON.stringify(responseBody)
   }
   return response
 }
 
-// auxiliar functions
-// HHTPS get request the URL
-
-function getRequest(url) {
-  return new Promise((resolve, reject) => {
-    const req = https.get(url, (res) => {
-      res.setEncoding('utf8')
-      let rawData = ''
-
-      res.on('data', (chunk) => {
-        rawData += chunk
-      })
-
-      res.on('end', () => {
-        try {
-          resolve(rawData)
-        } catch (err) {
-          reject(new Error(err))
-        }
-      })
-    })
-
-    req.on('error', (err) => {
-      reject(new Error(err))
-    })
-  })
-  */
+// (2.2) get master manifest from S3
+async function getManifestFile(key) {
+  const params = {
+    Bucket: s3Bucket,
+    Key: key.slice(1)
+  }
+  try {
+    const response = await s3.getObject(params).promise()
+    return response.Body.toString('ascii')
+  } catch (error) {
+    console.error(error)
+    return
+  }
 }
