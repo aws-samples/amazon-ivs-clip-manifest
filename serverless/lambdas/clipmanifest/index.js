@@ -5,11 +5,66 @@ const https = require('https')
 const m3u8Parser = require('m3u8-parser')
 const url = require('url')
 let newMaster = ''
-let resp
 
 exports.handler = async (event) => {
   // (1) parse event body
-  let body = JSON.parse(event.body)
+  const body = JSON.parse(event.body)
+  const masterURL = body.master_url
+  const startTime = body.start_time
+  const endTime = body.end_time
+  const excutionTime = Date.now()
+  const s3Bucket = process.env.STORAGE_IVSRECORDINGS_BUCKETNAME
+  const masterKey = url.parse(masterURL).pathname
+
+  console.log(masterKey)
+
+  // (2) get master manifest from S3
+
+  async function getManifestFile(file) {
+    const params = {
+      Bucket: process.env.STORAGE_IVSRECORDINGS_BUCKETNAME,
+      Key: file.slice(1)
+    }
+    try {
+      const masterManifest = await s3.getObject(params).promise()
+      return masterManifest.Body.toString('ascii')
+    } catch (error) {
+      console.error(error)
+      throw new Error('Error on getting the manifest file')
+    }
+  }
+  // (3) Parse the master manifest
+
+  const rawMasterManifest = await getManifestFile(masterKey)
+
+  async function parseManifest(manifest) {
+    let parser = new m3u8Parser.Parser()
+    parser.push(manifest)
+    parser.end()
+    return parser.manifest
+  }
+
+  const parsedMasterManifest = await parseManifest(rawMasterManifest)
+
+  // (4) get the playlist manifest
+  async function getPlaylistManifest(parsed_master) {
+    const playlistURI = JSON.stringify(parsed_master.playlists[0].uri)
+    const playlistURL = masterKey.replace(
+      'master.m3u8',
+      playlistURI.replace(/"/g, '')
+    )
+    const playlistManifest = await getManifestFile(playlistURL)
+    return playlistManifest
+  }
+
+  const rawPlaylistManifest = await getPlaylistManifest(parsedMasterManifest)
+
+  // (5) Parse the playlist manifest
+  const parsedPlaylistManifest = await parseManifest(rawPlaylistManifest)
+
+  // (6) Clip the content
+
+  /*
   let master_url = body.master_url
   let path = url.parse(master_url).pathname.replace('/master.m3u8', '')
   let location = `${process.env.STORAGE_IVSRECORDINGS_BUCKETNAME}${path}`
@@ -152,4 +207,5 @@ function getRequest(url) {
       reject(new Error(err))
     })
   })
+  */
 }
