@@ -5,9 +5,7 @@ import ClipPoster from './../img/clipposter.svg'
 
 export default function HomePage(props) {
   const playerRef = useRef(null)
-  const [vodData, setVodData] = useState('')
-
-  const [videoURL, setVideoURL] = useState('')
+  const [vodData, setvodData] = useState({ url: '', path: '' })
 
   const videoJsOptions = {
     autoplay: 'muted', //mute audio when page loads, but auto play video
@@ -18,7 +16,7 @@ export default function HomePage(props) {
     height: 504,
     sources: [
       {
-        src: videoURL,
+        src: vodData.url,
         type: 'application/x-mpegURL'
       }
     ]
@@ -32,7 +30,10 @@ export default function HomePage(props) {
       console.log('Effect')
       if (props.recordings) {
         setListofRec(props.recordings)
-        setVideoURL(props.recordings[0].master)
+        setvodData({
+          url: props.recordings[0].master,
+          path: props.recordings[0].path
+        })
       }
       if (props.clips) setListofClips(props.clips)
 
@@ -41,7 +42,7 @@ export default function HomePage(props) {
       }
     },
     [props],
-    console.log('PROPS', props, listofClips)
+    console.log('PROPS', props, vodData)
   )
 
   const handlePlayerReady = (player) => {
@@ -81,8 +82,15 @@ export default function HomePage(props) {
 
   const handleVODChange = (event) => {
     event.preventDefault()
-    console.log(event.target.value)
-    setVideoURL(event.target.value)
+    console.log(
+      event.target.options[event.target.selectedIndex].getAttribute('data-path')
+    )
+    setvodData({
+      url: event.target.value,
+      path: event.target.options[event.target.selectedIndex].getAttribute(
+        'data-path'
+      )
+    })
   }
 
   return (
@@ -94,13 +102,17 @@ export default function HomePage(props) {
               <div className='col-xl'>
                 <div class='form-group'>
                   <select
-                    value={videoURL}
+                    value={vodData.url}
                     className='custom-select large'
                     required
                     onChange={handleVODChange}
                   >
                     {listofRec.map((items, index) => (
-                      <option key={index} value={items.master}>
+                      <option
+                        key={index}
+                        value={items.master}
+                        data-path={items.path}
+                      >
                         {' '}
                         Select the VOD: {items.assetID}
                       </option>
@@ -112,7 +124,7 @@ export default function HomePage(props) {
           </form>
         </div>
         <div className='video-container'>
-          {videoURL ? (
+          {vodData.url ? (
             <VideoPlayer
               className='videoplayer'
               options={videoJsOptions}

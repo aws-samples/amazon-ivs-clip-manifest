@@ -6,7 +6,6 @@ const s3 = new AWS.S3()
 exports.handler = async (event, context) => {
   console.log('Initializing Function Get S3 Recordings')
   const accountID = process.env.ACCOUNT_ID
-  let vodjson = []
   const cfURL = process.env.CLOUDFRONT_DOMAIN_NAME
 
   async function getRecordings() {
@@ -18,20 +17,22 @@ exports.handler = async (event, context) => {
       const recordings = await s3.listObjects(params).promise()
       return recordings
     } catch (error) {
-      console.log(error)
-      return
+      console.error(error)
+      throw new Error('Error on getting recordings')
     }
   }
 
   const recordings = await getRecordings()
+  const vodData = []
 
   if (recordings) {
-    recordings.Contents.forEach((element) => {
-      let file = element.Key.substring(element.Key.lastIndexOf('/') + 1)
+    for (const recording of recordings.Contents) {
+      let file = recording.Key.substring(recording.Key.lastIndexOf('/') + 1)
       if (file === 'master.m3u8') {
-        let s3pathParsed = element.Key.split('/')
+        const s3pathParsed = recording.Key.split('/')
+        const pathLength = s3pathParsed.length
         let assetName = `Channel: ${s3pathParsed[3]} - Date: ${s3pathParsed[4]}-${s3pathParsed[5]}-${s3pathParsed[6]} ${s3pathParsed[7]}:${s3pathParsed[8]} - ID: ${s3pathParsed[9]}`
-        vodjson.push({
+        vodData.push({
           channel: s3pathParsed[3],
           year: s3pathParsed[4],
           month: s3pathParsed[5],
@@ -40,10 +41,11 @@ exports.handler = async (event, context) => {
           minute: s3pathParsed[8],
           recording: s3pathParsed[9],
           assetID: assetName,
-          master: `${cfURL}/${element.Key}`
+          path: s3pathParsed.slice(0, pathLength - 1).join('/'),
+          master: `${cfURL}/${recording.Key}`
         })
       }
-    })
+    }
   }
 
   const response = {
@@ -52,7 +54,7 @@ exports.handler = async (event, context) => {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': '*'
     },
-    body: JSON.stringify(vodjson)
+    body: JSON.stringify(vodData)
   }
   return response
 }
