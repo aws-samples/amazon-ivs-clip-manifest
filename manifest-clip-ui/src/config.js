@@ -1,7 +1,7 @@
 import config from './config.json'
 
 function getAPIValues(key) {
-  const index = config[0].findIndex((o) => o.OutputKey === key)
+  const index = config[0].findIndex((item) => item.OutputKey === key)
   return config[0][index].OutputValue
 }
 

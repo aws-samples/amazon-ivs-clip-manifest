@@ -1,6 +1,8 @@
+import { GET_CLIPS_API } from '../../config'
+
 export function getClipsAPI(pathfilter) {
   console.log('filter', pathfilter)
-  const url = `https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/getclips?vod=${pathfilter}`
+  const url = `${GET_CLIPS_API}?vod=${pathfilter}`
   return fetch(url, {
     method: 'GET',
     headers: new Headers({

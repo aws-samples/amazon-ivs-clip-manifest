@@ -224,7 +224,9 @@ Object URL: https://my-new-ivs-recording-bucket-098435415742.s3.amazonaws.com/iv
 
 
 
-```
+```sh
 aws cloudformation describe-stacks --stack-name sample-clip-manifest --query 'Stacks[].Outputs' > ../manifest-clip-ui/src/config.json 
+
+aws cloudformation describe-stacks --stack-name sample-clip-manifest --query 'Stacks[].Outputs' > ../manifest-clip-ui/src/config.json
 ```
 

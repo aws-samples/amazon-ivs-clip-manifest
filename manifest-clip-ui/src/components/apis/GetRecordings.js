@@ -1,4 +1,3 @@
-// you should import .env or .config instead of
 import { GET_RECORDING_API } from '../../config'
 
 export function getRecordingsAPI() {
