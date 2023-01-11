@@ -6,3 +6,5 @@ function getAPIValues(key) {
 }
 
 export const GET_RECORDING_API = getAPIValues('ApiURLGetRecordings')
+export const GET_CLIPS_API = getAPIValues('ApiURLGetClips')
+export const POST_CLIPMANIFEST_API = getAPIValues('ApiURLCreateClip')
