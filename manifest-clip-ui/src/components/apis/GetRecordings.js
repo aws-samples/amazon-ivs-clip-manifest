@@ -1,9 +1,9 @@
 // you should import .env or .config instead of
+import { GET_RECORDING_API } from '../../config'
 
 export function getRecordingsAPI() {
-  console.log('get Recordings')
-  const url =
-    'https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/getrecordings/'
+  console.log('get Recordings', GET_RECORDING_API)
+  const url = GET_RECORDING_API
 
   return fetch(url, {
     method: 'GET',

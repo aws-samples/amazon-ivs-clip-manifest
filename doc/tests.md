@@ -221,3 +221,10 @@ Object URL: https://my-new-ivs-recording-bucket-098435415742.s3.amazonaws.com/iv
 ```
 
 [Play the Output Clip](https://d1vzkjoets0sdc.cloudfront.net/ivs/v1/098435415742/2rrcA103rn67/2022/11/16/1/8/lFOBQr3Hdzlg/media/hls/1670362582722_clip_master.m3u8)
+
+
+
+```
+aws cloudformation describe-stacks --stack-name sample-clip-manifest --query 'Stacks[].Outputs' > ../manifest-clip-ui/src/config.json 
+```
+

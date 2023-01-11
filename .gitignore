@@ -9,6 +9,9 @@ standalone-api/clipmanifest/node_modules
 # production
 */build
 
+#config file
+manifest-clip-ui/src/config.json
+
 # misc
 /serverless/packaged.yaml
 
