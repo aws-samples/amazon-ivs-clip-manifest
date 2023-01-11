@@ -21,24 +21,29 @@
     - [x] front get recordings
     - [x] call from Home to api module
     - [x] map each item
-    - [ ] onClick 
-    - [ ] onSelect
+    - [x] onClick 
+    - [x] onSelect
 #### (2.2) get clips
 - [x] lambda get clips
     - [x] update sam package
     - [x] front get recordings
     - [x] call from Home to api module
     - [x] map each item
-    - [ ] onSelect
+    - [ ] filter the clips based on the recording ID
+    - [ ] onClick
+    - [ ] Play
 ### (4) manifestclip
 - [x] lambda
 - [x] sam
 - [x] change clip to have an ID
 - [x] change the playlist to have a version
-- [ ] change from Request to S3 https://stackoverflow.com/questions/30651502/how-to-get-contents-of-a-text-file-from-aws-s3-using-a-lambda-function#:~:text=You%20can%20use%20data.,encoding%20types%20to%20the%20function.
+- [x] change from Request to S3 https://stackoverflow.com/questions/30651502/how-to-get-contents-of-a-text-file-from-aws-s3-using-a-lambda-function#:~:text=You%20can%20use%20data.,encoding%20types%20to%20the%20function.
 - [ ] front api
+- [ ] time range selector
 - [ ] call from home 
 - [ ] onClick
+### (5) Front place holders
+- [ ] add place holders
 ### (5) Create the config file and import
 - [ ] .env or .config
 - [ ] import in each api

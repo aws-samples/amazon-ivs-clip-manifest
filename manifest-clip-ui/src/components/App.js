@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import './App.css'
 import Home from './HomePage'
-import FetchRecordings from './apis/GetRecordings'
-import FetchClips from './apis/GetClips'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 export default function App(props) {
@@ -19,10 +17,10 @@ export default function App(props) {
     window.location.href = 'https://docs.aws.amazon.com/ivs/' //Will take you to Google.
   }
 
+  //      <FetchClips onClipFetched={setClips} />
+
   return (
     <div className='App'>
-      <FetchRecordings onRecFetched={setRecordings} />
-      <FetchClips onClipsFetched={setClips} />
       <nav className='navbar navbar-dark bg-dark'>
         <a class='navbar-brand' href='#'>
           IVS Manifest Clipping
@@ -37,12 +35,6 @@ export default function App(props) {
       </nav>
       <Router>
         <Routes>
-          <Route
-            path='/Recordings'
-            element={
-              <FetchRecordings onRecFetched={setRecordings} {...props} />
-            }
-          />
           <Route
             path='/'
             element={

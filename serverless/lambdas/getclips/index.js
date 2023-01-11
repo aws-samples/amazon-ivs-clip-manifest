@@ -4,33 +4,33 @@ const AWS = require('aws-sdk')
 const s3 = new AWS.S3()
 
 exports.handler = async (event, context) => {
-  console.log('Initializing Function Get S3 Recordings')
-  const accountID = process.env.ACCOUNT_ID
+  console.log('Initializing Function Get S3 Clips')
+  const vodPath = event.queryStringParameters
+  console.log(vodPath.vod)
   let clipjson = []
   const cfURL = process.env.CLOUDFRONT_DOMAIN_NAME
 
-  async function getRecordings() {
+  async function getClips() {
     const params = {
       Bucket: process.env.STORAGE_IVSRECORDINGS_BUCKETNAME,
-      Prefix: `ivs/v1/${accountID}/`
+      Prefix: `${vodPath.vod}/`
     }
     try {
-      const recordings = await s3.listObjects(params).promise()
-      return recordings
+      const clips = await s3.listObjects(params).promise()
+      return clips
     } catch (error) {
       console.log(error)
       return
     }
   }
 
-  const recordings = await getRecordings()
+  const clips = await getClips()
 
-  if (recordings) {
-    recordings.Contents.forEach((element) => {
+  if (clips) {
+    clips.Contents.forEach((element) => {
       let file = element.Key.substring(element.Key.lastIndexOf('/') + 1)
       const target = new RegExp('clip_master*')
       if (target.test(file)) {
-        console.log('Loop de clips', element)
         let s3pathParsed = element.Key.split('/')
         let assetName = `Channel: ${s3pathParsed[3]} - Date: ${s3pathParsed[4]}-${s3pathParsed[5]}-${s3pathParsed[6]} ${s3pathParsed[7]}:${s3pathParsed[8]} - ID: ${s3pathParsed[9]}`
         clipjson.push({

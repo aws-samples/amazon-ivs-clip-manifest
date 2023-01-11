@@ -18,7 +18,7 @@ exports.handler = async (event, context) => {
       return recordings
     } catch (error) {
       console.error(error)
-      throw new Error('Error on getting recordings')
+      return
     }
   }
 

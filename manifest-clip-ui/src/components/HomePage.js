@@ -2,10 +2,14 @@ import React, { useRef, useEffect, useState } from 'react'
 import './styles/HomePage.style.css'
 import VideoPlayer from './player/playerJS'
 import ClipPoster from './../img/clipposter.svg'
+import { getClipsAPI } from './apis/getClips'
+import { getRecordingsAPI } from './apis/getRecordings'
 
 export default function HomePage(props) {
   const playerRef = useRef(null)
   const [vodData, setvodData] = useState({ url: '', path: '' })
+  const [listofRec, setListofRec] = useState([])
+  const [listofClips, setListofClips] = useState([])
 
   const videoJsOptions = {
     autoplay: 'muted', //mute audio when page loads, but auto play video
@@ -22,28 +26,27 @@ export default function HomePage(props) {
     ]
   }
 
-  let [listofRec, setListofRec] = useState([])
-  let [listofClips, setListofClips] = useState([])
+  useEffect(() => {
+    if (!vodData.url) handleRecodingData()
+  }, [])
 
-  useEffect(
-    () => {
-      console.log('Effect')
-      if (props.recordings) {
-        setListofRec(props.recordings)
-        setvodData({
-          url: props.recordings[0].master,
-          path: props.recordings[0].path
-        })
-      }
-      if (props.clips) setListofClips(props.clips)
+  const handleRecodingData = async () => {
+    await getRecordingsAPI().then((items) => {
+      setListofRec(items)
+      setvodData({
+        url: items[0].master,
+        path: items[0].path
+      })
+      getClips(items[0].path)
+    })
+  }
 
-      return () => {
-        //second
-      }
-    },
-    [props],
-    console.log('PROPS', props, vodData)
-  )
+  const getClips = async (voddata) => {
+    console.log('vodData')
+    await getClipsAPI(voddata).then((items) => {
+      setListofClips(items)
+    })
+  }
 
   const handlePlayerReady = (player) => {
     player.on('waiting', () => {
@@ -91,6 +94,9 @@ export default function HomePage(props) {
         'data-path'
       )
     })
+    getClips(
+      event.target.options[event.target.selectedIndex].getAttribute('data-path')
+    )
   }
 
   return (

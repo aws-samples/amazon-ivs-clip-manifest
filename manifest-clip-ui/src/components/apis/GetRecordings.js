@@ -1,30 +1,19 @@
-import React, { useState, useEffect } from 'react'
 // you should import .env or .config instead of
 
-export default function GetRecordings(props) {
-  const [data, setData] = useState([])
+export function getRecordingsAPI() {
+  console.log('get Recordings')
+  const url =
+    'https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/getrecordings/'
 
-  useEffect(() => {
-    console.log('get Recordings')
-    const url =
-      'https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/getrecordings/'
-
-    fetch(url, {
-      method: 'GET',
-      headers: new Headers({
-        Accept: 'application/json'
-      })
+  return fetch(url, {
+    method: 'GET',
+    headers: new Headers({
+      Accept: 'application/json'
     })
-      .then((response) => response.json())
-      .then((response) => {
-        console.log('success', response)
-        setData(response)
-        props.onRecFetched(response)
-      })
-      .catch((error) => {
-        console.error('Error', error)
-        return error
-      })
-    return () => {}
-  }, [])
+  })
+    .then((response) => response.json())
+    .catch((error) => {
+      console.error('Error', error)
+      return error
+    })
 }
