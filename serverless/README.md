@@ -1,12 +1,12 @@
 # Getting Started installing the backend API
 
-The following steps show how to use AWS SAM to create a deployment build around [Amazon Simple Storage Service (Amazon S3), Amazon API Gateway and AWS Lambda, Amazon CloudFront. It also attach the Amazon CloudFront distribution to the Amazon S3 bucket, and apply the required policies to both.
+The following steps show how to use AWS SAM to create a deployment build around Amazon Simple Storage Service (Amazon S3), Amazon API Gateway and AWS Lambda, Amazon CloudFront. It also attach the Amazon CloudFront distribution to the Amazon S3 bucket, and apply the required policies to both.
 
 The [AWS Serverless Application Model (AWS SAM)](https://aws.amazon.com/serverless/sam/) is an open-source framework for building serverless applications. Built on [AWS CloudFormation](https://aws.amazon.com/cloudformation/), AWS SAM provides shorthand syntax to declare serverless resources using JSON or YAML. During deployment, AWS SAM transforms the serverless resources into CloudFormation syntax, enabling you to build serverless applications faster. As a companion to AWS SAM, the [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-reference.html#serverless-sam-cli) is a command line tool that operates on AWS SAM templates.
 
 ## Deployment Steps
 
-#### 1. Cloning the Git repository
+### 1. Cloning the Git repository
 
 Clone the git repository of the Clip Manifest API for Amazon IVS:
 
@@ -97,54 +97,9 @@ Take note of the RecordingConfiguration ARN, as it will be used to link your rec
 aws ivs create-channel --name my-ivs-channel --recording-configuration-arn "<you-recording-arn>"
 ```
 
-### 8. Testing the clipmanifest API 
-
-After completing a live transmission to your Amazon IVS RTMPS endpoint, navigate to the Amazon S3 Recording Bucket, and look for the .m3u8 manifest. The Amazon S3 path should look like the below:
-
-````
-/ivs/v1/<aws_account_id>/<channel_id>/<year>/<month>/<day>/<hours>/<minutes>/<recording_id>/media/hls/720p30/playlist.m3u8
-````
-
-<img src="../doc/playlist_input.png" width=50%>
-
-
-### 9. Using the create clips API
-
-Make an HTTP Post call to the Amazon API Gateway endpoint.
+### 8. Extract the Outputs from the SAM package to pass as parameters to WebUI 
 
 ```sh
-curl -X POST <API Gateway Endpoint>/clipmanifest -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://<url of the ivs recording>\"}"
+aws cloudformation describe-stacks --stack-name sample-clip-manifest --query 'Stacks[].Outputs' > ../manifest-clip-ui/src/config.json 
 ```
-
-example: 
-```sh
-curl -X POST https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/ -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://<cloudfront_dist_id>.cloudfront.net/ivs/v1/<account_id>/2rrcA103rn67/2022/10/15/2/11/X5JJ9FegmZiq/media/hls/master.m3u8\"}" 
-```
-
-### 10. Test the clip
-
-The new manifest follows the the path URL of the recording with the object called clip_master.m3u8
-
-
-<img src="../doc/playlist_output.png" width=50%>
-
-
-### Other APIs Usage
-
-
-#### Get recordings API
-```sh
-curl -X GET <API Gateway Endpoint>/getrecordings
-```
-
-#### Get clips API
-```sh
-curl -X GET <API Gateway Endpoint>/getclips
-```
-## About Amazon IVS
-* Amazon Interactive Video Service (Amazon IVS) is a managed live streaming solution that is quick and easy to set up, and ideal for creating interactive video experiences. [Learn more](https://aws.amazon.com/ivs/).
-* [Amazon IVS docs](https://docs.aws.amazon.com/ivs/)
-* [User Guide](https://docs.aws.amazon.com/ivs/latest/userguide/)
-* [API Reference](https://docs.aws.amazon.com/ivs/latest/APIReference/)
-* [Learn more about Amazon IVS on IVS.rocks](https://ivs.rocks/)
-* [View more demos like this](https://ivs.rocks/examples)
+[Click here to proceed to the WebUI deployment steps ->](/manifest-clip-ui/README.md)
