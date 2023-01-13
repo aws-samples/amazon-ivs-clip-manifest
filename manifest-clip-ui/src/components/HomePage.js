@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, useCallback } from 'react'
 import './styles/HomePage.style.css'
 import VideoPlayer from './player/playerJS'
 import ClipPoster from './../img/clipposter.svg'
@@ -6,10 +6,37 @@ import { getClipsAPI } from './apis/getClips'
 import { getRecordingsAPI } from './apis/getRecordings'
 
 export default function HomePage(props) {
+  const [duration, setDuration] = useState(0)
+  const [position, setPosition] = useState(0)
   const playerRef = useRef(null)
   const [vodData, setvodData] = useState({ url: '', path: '' })
   const [listofRec, setListofRec] = useState([])
   const [listofClips, setListofClips] = useState([])
+  const [loaded, setLoaded] = useState(false)
+  const [clipControls, setClipControls] = useState({
+    startTime: null,
+    endTime: null
+  })
+
+  useEffect(() => {
+    if (!vodData.url) handleRecodingData()
+  }, [])
+
+  useEffect(() => {
+    if (loaded) {
+      let curPlayer = document.querySelector('video')
+      curPlayer.addEventListener('canplay', () => {
+        curPlayer.addEventListener('timeupdate', () => {
+          setPosition(playerRef.current.currentTime())
+        })
+      })
+      return () => {
+        curPlayer.removeEventListener('timeupdate', () => {
+          setPosition(playerRef.current.currentTime())
+        })
+      }
+    }
+  }, [loaded])
 
   const videoJsOptions = {
     autoplay: 'muted', //mute audio when page loads, but auto play video
@@ -18,6 +45,7 @@ export default function HomePage(props) {
     fluid: true,
     width: 896,
     height: 504,
+    playbackRates: [0.5, 1, 1.5, 2, 4, 8],
     sources: [
       {
         src: vodData.url,
@@ -25,10 +53,6 @@ export default function HomePage(props) {
       }
     ]
   }
-
-  useEffect(() => {
-    if (!vodData.url) handleRecodingData()
-  }, [])
 
   const handleRecodingData = async () => {
     await getRecordingsAPI().then((items) => {
@@ -49,6 +73,11 @@ export default function HomePage(props) {
   }
 
   const handlePlayerReady = (player) => {
+    if (loaded === false) {
+      console.log('setting value!!!!!!')
+      setLoaded(true)
+    }
+
     player.on('waiting', () => {
       console.log('player is waiting')
     })
@@ -58,8 +87,10 @@ export default function HomePage(props) {
     })
 
     player.on('playing', () => {
-      console.log('player playing')
+      console.log('player is playing')
       addDebugLine(Date.now(), 'Player playing')
+      console.log('Video Duration!', player.duration())
+      setDuration(player.duration().toFixed(0))
     })
 
     player.on('error', (err) => {
@@ -67,7 +98,39 @@ export default function HomePage(props) {
       addDebugLine(Date.now(), `Player ${err.type} ${err.target.innerText}`)
     })
 
+    player.on('pause', () => {
+      console.log('Paused')
+    })
+
     playerRef.current = player
+  }
+
+  const handleSliderSeekChangeStart = (newPosition) => {
+    console.log(newPosition.target.value)
+    playerRef.current.currentTime(newPosition.target.value)
+    setClipControls({ startTime: newPosition })
+  }
+
+  const handleSetStartTime = (position) => {
+    playerRef.current.pause()
+    console.log(position.target.value)
+    setClipControls({ startTime: position.target.value })
+  }
+
+  const handleSliderSeekChangeEnd = (newPosition) => {
+    console.log(newPosition.target.value)
+    //playerRef.current.currentTime(newPosition.target.value)
+    setClipControls({ startTime: clipControls.startTime, endTime: newPosition })
+  }
+
+  const handleSetEndTime = (position) => {
+    playerRef.current.pause()
+    console.log(position.target.value)
+    setClipControls({
+      startTime: clipControls.startTime,
+      endTime: position.target.value
+    })
+    console.log(clipControls)
   }
 
   function addDebugLine(metadataTime, metadataText) {
@@ -97,6 +160,11 @@ export default function HomePage(props) {
     getClips(
       event.target.options[event.target.selectedIndex].getAttribute('data-path')
     )
+  }
+
+  const handlePlayClip = (event) => {
+    console.log(event)
+    setvodData({ url: event })
   }
 
   return (
@@ -135,6 +203,7 @@ export default function HomePage(props) {
               className='videoplayer'
               options={videoJsOptions}
               onReady={handlePlayerReady}
+              ref={playerRef}
             />
           ) : (
             <div className='videoplayer'>
@@ -143,7 +212,7 @@ export default function HomePage(props) {
           )}
         </div>
         <div className='controls-container'>
-          Clip Controls
+          Clip Controls {position}
           <form>
             <div class='form-group'>
               <div className='row'>
@@ -153,9 +222,14 @@ export default function HomePage(props) {
                 <div className='col-xl'>
                   <input
                     type='range'
-                    value='20'
+                    id='start'
+                    value={
+                      clipControls.startTime ? clipControls.startTime : position
+                    }
                     class='form-control-range'
-                    id='formControlRange'
+                    max={duration}
+                    onChange={(e) => handleSliderSeekChangeStart(e)}
+                    onClick={(e) => handleSetStartTime(e)}
                   />
                 </div>
                 <div className='col-sm-1'>
@@ -176,9 +250,13 @@ export default function HomePage(props) {
                 <div className='col-xl'>
                   <input
                     type='range'
-                    value='100'
+                    id='end'
+                    value={
+                      clipControls.endTime ? clipControls.endTime : position
+                    }
+                    max={duration}
                     class='form-control-range'
-                    id='formControlRange'
+                    onClick={(e) => handleSetEndTime(e)}
                   />
                 </div>
                 <div className='col-sm-1'>
@@ -196,7 +274,11 @@ export default function HomePage(props) {
         <div className='clips-container'>
           <div className='clips-inline'>
             {listofClips.map((items, index) => (
-              <div className='card col-sm-3' key={index}>
+              <div
+                className='card col-sm-3'
+                key={index}
+                onClick={() => handlePlayClip(items.master)}
+              >
                 <img
                   class='card-img-top'
                   src={ClipPoster}

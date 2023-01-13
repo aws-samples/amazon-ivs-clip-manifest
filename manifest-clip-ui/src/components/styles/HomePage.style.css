@@ -57,7 +57,9 @@ body {
   flex-direction: row;
   white-space: nowrap;
   max-height: 250px;
+  cursor: pointer;
 }
+
 
 .clips-inline {
   display: flex;
