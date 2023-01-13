@@ -28,14 +28,23 @@ To get the demo running in your own AWS account, follow these instructions.
 
 ### Deployment Options
 
+#### 1. Deploy the complete solution (APIs + WedUI)
 
-### [1. Deploy the backend severless app](/serverless/README.md)
-Deploy the backend AWS lambda functions needed to clip the content based on the URL.
+This option implements the complete solution with the backend APIs needed for performing retrieving the raw recorded streams from IVS, clipping, listing the clips.
 
-### [2. Deploy the frontend web app (Optional)](/manifest-clip-ui/README.md) 
+##### [Step 1. Deploy the backend severless app](/serverless/README.md)
+Deploy the backend AWS Lambda functions [clipmanifest](/serverless/lambdas/clipmanifest/), [getclips](/serverless/lambdas/getclips/) and [getrecordings](/serverless/lambdas/getrecordings/). Those functions will be invoked by the web application UI.
 
-Deploy the frontend web application on top of the backend serverless app
+##### [Step 2. Deploy the frontend web app](/manifest-clip-ui/README.md) 
 
+Deploy the frontend web application on top of the backend serverless app.
+
+#### 2. Deploy the stand-alone API only
+
+This option implements just the backend APIs of solution. If you want to create your own application or webUI, this option allow you to leverage just the API directly
+
+##### [Step 1. Deploy the backend severless app only](/standalone-api/README.md)
+Deploy the backend AWS Lambda functions [clipmanifest](/serverless/lambdas/clipmanifest/), [getclips](/serverless/lambdas/getclips/) and [getrecordings](/serverless/lambdas/getrecordings/).
 
 
 ### Contributing guidelines
@@ -45,3 +54,10 @@ See [CONTRIBUTING](CONTRIBUTING.md) for more information.
 This library is licensed under the MIT-0 License. See the LICENSE file.
 
 
+### About Amazon IVS
+* Amazon Interactive Video Service (Amazon IVS) is a managed live streaming solution that is quick and easy to set up, and ideal for creating interactive video experiences. [Learn more](https://aws.amazon.com/ivs/).
+* [Amazon IVS docs](https://docs.aws.amazon.com/ivs/)
+* [User Guide](https://docs.aws.amazon.com/ivs/latest/userguide/)
+* [API Reference](https://docs.aws.amazon.com/ivs/latest/APIReference/)
+* [Learn more about Amazon IVS on IVS.rocks](https://ivs.rocks/)
+* [View more demos like this](https://ivs.rocks/examples)
