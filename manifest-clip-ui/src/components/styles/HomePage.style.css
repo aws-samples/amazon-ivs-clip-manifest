@@ -39,7 +39,6 @@ body {
   margin-top: 10px;
   background-color: #fff;
   border: 0rem;
-  
 }
 
 .video-player {
@@ -53,6 +52,7 @@ body {
 .video-player-placeholder {
   position: relative;
   max-width: 1280px;
+  margin-bottom: 10px;
 }
 
 .controls-container {
