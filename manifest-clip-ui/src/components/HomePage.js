@@ -1,8 +1,9 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import './styles/HomePage.style.css'
 import VideoPlayer from './player/playerJS'
 import ClipPoster from './../img/clipposter.svg'
 import { getClipsAPI } from './apis/getClips'
+import { createClipAPI } from './apis/createClip'
 import { getRecordingsAPI } from './apis/getRecordings'
 
 export default function HomePage(props) {
@@ -17,6 +18,7 @@ export default function HomePage(props) {
     startTime: null,
     endTime: null
   })
+  const [playClip, setPlayingClip] = useState(false)
 
   useEffect(() => {
     if (!vodData.url) handleRecodingData()
@@ -111,24 +113,26 @@ export default function HomePage(props) {
     setClipControls({ startTime: newPosition })
   }
 
-  const handleSetStartTime = (position) => {
+  const handleSetStartTime = (e) => {
+    e.preventDefault()
     playerRef.current.pause()
-    console.log(position.target.value)
-    setClipControls({ startTime: position.target.value })
+    console.log(position)
+    setClipControls({ startTime: position })
   }
 
   const handleSliderSeekChangeEnd = (newPosition) => {
     console.log(newPosition.target.value)
-    //playerRef.current.currentTime(newPosition.target.value)
+    playerRef.current.currentTime(newPosition.target.value)
     setClipControls({ startTime: clipControls.startTime, endTime: newPosition })
   }
 
-  const handleSetEndTime = (position) => {
+  const handleSetEndTime = (e) => {
+    e.preventDefault()
     playerRef.current.pause()
-    console.log(position.target.value)
+    console.log(position)
     setClipControls({
       startTime: clipControls.startTime,
-      endTime: position.target.value
+      endTime: position
     })
     console.log(clipControls)
   }
@@ -139,7 +143,7 @@ export default function HomePage(props) {
           <span className="debug-data__value">${metadataText}</span>`.trim()
 
     const dataLine = document.createElement('div')
-    dataLine.classList.add('class', 'data-line')
+    dataLine.classList.add('className', 'data-line')
     dataLine.innerHTML = domString
 
     const debugData = document.querySelector('.debug-data')
@@ -151,6 +155,7 @@ export default function HomePage(props) {
     console.log(
       event.target.options[event.target.selectedIndex].getAttribute('data-path')
     )
+    setPlayingClip(false)
     setvodData({
       url: event.target.value,
       path: event.target.options[event.target.selectedIndex].getAttribute(
@@ -164,7 +169,28 @@ export default function HomePage(props) {
 
   const handlePlayClip = (event) => {
     console.log(event)
+    setPlayingClip(true)
     setvodData({ url: event })
+    let newSrc = { src: event, type: 'application/x-mpegURL' }
+    playerRef.current.src(newSrc)
+  }
+
+  const eraseClipStartEnd = () => {
+    setClipControls({ startTime: null, endTime: null })
+    playerRef.current.currentTime(0)
+    playerRef.current.play()
+  }
+
+  const createClip = async () => {
+    console.log(vodData.url, clipControls.startTime, clipControls.endTime)
+    await createClipAPI(
+      clipControls.startTime,
+      clipControls.endTime,
+      vodData.url
+    ).then((response) => {
+      console.log('Response', response)
+    })
+    getClips(vodData.path)
   }
 
   return (
@@ -174,7 +200,7 @@ export default function HomePage(props) {
           <form>
             <div className='row'>
               <div className='col-xl'>
-                <div class='form-group'>
+                <div className='form-group'>
                   <select
                     value={vodData.url}
                     className='custom-select large'
@@ -200,13 +226,13 @@ export default function HomePage(props) {
         <div className='video-container'>
           {vodData.url ? (
             <VideoPlayer
-              className='videoplayer'
+              className='video-player'
               options={videoJsOptions}
               onReady={handlePlayerReady}
               ref={playerRef}
             />
           ) : (
-            <div className='videoplayer'>
+            <div className='video-player'>
               No VOD Selected or No Live recorded Yet...
             </div>
           )}
@@ -214,40 +240,59 @@ export default function HomePage(props) {
         <div className='controls-container'>
           Clip Controls {position}
           <form>
-            <div class='form-group'>
-              <div className='row'>
-                <div className='col-sm-1'>
-                  <button className='btn btn-primary'>Set Start</button>
+            <div className='form-group'>
+              <div className='row row-center'>
+                <div className='col col-small'>
+                  <button
+                    className='btn btn-primary control-btn'
+                    onClick={(e) => handleSetStartTime(e)}
+                    disabled={playClip}
+                  >
+                    Set Start
+                  </button>
                 </div>
-                <div className='col-xl'>
+                <div className='col-large'>
                   <input
                     type='range'
                     id='start'
                     value={
                       clipControls.startTime ? clipControls.startTime : position
                     }
-                    class='form-control-range'
+                    className='form-control-range control-set'
                     max={duration}
+                    disabled={playClip}
                     onChange={(e) => handleSliderSeekChangeStart(e)}
                     onClick={(e) => handleSetStartTime(e)}
                   />
                 </div>
-                <div className='col-sm-1'>
+                <div className='col col-small'>
                   <input
                     type='text'
-                    class='form-control'
+                    className='form-control clip-control'
                     id='formGroupExampleInput2'
-                    placeholder='20'
+                    value={
+                      clipControls.startTime
+                        ? clipControls.startTime.toFixed(1)
+                        : 0
+                    }
+                    disabled={playClip}
+                    onChange={(e) => handleSliderSeekChangeStart(e)}
                   />
                 </div>
               </div>
             </div>
-            <div class='form-group'>
-              <div className='row'>
-                <div className='col-sm-1'>
-                  <button className='btn btn-primary'>Set Stop</button>
+            <div className='form-group'>
+              <div className='row row-center'>
+                <div className='col col-small'>
+                  <button
+                    className='btn btn-primary control-btn'
+                    onClick={(e) => handleSetEndTime(e)}
+                    disabled={playClip}
+                  >
+                    Set Stop
+                  </button>
                 </div>
-                <div className='col-xl'>
+                <div className='col-large'>
                   <input
                     type='range'
                     id='end'
@@ -255,39 +300,74 @@ export default function HomePage(props) {
                       clipControls.endTime ? clipControls.endTime : position
                     }
                     max={duration}
-                    class='form-control-range'
+                    disabled={playClip}
+                    className='form-control-range control-set'
                     onClick={(e) => handleSetEndTime(e)}
                   />
                 </div>
-                <div className='col-sm-1'>
+                <div className='col col-small'>
                   <input
                     type='text'
-                    class='form-control'
+                    className='form-control clip-control'
                     id='formGroupExampleInput2'
-                    placeholder='100'
+                    value={
+                      clipControls.endTime ? clipControls.endTime.toFixed(1) : 0
+                    }
+                    disabled={playClip}
+                    onChange={(e) => handleSliderSeekChangeStart(e)}
                   />
                 </div>
               </div>
             </div>
           </form>
         </div>
+        <div className='createclip-container'>
+          {clipControls.startTime && clipControls.endTime ? (
+            <div class='toast-body'>
+              Clips attributes are defined Start{' '}
+              {clipControls.startTime.toFixed(2)}, End{' '}
+              {clipControls.endTime.toFixed(2)}, click create clip or close.
+              <div class='mt-2 pt-2 border-top'>
+                <button
+                  type='button'
+                  className='btn btn-primary control-btn'
+                  onClick={(e) => createClip(e)}
+                >
+                  Create Clip
+                </button>
+                <button
+                  type='button'
+                  className='btn btn-secondary control-btn'
+                  onClick={() => eraseClipStartEnd()}
+                >
+                  Close
+                </button>
+              </div>
+              <hr className='solid'></hr>
+            </div>
+          ) : (
+            <></>
+          )}
+        </div>
         <div className='clips-container'>
           <div className='clips-inline'>
             {listofClips.map((items, index) => (
               <div
-                className='card col-sm-3'
+                className='card col-sm-2'
                 key={index}
                 onClick={() => handlePlayClip(items.master)}
               >
                 <img
-                  class='card-img-top'
+                  className='card-img-top'
                   src={ClipPoster}
                   alt={items.assetID}
                   maxwidth='200'
                   maxheight='150'
                 />
-                <div class='card-body'>
-                  <p class='card-text'>Rec ID: {items.recording}</p>
+                <div className='card-body'>
+                  <p className='card-text card-overflow'>
+                    ID: {items.recording}
+                  </p>
                 </div>
               </div>
             ))}
