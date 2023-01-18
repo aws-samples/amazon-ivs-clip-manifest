@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react'
 import './styles/HomePage.style.css'
 import VideoPlayer from './player/playerJS'
 import ClipPoster from './../img/clipposter.svg'
+import VODPoster from './../img/vodposter.svg'
 import { getClipsAPI } from './apis/getClips'
 import { createClipAPI } from './apis/createClip'
 import { getRecordingsAPI } from './apis/getRecordings'
@@ -10,7 +11,7 @@ export default function HomePage(props) {
   const [duration, setDuration] = useState(0)
   const [position, setPosition] = useState(0)
   const playerRef = useRef(null)
-  const [vodData, setvodData] = useState({ url: '', path: '' })
+  const [vodData, setvodData] = useState({ url: '', path: '', data: null })
   const [listofRec, setListofRec] = useState([])
   const [listofClips, setListofClips] = useState([])
   const [loaded, setLoaded] = useState(false)
@@ -54,6 +55,10 @@ export default function HomePage(props) {
         type: 'application/x-mpegURL'
       }
     ]
+  }
+
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
   }
 
   const handleRecodingData = async () => {
@@ -113,17 +118,13 @@ export default function HomePage(props) {
     setClipControls({ startTime: newPosition })
   }
 
-  const handleSetStartTime = (e) => {
+  const handleSetStartTime = async (e) => {
     e.preventDefault()
     playerRef.current.pause()
     console.log(position)
     setClipControls({ startTime: position })
-  }
-
-  const handleSliderSeekChangeEnd = (newPosition) => {
-    console.log(newPosition.target.value)
-    playerRef.current.currentTime(newPosition.target.value)
-    setClipControls({ startTime: clipControls.startTime, endTime: newPosition })
+    await sleep(2000)
+    playerRef.current.play()
   }
 
   const handleSetEndTime = (e) => {
@@ -137,7 +138,7 @@ export default function HomePage(props) {
     console.log(clipControls)
   }
 
-  function addDebugLine(metadataTime, metadataText) {
+  const addDebugLine = (metadataTime, metadataText) => {
     const domString = `
           <span className="debug-data__time">${metadataTime}</span>
           <span className="debug-data__value">${metadataText}</span>`.trim()
@@ -224,7 +225,7 @@ export default function HomePage(props) {
           </form>
         </div>
         <div className='video-container'>
-          {vodData.url ? (
+          {vodData.data ? (
             <VideoPlayer
               className='video-player'
               options={videoJsOptions}
@@ -232,8 +233,8 @@ export default function HomePage(props) {
               ref={playerRef}
             />
           ) : (
-            <div className='video-player'>
-              No VOD Selected or No Live recorded Yet...
+            <div className='video-player-placeholder'>
+              <img className='card-img-top' src={VODPoster} alt='Poster' />
             </div>
           )}
         </div>
@@ -324,7 +325,7 @@ export default function HomePage(props) {
         <div className='createclip-container'>
           {clipControls.startTime && clipControls.endTime ? (
             <div class='toast-body'>
-              Clips attributes are defined Start{' '}
+              Clips attributes has been defined, Start{' '}
               {clipControls.startTime.toFixed(2)}, End{' '}
               {clipControls.endTime.toFixed(2)}, click create clip or close.
               <div class='mt-2 pt-2 border-top'>
