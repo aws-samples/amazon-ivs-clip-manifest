@@ -11,7 +11,7 @@ export default function HomePage(props) {
   const [duration, setDuration] = useState(0)
   const [position, setPosition] = useState(0)
   const playerRef = useRef(null)
-  const [vodData, setvodData] = useState({ url: '', path: '', data: null })
+  const [vodData, setvodData] = useState({ url: '', path: '' })
   const [listofRec, setListofRec] = useState([])
   const [listofClips, setListofClips] = useState([])
   const [loaded, setLoaded] = useState(false)
@@ -225,7 +225,7 @@ export default function HomePage(props) {
           </form>
         </div>
         <div className='video-container'>
-          {vodData.data ? (
+          {vodData.url ? (
             <VideoPlayer
               className='video-player'
               options={videoJsOptions}
