@@ -113,8 +113,13 @@ export default function HomePage(props) {
   }
 
   const handleSliderSeekChangeStart = (newPosition) => {
-    console.log(newPosition.target.value)
+    console.log('New position', newPosition.target.value)
+    setClipControls({ startTime: newPosition })
     playerRef.current.currentTime(newPosition.target.value)
+  }
+
+  const handleInputChangeStart = (newPosition) => {
+    newPosition.preventDefault()
     setClipControls({ startTime: newPosition })
   }
 
@@ -271,13 +276,9 @@ export default function HomePage(props) {
                     type='text'
                     className='form-control clip-control'
                     id='formGroupExampleInput2'
-                    value={
-                      clipControls.startTime
-                        ? clipControls.startTime.toFixed(1)
-                        : 0
-                    }
+                    value={clipControls.startTime ? clipControls.startTime : 0}
                     disabled={playClip}
-                    onChange={(e) => handleSliderSeekChangeStart(e)}
+                    onChange={(e) => handleInputChangeStart(e)}
                   />
                 </div>
               </div>
@@ -311,9 +312,7 @@ export default function HomePage(props) {
                     type='text'
                     className='form-control clip-control'
                     id='formGroupExampleInput2'
-                    value={
-                      clipControls.endTime ? clipControls.endTime.toFixed(1) : 0
-                    }
+                    value={clipControls.endTime ? clipControls.endTime : 0}
                     disabled={playClip}
                     onChange={(e) => handleSliderSeekChangeStart(e)}
                   />

@@ -17,10 +17,9 @@ git clone https://gitlab.aws.dev/osmarb/aws-ivs-manifest-clip.git
 
 ### 2. Install the lambda packages
 ```sh
-cd aws-ivs-manifest-clip
-cd lambda
+cd aws-ivs-manifest-clip/serverless/lambdas/clipmanifest/
 npm install
-cd ..
+cd ../..
 ```
 
 ### 3. Create a deployment bucket or use an existing bucket
@@ -76,7 +75,6 @@ aws ivs create-recording-configuration \
     --recording-reconnect-window-seconds 60 \
     --destination-configuration s3={bucketName=<Your Recording Bucket Name>} \
     --thumbnail-configuration recordingMode="INTERVAL",targetIntervalSeconds=30
-
 ```
 
 Take note of the RecordingConfiguration ARN, as it will be used to link your recording configuration.
@@ -97,7 +95,7 @@ Take note of the RecordingConfiguration ARN, as it will be used to link your rec
 aws ivs create-channel --name my-ivs-channel --recording-configuration-arn "<you-recording-arn>"
 ```
 
-### 8. Extract the Outputs from the SAM package to pass as parameters to WebUI 
+### 8. Extract the Outputs from the SAM package to pass as parameters to Web UI 
 
 ```sh
 aws cloudformation describe-stacks --stack-name sample-clip-manifest --query 'Stacks[].Outputs' > ../manifest-clip-ui/src/config.json 
