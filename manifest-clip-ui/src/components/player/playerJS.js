@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: MIT-0
 
 import React from 'react'
+import videojs from 'video.js'
+import { registerIVSTech, registerIVSQualityPlugin } from 'amazon-ivs-player'
+
 function VideoJS(props) {
   //const videoRef = React.useRef(null);
   const playerRef = React.useRef(null)
