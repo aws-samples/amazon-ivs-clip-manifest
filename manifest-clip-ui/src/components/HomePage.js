@@ -17,7 +17,8 @@ export default function HomePage(props) {
   const [loaded, setLoaded] = useState(false)
   const [clipControls, setClipControls] = useState({
     startTime: null,
-    endTime: null
+    endTime: null,
+    byteRange: false
   })
   const [playClip, setPlayingClip] = useState(false)
 
@@ -170,7 +171,7 @@ export default function HomePage(props) {
     getClips(
       event.target.options[event.target.selectedIndex].getAttribute('data-path')
     )
-    setClipControls({ startTime: null, endTime: null })
+    setClipControls({ ...clipControls, startTime: null, endTime: null })
     playerRef.current.currentTime(0)
   }
 
@@ -183,17 +184,18 @@ export default function HomePage(props) {
   }
 
   const eraseClipStartEnd = () => {
-    setClipControls({ startTime: null, endTime: null })
+    setClipControls({ ...clipControls, startTime: null, endTime: null })
     playerRef.current.currentTime(0)
     playerRef.current.play()
   }
 
   const createClip = async () => {
-    console.log(vodData.url, clipControls.startTime, clipControls.endTime)
+    console.log(vodData.url, clipControls)
     await createClipAPI(
       clipControls.startTime,
       clipControls.endTime,
-      vodData.url
+      vodData.url,
+      clipControls.byteRange
     ).then((response) => {
       console.log('Response', response)
     })
@@ -343,6 +345,22 @@ export default function HomePage(props) {
                 >
                   Close
                 </button>
+                <div class='form-check'>
+                  <input
+                    type='checkbox'
+                    class='form-check-input'
+                    id='exampleCheck1'
+                    onChange={(e) =>
+                      setClipControls({
+                        ...clipControls,
+                        byteRange: e.target.checked
+                      })
+                    }
+                  />
+                  <label class='form-check-label' for='exampleCheck1'>
+                    Byte Range
+                  </label>
+                </div>
               </div>
               <hr className='solid'></hr>
             </div>
