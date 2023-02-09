@@ -170,6 +170,8 @@ export default function HomePage(props) {
     getClips(
       event.target.options[event.target.selectedIndex].getAttribute('data-path')
     )
+    setClipControls({ startTime: null, endTime: null })
+    playerRef.current.currentTime(0)
   }
 
   const handlePlayClip = (event) => {
