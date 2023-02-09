@@ -12,7 +12,8 @@ export function createClipAPI(start_time, end_time, master_url) {
     body: JSON.stringify({
       start_time: start_time,
       end_time: end_time,
-      master_url: master_url
+      master_url: master_url,
+      byte_range: true
     })
   })
     .then((data) => data.json())

@@ -158,9 +158,6 @@ export default function HomePage(props) {
 
   const handleVODChange = (event) => {
     event.preventDefault()
-    console.log(
-      event.target.options[event.target.selectedIndex].getAttribute('data-path')
-    )
     setPlayingClip(false)
     setvodData({
       url: event.target.value,
@@ -168,6 +165,8 @@ export default function HomePage(props) {
         'data-path'
       )
     })
+    let newSrc = { src: event.target.value, type: 'application/x-mpegURL' }
+    playerRef.current.src(newSrc)
     getClips(
       event.target.options[event.target.selectedIndex].getAttribute('data-path')
     )

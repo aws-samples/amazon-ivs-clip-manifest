@@ -14,7 +14,7 @@ exports.handler = async (event, context) => {
       Prefix: `ivs/v1/${accountID}/`
     }
     try {
-      const recordings = await s3.listObjects(params).promise()
+      const recordings = await s3.listObjectsV2(params).promise()
       return recordings
     } catch (error) {
       console.error(error)
@@ -29,6 +29,7 @@ exports.handler = async (event, context) => {
     for (const recording of recordings.Contents) {
       let file = recording.Key.substring(recording.Key.lastIndexOf('/') + 1)
       if (file === 'master.m3u8') {
+        console.log('Found Master Manifest', recording.Key)
         const s3pathParsed = recording.Key.split('/')
         const pathLength = s3pathParsed.length
         let assetName = `Channel: ${s3pathParsed[3]} - Date: ${s3pathParsed[4]}-${s3pathParsed[5]}-${s3pathParsed[6]} ${s3pathParsed[7]}:${s3pathParsed[8]} - ID: ${s3pathParsed[9]}`

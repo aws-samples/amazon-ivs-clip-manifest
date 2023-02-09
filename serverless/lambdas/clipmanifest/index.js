@@ -63,13 +63,12 @@ exports.handler = async (event) => {
     // add manifest generic lines
     genericExt = lines.filter(
       (line) =>
-        line.startsWith('#EXT-X-VERSION') |
-        '#EXT-X-TARGETDURATION' |
-        '#ID3-EQUIV-TDTG' |
-        '#EXT-X-PLAYLIST-TYPE' |
-        '#EXT-X-MEDIA-SEQUENCE' |
-        '#EXT-X-TWITCH-ELAPSED-SECS'
+        line.startsWith('#ID3-EQUIV-TDTG') |
+        line.startsWith('#EXT-X-PLAYLIST-TYPE') |
+        line.startsWith('#EXT-X-MEDIA-SEQUENCE') |
+        line.startsWith('#EXT-X-TWITCH-ELAPSED-SECS')
     )
+    console.log('genericExt', genericExt)
     // add the media playlist files
     for (let i = 0; i < lines.length; i++) {
       let segment = {}
@@ -111,15 +110,22 @@ exports.handler = async (event) => {
 
   // (7) create the playlist manifest for the clip
   function createPlaylistManifest(segments) {
-    let playlist = `#EXTM3U\n`
-    for (let i = 0; i < genericExt.length; i++) {
-      playlist += `${genericExt[i]}\n`
-    }
+    let playlist = `#EXTM3U\n#EXT-X-VERSION:4\n`
     let duration = 0
     for (let i = 0; i < segments.length; i++) {
       let segment = segments[i]
+      console.log('segment', segment.duration)
       duration += segment.duration
     }
+    playlist += `#EXT-X-TARGETDURATION:${Math.ceil(duration)}\n`
+
+    for (let i = 0; i < genericExt.length; i++) {
+      playlist += `${genericExt[i]}\n`
+    }
+
+    console.log('with ext', playlist)
+
+    console.log('duration', duration)
     playlist += `#EXT-X-TWITCH-TOTAL-SECS:${duration.toFixed(3)}\n`
     for (let i = 0; i < segments.length; i++) {
       let segment = segments[i]
@@ -136,6 +142,8 @@ exports.handler = async (event) => {
   const newPlaylist = createPlaylistManifest(
     clipPlaylistbyPDT(rawPlaylistManifest, startTime, endTime)
   )
+
+  console.log('newPlaylist', newPlaylist)
 
   // (8) write to S3 the filtered Master Manifest
   if (rawMasterManifest) {
