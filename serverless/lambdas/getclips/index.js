@@ -42,7 +42,8 @@ exports.handler = async (event, context) => {
           minute: s3pathParsed[8],
           recording: s3pathParsed[9],
           assetID: assetName,
-          master: `${cfURL}/${element.Key}`
+          master: `${cfURL}/${element.Key}`,
+          execution: element.Key.substring(element.Key.lastIndexOf('/') + 1)
         })
       }
     })

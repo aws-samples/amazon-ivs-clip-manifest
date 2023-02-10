@@ -42,6 +42,19 @@ export default function HomePage(props) {
     }
   }, [loaded])
 
+  const addDebugLine = (metadataTime, metadataText) => {
+    const domString = `
+          <span className="debug-data__time">${metadataTime}</span>
+          <span className="debug-data__value">${metadataText}</span>`.trim()
+
+    const dataLine = document.createElement('div')
+    dataLine.classList.add('className', 'data-line')
+    dataLine.innerHTML = domString
+
+    const debugData = document.querySelector('.debug-data')
+    debugData.appendChild(dataLine)
+  }
+
   const videoJsOptions = {
     autoplay: 'muted', //mute audio when page loads, but auto play video
     controls: true,
@@ -96,14 +109,14 @@ export default function HomePage(props) {
 
     player.on('playing', () => {
       console.log('player is playing')
-      addDebugLine(Date.now(), 'Player playing')
+      addDebugLine(Date.now(), ': Player playing')
       console.log('Video Duration!', player.duration())
       setDuration(player.duration().toFixed(0))
     })
 
     player.on('error', (err) => {
       console.log('Play Error', err)
-      addDebugLine(Date.now(), `Player ${err.type} ${err.target.innerText}`)
+      addDebugLine(Date.now(), `: Player ${err.type} ${err.target.innerText}`)
     })
 
     player.on('pause', () => {
@@ -115,13 +128,28 @@ export default function HomePage(props) {
 
   const handleSliderSeekChangeStart = (newPosition) => {
     console.log('New position', newPosition.target.value)
-    setClipControls({ startTime: newPosition })
-    playerRef.current.currentTime(newPosition.target.value)
+    if (newPosition.target.value) {
+      setClipControls({ startTime: newPosition })
+      playerRef.current.currentTime(newPosition.target.value)
+    }
+  }
+
+  const handleSliderSeekChangeEnd = (newPosition) => {
+    console.log('New position', newPosition.target.value)
+    if (newPosition.target.value) {
+      setClipControls({ startTime: newPosition })
+      playerRef.current.currentTime(newPosition.target.value)
+    }
   }
 
   const handleInputChangeStart = (newPosition) => {
     newPosition.preventDefault()
-    setClipControls({ startTime: newPosition })
+    setClipControls({ ...clipControls, startTime: newPosition })
+  }
+
+  const handleInputChangeEnd = (newPosition) => {
+    newPosition.preventDefault()
+    setClipControls({ ...clipControls, endTime: newPosition })
   }
 
   const handleSetStartTime = async (e) => {
@@ -129,6 +157,7 @@ export default function HomePage(props) {
     playerRef.current.pause()
     console.log(position)
     setClipControls({ startTime: position })
+    addDebugLine(Date.now(), `: Start time set to ${position}`)
     await sleep(2000)
     playerRef.current.play()
   }
@@ -136,25 +165,12 @@ export default function HomePage(props) {
   const handleSetEndTime = (e) => {
     e.preventDefault()
     playerRef.current.pause()
-    console.log(position)
+    addDebugLine(Date.now(), `: End time set to ${position}`)
     setClipControls({
       startTime: clipControls.startTime,
       endTime: position
     })
     console.log(clipControls)
-  }
-
-  const addDebugLine = (metadataTime, metadataText) => {
-    const domString = `
-          <span className="debug-data__time">${metadataTime}</span>
-          <span className="debug-data__value">${metadataText}</span>`.trim()
-
-    const dataLine = document.createElement('div')
-    dataLine.classList.add('className', 'data-line')
-    dataLine.innerHTML = domString
-
-    const debugData = document.querySelector('.debug-data')
-    debugData.appendChild(dataLine)
   }
 
   const handleVODChange = (event) => {
@@ -190,7 +206,22 @@ export default function HomePage(props) {
   }
 
   const createClip = async () => {
-    console.log(vodData.url, clipControls)
+    if (clipControls.startTime === null || clipControls.endTime === null) {
+      addDebugLine(
+        Date.now(),
+        `: Create Clip Error: Please select a start and end time`
+      )
+      alert('Please select a start and end time')
+      return
+    }
+    if (clipControls.startTime > clipControls.endTime) {
+      alert('Start time must be less than end time')
+      addDebugLine(
+        Date.now(),
+        `: Create Clip Error: Start time must be less than end time`
+      )
+      return
+    }
     await createClipAPI(
       clipControls.startTime,
       clipControls.endTime,
@@ -198,6 +229,10 @@ export default function HomePage(props) {
       clipControls.byteRange
     ).then((response) => {
       console.log('Response', response)
+      addDebugLine(
+        Date.now(),
+        `: Create Clip Success: New clip created at ${JSON.stringify(response)}`
+      )
     })
     getClips(vodData.path)
   }
@@ -280,8 +315,8 @@ export default function HomePage(props) {
                     className='form-control clip-control'
                     id='formGroupExampleInput2'
                     value={clipControls.startTime ? clipControls.startTime : 0}
-                    disabled={playClip}
-                    onChange={(e) => handleInputChangeStart(e)}
+                    disabled={true}
+                    //onChange={(e) => handleInputChangeStart(e)}
                   />
                 </div>
               </div>
@@ -307,6 +342,7 @@ export default function HomePage(props) {
                     max={duration}
                     disabled={playClip}
                     className='form-control-range control-set'
+                    onChange={(e) => handleSliderSeekChangeEnd(e)}
                     onClick={(e) => handleSetEndTime(e)}
                   />
                 </div>
@@ -316,8 +352,8 @@ export default function HomePage(props) {
                     className='form-control clip-control'
                     id='formGroupExampleInput2'
                     value={clipControls.endTime ? clipControls.endTime : 0}
-                    disabled={playClip}
-                    onChange={(e) => handleSliderSeekChangeStart(e)}
+                    disabled={true}
+                    //onChange={(e) => handleInputChangeEnd(e)}
                   />
                 </div>
               </div>
@@ -327,9 +363,8 @@ export default function HomePage(props) {
         <div className='createclip-container'>
           {clipControls.startTime && clipControls.endTime ? (
             <div class='toast-body'>
-              Clips attributes has been defined, Start{' '}
-              {clipControls.startTime.toFixed(2)}, End{' '}
-              {clipControls.endTime.toFixed(2)}, click create clip or close.
+              Clips attributes has been defined, Start {clipControls.startTime},
+              End {clipControls.endTime}, click create clip or close.
               <div class='mt-2 pt-2 border-top'>
                 <button
                   type='button'
@@ -357,8 +392,10 @@ export default function HomePage(props) {
                       })
                     }
                   />
-                  <label class='form-check-label' for='exampleCheck1'>
-                    Byte Range
+                  <label class='form-check-label'>
+                    Byte Range? Note: Byte range allows extra precision, up to
+                    one-second. It's only avaliable for VODs recorded after
+                    Amazon IVS byte range support.
                   </label>
                 </div>
               </div>
@@ -385,7 +422,7 @@ export default function HomePage(props) {
                 />
                 <div className='card-body'>
                   <p className='card-text card-overflow'>
-                    ID: {items.recording}
+                    ID: {items.execution}
                   </p>
                 </div>
               </div>
@@ -394,7 +431,7 @@ export default function HomePage(props) {
         </div>
 
         <div className='debug-container'>
-          <div className='debug-data'> debug</div>
+          <div className='debug-data'> Debug data:</div>
         </div>
       </div>
     </div>

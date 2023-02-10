@@ -44,9 +44,8 @@ function VideoJS(props) {
       }
     } else {
       // you can update player here [update player through props]
-      const player = playerRef.current
     }
-  }, [options])
+  }, [onReady, options])
 
   // Dispose the Video.js player when the functional component unmounts
   React.useEffect(() => {
