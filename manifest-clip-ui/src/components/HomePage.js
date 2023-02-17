@@ -24,9 +24,7 @@ export default function HomePage(props) {
 
   useEffect(() => {
     if (!vodData.url) handleRecodingData()
-  }, [])
 
-  useEffect(() => {
     if (loaded) {
       let curPlayer = document.querySelector('video')
       curPlayer.addEventListener('canplay', () => {
@@ -140,16 +138,6 @@ export default function HomePage(props) {
       setClipControls({ startTime: newPosition })
       playerRef.current.currentTime(newPosition.target.value)
     }
-  }
-
-  const handleInputChangeStart = (newPosition) => {
-    newPosition.preventDefault()
-    setClipControls({ ...clipControls, startTime: newPosition })
-  }
-
-  const handleInputChangeEnd = (newPosition) => {
-    newPosition.preventDefault()
-    setClipControls({ ...clipControls, endTime: newPosition })
   }
 
   const handleSetStartTime = async (e) => {
