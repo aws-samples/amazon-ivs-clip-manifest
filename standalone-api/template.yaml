@@ -21,7 +21,7 @@ Resources:
       Handler: index.handler
       CodeUri: clipmanifest
       Policies:
-        - S3WritePolicy:
+        - S3CrudPolicy:
             BucketName: !Ref IVSRecordingSAPIBucket
       Events:
         Api1:
