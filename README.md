@@ -1,10 +1,15 @@
 # IVS Manifest Clipping Web Demo
-A demo web application for demonstrating how you can use Amazon IVS in conjunction with Amazon API Gateway and AWS Lambda to clip/trim content based on PDT information of the HLS manifest. 
+A reference solution for demonstrating how you can use [Amazon Interactive Video Service (Amazon IVS)](https://aws.amazon.com/ivs/) in conjunction with Amazon API Gateway and AWS Lambda to clip/trim content based on PDT information of the HLS manifest. 
 
 This is a serverless web application leveraging [Amazon IVS](https://aws.amazon.com/ivs/), [Amazon API Gateway](https://aws.amazon.com/api-gateway/), [AWS Lambda](https://aws.amazon.com/lambda/), [Amazon S3](https://aws.amazon.com/s3/) and [Amazon CloudFront](https://aws.amazon.com/cloudfront/). The sample frontend is an application page built using [React.js](https://reactjs.org/) and [VideoJS](https://videojs.com/) and backend is built using [Node.js](https://nodejs.org/), Amazon API Gateway and AWS Lambda functions used to [list all Amazon IVS recordings](/serverless/lambdas/getrecordings/), to [clip/trim the recordings](/serverless/lambdas/clipmanifest/) and [list all clipped recordings](/serverless/lambdas/getclips/).
 
 ## Solution Architecture
 
+<img src="/doc/architecture.png" width=100%>
+
+## Solution Web Application GUI
+
+<img src="/doc/UI-Sample-Clip.png" width=100%>
 
 
 ## Deployment Steps
@@ -28,23 +33,17 @@ To get the demo running in your own AWS account, follow these instructions.
 
 ### Deployment Options
 
-#### 1. Deploy the complete solution (APIs + WedUI)
+#### Option A - Deploy the complete solution (APIs + WebUI)
 
 This option implements the complete solution with the backend APIs needed for performing retrieving the raw recorded streams from IVS, clipping, listing the clips.
 
-##### [Step 1. Deploy the backend severless app](/serverless/README.md)
-Deploy the backend AWS Lambda functions [clipmanifest](/serverless/lambdas/clipmanifest/), [getclips](/serverless/lambdas/getclips/) and [getrecordings](/serverless/lambdas/getrecordings/). Those functions will be invoked by the web application UI.
+[Follow this Deployment Guide to deploy the complete solution](/serverless/README.md) to deploy the backend AWS Lambda functions [clipmanifest](/serverless/lambdas/clipmanifest/), [getclips](/serverless/lambdas/getclips/) and [getrecordings](/serverless/lambdas/getrecordings/) with the frontend web application on top of the backend serverless app.
 
-##### [Step 2. Deploy the frontend web app](/manifest-clip-ui/README.md) 
+#### Option B - Deploy the stand-alone API only
 
-Deploy the frontend web application on top of the backend serverless app.
+This option implements just the backend APIs of solution. If you want to create your own application or WebUI, this option allow you to leverage just the API directly.
 
-#### 2. Deploy the stand-alone API only
-
-This option implements just the backend APIs of solution. If you want to create your own application or webUI, this option allow you to leverage just the API directly
-
-##### [Step 1. Deploy the backend severless app only](/standalone-api/README.md)
-Deploy the backend AWS Lambda functions [clipmanifest](/serverless/lambdas/clipmanifest/), [getclips](/serverless/lambdas/getclips/) and [getrecordings](/serverless/lambdas/getrecordings/).
+[Follow this Deployment Guide to deploy the backend severless app only](/standalone-api/README.md) to deploy the backend AWS Lambda functions [clipmanifest](/serverless/lambdas/clipmanifest/), [getclips](/serverless/lambdas/getclips/) and [getrecordings](/serverless/lambdas/getrecordings/).
 
 
 ### Contributing guidelines

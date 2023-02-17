@@ -1,5 +1,5 @@
 ## Deployment Steps
-This install the standalone clipmanifest API **only**.
+This steps deploys the standalone clipmanifest API **only**. If you already have your application and just would like to deploy the API, these are the correct steps that you should follow.
 
 ### Install the lambda packages
 ```sh
@@ -31,26 +31,14 @@ sam deploy \
 
 ### API Usage
 
-#### Get recordings API
-```sh
-curl -X GET <API Gateway Endpoint>/getrecordings
-```
-
-#### Get clips API
-```sh
-curl -X GET <API Gateway Endpoint>/getclips
-```
-
 #### Create clips API
 ```sh
-curl -X POST <API Gateway Endpoint>/clipmanifest -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://<url of the ivs recording>\"}"
+curl -X POST <API Gateway Endpoint>/clipmanifest -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://<url of the ivs recording>\"  \"byte_range\": true}"
 ```
-
-
 
 example: 
 ```sh
-curl -X POST https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/ -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://d33pec9ri0pzqq.cloudfront.net/ivs/v1/098435415742/2rrcA103rn67/2022/10/15/2/11/X5JJ9FegmZiq/media/hls/master.m3u8\"}" 
+curl -X POST https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/ -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://d33pec9ri0pzqq.cloudfront.net/ivs/v1/098435415742/2rrcA103rn67/2022/10/15/2/11/X5JJ9FegmZiq/media/hls/master.m3u8\" \"byte_range\": true}" 
 ```
 
 ### Test the clip
@@ -71,6 +59,7 @@ Payload:
   "start_time": 0,
   "end_time": 10,
   "master_url": "My-URL"
+  "byte_range": true
 }
 ```
 Response Code: 200<br />
@@ -110,12 +99,12 @@ After completing a live transmission to your Amazon IVS RTMPS endpoint, navigate
 Make an HTTP Post call to the Amazon API Gateway endpoint.
 
 ```sh
-curl -X POST <API Gateway Endpoint>/clipmanifest -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://<url of the ivs recording>\"}"
+curl -X POST <API Gateway Endpoint>/clipmanifest -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://<url of the ivs recording>\" \"byte_range\": true}"
 ```
 
 example: 
 ```sh
-curl -X POST https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/ -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://<cloudfront_dist_id>.cloudfront.net/ivs/v1/<account_id>/2rrcA103rn67/2022/10/15/2/11/X5JJ9FegmZiq/media/hls/master.m3u8\"}" 
+curl -X POST https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/ -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://<cloudfront_dist_id>.cloudfront.net/ivs/v1/<account_id>/2rrcA103rn67/2022/10/15/2/11/X5JJ9FegmZiq/media/hls/master.m3u8\" \"byte_range\": true}" 
 ```
 
 ### 10. Test the clip

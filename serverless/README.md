@@ -64,6 +64,7 @@ CloudfrontDistribution
 
 ```
 
+
 ### 6. Amazon IVS Channel configuration
 
 If you already have an Amazon IVS channel created that you want to use, you can skip this step.
@@ -100,4 +101,17 @@ aws ivs create-channel --name my-ivs-channel --recording-configuration-arn "<you
 ```sh
 aws cloudformation describe-stacks --stack-name sample-clip-manifest --query 'Stacks[].Outputs' > ../manifest-clip-ui/src/config.json 
 ```
-[Click here to proceed to the WebUI deployment steps ->](/manifest-clip-ui/README.md)
+
+### 6. Deploy the WebUI 
+
+```sh
+cd manifest-web-ui
+npm install
+npm start
+```
+
+## Choose Your Own Adventure
+
+Congratulations on building ClipManifest solurion! With the base application complete with backend API and the local WebUI installed, it's time to choose if you want to to demonstrate the solution to a broader audience.
+
+- [Public Hosting](manifest-clip-ui/public-deploy/README.md) - Publish the web application to the Public internet. After completing this exension, you'll be able to share a URL with the complete solution.
