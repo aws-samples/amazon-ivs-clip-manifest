@@ -26,3 +26,4 @@ manifest-clip-ui/src/config.json
 .env.production.local
 serverless/.aws-sam/build.toml
 manifest-clip-ui/public-deploy/packaged.yaml
+standalone-api/packaged.yaml
