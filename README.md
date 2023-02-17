@@ -1,4 +1,4 @@
-# Amazon IVS Manifest Clipping Web Demo
+# Amazon IVS Manifest Clipping Solution
 A reference solution for demonstrating how you can use [Amazon Interactive Video Service (Amazon IVS)](https://aws.amazon.com/ivs/) in conjunction with Amazon API Gateway and AWS Lambda to clip/trim content based on PDT information of the HLS manifest. 
 
 This is a serverless web application leveraging [Amazon IVS](https://aws.amazon.com/ivs/), [Amazon API Gateway](https://aws.amazon.com/api-gateway/), [AWS Lambda](https://aws.amazon.com/lambda/), [Amazon S3](https://aws.amazon.com/s3/) and [Amazon CloudFront](https://aws.amazon.com/cloudfront/). The sample frontend is an application page built using [React.js](https://reactjs.org/) and [VideoJS](https://videojs.com/) and backend is built using [Node.js](https://nodejs.org/), Amazon API Gateway and AWS Lambda functions used to [list all Amazon IVS recordings](/serverless/lambdas/getrecordings/), to [clip/trim the recordings](/serverless/lambdas/clipmanifest/) and [list all clipped recordings](/serverless/lambdas/getclips/).
