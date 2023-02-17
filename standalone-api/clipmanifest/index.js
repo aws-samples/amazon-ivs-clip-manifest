@@ -1,119 +1,185 @@
 /// Author: Osmar Bento da Silva Junior - osmarb@amazon.com
+'use strict'
 const AWS = require('aws-sdk')
 const s3 = new AWS.S3()
-const https = require('https')
-const m3u8Parser = require('m3u8-parser')
 const url = require('url')
-let newMaster = ''
-let resp
+const s3Bucket = process.env.STORAGE_IVSRECORDINGS_BUCKETNAME
 
 exports.handler = async (event) => {
-  // (1) parse event body
-  let body = JSON.parse(event.body)
-  let master_url = body.master_url
-  let path = url.parse(master_url).pathname.replace('/master.m3u8', '')
-  let location = `${process.env.STORAGE_IVSRECORDINGS_BUCKETNAME}${path}`
-  let start_time = body.start_time
-  let end_time = body.end_time
-  let excutionTime = Date.now()
+  // (1) parse event body and get the start and end time of the clip
+  const body = JSON.parse(event.body)
+  const excutionTime = Date.now()
+  const startTime = body.start_time
+  const endTime = body.end_time
+  const byteRange = body.byte_range
+  let masterURL = url.parse(body.master_url).pathname
+  const pathName = masterURL.replace('/master.m3u8', '')
+  const s3BucketFolder = s3Bucket + pathName
 
-  // (2) get manifest and parse and create a list use as obj
-  if (!master_url) return
-  const masterManifest = await parseMaster(master_url)
+  let genericExt = []
+  // (2) request the master manifest from S3 and return the raw manifest
+  const rawMasterManifest = await getManifestfromS3(
+    byteRange
+      ? masterURL.replace('master.m3u8', 'byte-range-multivariant.m3u8')
+      : masterURL
+  )
 
-  async function parseMaster(url) {
-    console.log('parseMaster')
-    let manifest = await getRequest(url)
-    newMaster = manifest
-      .toString()
-      .replace(/playlist/g, `${excutionTime}_clip_playlist`)
-    var parser = new m3u8Parser.Parser()
-    parser.push(manifest)
-    parser.end()
-    return parser.manifest
+  // (3) parse the master manifest and return the media playlists
+  function parseMaster(masterFile) {
+    let lines = masterFile.split('\n')
+    let playlists = []
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i].trim()
+      const regExp = new RegExp('^[0-9]{1,3}p[0-9]{2}')
+      if (regExp.test(line)) {
+        let playlist = {}
+        playlist.uri = line
+        playlist.base = line.split('/')[0]
+        playlist.filename = line.split('/')[1]
+        playlists.push(playlist)
+      }
+    }
+    return playlists
+  }
+  // (4) request the playlist manifest from S3 and return the raw playslist manifest
+  async function getPlaylistManifest(playlists) {
+    let playlistURL = `${pathName}/${playlists[0].uri}`
+    try {
+      const playlistManifest = await getManifestfromS3(playlistURL)
+      return playlistManifest
+    } catch (error) {
+      console.error(error)
+      return
+    }
   }
 
-  // (3) get the manifest and fiter the date time interval, create the new adaptative manifest
-  const clipManifest = await clipAdaptative(masterManifest)
+  const mediaPlaylists = parseMaster(rawMasterManifest)
+  const rawPlaylistManifest = await getPlaylistManifest(mediaPlaylists)
 
-  async function clipAdaptative(master) {
-    console.log('parseAdaptative')
-    let clipMaifest = []
-    let adaptativeURI = JSON.stringify(master.playlists[0].uri)
-    let adaptativeURL = master_url.replace(
-      'master.m3u8',
-      adaptativeURI.replace(/"/g, '')
+  // (5) parse the playlist manifest and return the segments
+  function parsePlaylistwithPDT(playlist) {
+    let lines = playlist.split('\n')
+    let segments = []
+    // add manifest generic lines
+    genericExt = lines.filter(
+      (line) =>
+        line.startsWith('#ID3-EQUIV-TDTG') |
+        line.startsWith('#EXT-X-PLAYLIST-TYPE') |
+        line.startsWith('#EXT-X-MEDIA-SEQUENCE') |
+        line.startsWith('#EXT-X-TWITCH-ELAPSED-SECS')
     )
-    let manifest = await getRequest(adaptativeURL)
-    var parser = new m3u8Parser.Parser()
-    parser.push(manifest)
-    parser.end()
-    let parsedManifest = parser.manifest
-    let streamStart = parsedManifest.segments[0].dateTimeObject.getTime()
-    let clipStartAt = Math.floor(start_time * 1000 + streamStart)
-    let clipEndAt = Math.floor(streamStart + end_time * 1000)
-
-    clipMaifest = parsedManifest.segments.filter((item) => {
-      let date = item.dateTimeObject.getTime()
-      let endDate = date + item.duration * 1000
-      return endDate >= clipStartAt && date <= clipEndAt
-    })
-
-    let chunks = ''
-
-    clipMaifest.forEach((element) => {
-      chunks += `#EXT-X-PROGRAM-DATE-TIME:${element.dateTimeString}
-#EXTINF:${element.duration},
-${element.uri}\n`
-    })
-
-    let bodyAdptativeManifest = `#EXTM3U
-#EXT-X-VERSION:${parsedManifest.version}
-#EXT-X-TARGETDURATION:${parsedManifest.targetDuration}
-#ID3-EQUIV-TDTG:${parsedManifest.dateTimeString.toString().slice(0, 19)}
-#EXT-X-PLAYLIST-TYPE:${parsedManifest.playlistType}
-#EXT-X-MEDIA-SEQUENCE:${parsedManifest.mediaSequence}
-#EXT-X-TWITCH-ELAPSED-SECS:${start_time}.000
-#EXT-X-TWITCH-TOTAL-SECS:${end_time}.000
-${chunks.trim()}
-#EXT-X-ENDLIST`
-    return bodyAdptativeManifest.trim()
+    console.log('genericExt', genericExt)
+    // add the media playlist files
+    for (let i = 0; i < lines.length; i++) {
+      let segment = {}
+      let line = lines[i].trim()
+      if (line.startsWith('#EXT-X-PROGRAM-DATE-TIME')) {
+        let PDTinfo = line.substr(line.indexOf(':') + 1)
+        if (byteRange) {
+          segment.byte = lines[i + 2]
+          segment.uri = lines[i + 3]
+        } else {
+          segment.uri = lines[i + 2]
+        }
+        segment.pdt = PDTinfo
+        segment.duration = parseFloat(lines[i + 1].split(':').pop())
+        segments.push(segment)
+      }
+    }
+    return segments
   }
 
-  // (4) write to S3
-  await writeToS3(newMaster, `${excutionTime}_clip_master.m3u8`, location)
-  // (4.1) Loop write to S3 the Adaptative Manifest
-  await loopWrite(clipManifest, masterManifest, location)
+  // (6) filter the segments by the start and end time of the clip
+  function clipPlaylistbyPDT(playlist, start, end) {
+    let segments = parsePlaylistwithPDT(playlist)
+    let filterSegments = []
+    let streamStart = new Date(segments[0].pdt).getTime()
+    let clipStartAt = Math.floor(start * 1000 + streamStart)
+    let clipEndAt = Math.floor(streamStart + end * 1000)
+    for (let i = 0; i < segments.length; i++) {
+      let segment = segments[i]
+      let segmentPDT = new Date(segment.pdt)
+      let date = segmentPDT.getTime()
+      let endDate = date + segment.duration * 1000
+      if (endDate >= clipStartAt && date <= clipEndAt) {
+        filterSegments.push(segment)
+      }
+    }
+    return filterSegments
+  }
 
-  async function loopWrite(clipBody, master, local) {
-    let playlists = master.playlists
-    for await (const playlist of playlists) {
-      let newLocation = `${local}/${playlist.attributes.VIDEO}`
+  // (7) create the playlist manifest for the clip
+  function createPlaylistManifest(segments) {
+    let playlist = `#EXTM3U\n#EXT-X-VERSION:4\n`
+    let duration = 0
+    for (let i = 0; i < segments.length; i++) {
+      let segment = segments[i]
+      console.log('segment', segment.duration)
+      duration += segment.duration
+    }
+    playlist += `#EXT-X-TARGETDURATION:${Math.ceil(duration)}\n`
+
+    for (let i = 0; i < genericExt.length; i++) {
+      playlist += `${genericExt[i]}\n`
+    }
+
+    console.log('with ext', playlist)
+
+    console.log('duration', duration)
+    playlist += `#EXT-X-TWITCH-TOTAL-SECS:${duration.toFixed(3)}\n`
+    for (let i = 0; i < segments.length; i++) {
+      let segment = segments[i]
+      if (segment.byte) {
+        playlist += `#EXT-X-PROGRAM-DATE-TIME:${segment.pdt}\n#EXTINF:${segment.duration}\n${segment.byte}\n${segment.uri}\n`
+      } else {
+        playlist += `#EXT-X-PROGRAM-DATE-TIME:${segment.pdt}\n#EXTINF:${segment.duration}\n${segment.uri}\n`
+      }
+    }
+    playlist += '#EXT-X-ENDLIST'
+    return playlist
+  }
+
+  const newPlaylist = createPlaylistManifest(
+    clipPlaylistbyPDT(rawPlaylistManifest, startTime, endTime)
+  )
+
+  console.log('newPlaylist', newPlaylist)
+
+  // (8) write to S3 the filtered Master Manifest
+  if (rawMasterManifest) {
+    let fileName = new RegExp(mediaPlaylists[0].filename, 'g')
+    let newMaster = rawMasterManifest
+      .toString()
+      .replace(fileName, `${excutionTime}_clip_playlist.m3u8`)
+    await writeToS3(
+      newMaster,
+      `${excutionTime}_clip_master.m3u8`,
+      s3BucketFolder
+    )
+  }
+
+  // (9) write to S3 the filtered Media Playlist
+  if (mediaPlaylists) {
+    for await (const playlist of mediaPlaylists) {
+      const newLocation = `${s3BucketFolder}/${playlist.base}`
       await writeToS3(
-        clipBody,
+        newPlaylist,
         `${excutionTime}_clip_playlist.m3u8`,
         newLocation
       )
     }
   }
 
-  async function writeToS3(body, filename, location) {
-    let params = {
-      Body: body,
-      Bucket: location,
-      Key: filename,
-      ContentType: 'application/x-mpegURL'
+  // (10) return the response
+  const responseBody = [
+    {
+      execution: excutionTime,
+      path: pathName,
+      bucket: s3Bucket,
+      clip_master: `${s3BucketFolder}/${excutionTime}_clip_master.m3u8`,
+      master_url: `${process.env.CLOUDFRONT_DOMAIN_NAME}${pathName}/${excutionTime}_clip_master.m3u8`
     }
-    await s3
-      .putObject(params, function (err, data) {
-        if (err) {
-          console.log('Error uploading data: ', err)
-        } else {
-          resp = data
-        }
-      })
-      .promise()
-  }
+  ]
 
   const response = {
     statusCode: 200,
@@ -121,35 +187,39 @@ ${chunks.trim()}
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': '*'
     },
-    body: clipManifest
+    body: JSON.stringify(responseBody)
   }
   return response
 }
 
-// auxiliar functions
-// HHTPS get request the URL
+// (aux 1) get master manifest from S3
+async function getManifestfromS3(key) {
+  const params = {
+    Bucket: s3Bucket,
+    Key: key.slice(1)
+  }
+  try {
+    const response = await s3.getObject(params).promise()
+    return response.Body.toString('ascii')
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
+}
 
-function getRequest(url) {
-  return new Promise((resolve, reject) => {
-    const req = https.get(url, (res) => {
-      res.setEncoding('utf8')
-      let rawData = ''
-
-      res.on('data', (chunk) => {
-        rawData += chunk
-      })
-
-      res.on('end', () => {
-        try {
-          resolve(rawData)
-        } catch (err) {
-          reject(new Error(err))
-        }
-      })
-    })
-
-    req.on('error', (err) => {
-      reject(new Error(err))
-    })
-  })
+// (aux 2) get master manifest from S3
+async function writeToS3(body, filename, location) {
+  const params = {
+    Body: body,
+    Bucket: location,
+    Key: filename,
+    ContentType: 'application/x-mpegURL'
+  }
+  try {
+    const data = await s3.putObject(params).promise()
+    return data
+  } catch (error) {
+    console.error(`Error uploading data to S3: ${err.message}`)
+    throw error
+  }
 }
