@@ -11,13 +11,13 @@ The [AWS Serverless Application Model (AWS SAM)](https://aws.amazon.com/serverle
 Clone the git repository of the Clip Manifest API for Amazon IVS:
 
 ```
-git clone https://gitlab.aws.dev/osmarb/aws-ivs-manifest-clip.git
+git clone https://github.com/aws-samples/amazon-ivs-clip-manifest.git
 ```
 
 
 ### 2. Install the lambda packages
 ```sh
-cd aws-ivs-manifest-clip/serverless/lambdas/clipmanifest/
+cd amazon-ivs-clip-manifest/serverless/lambdas/clipmanifest/
 npm install
 cd ../..
 ```
