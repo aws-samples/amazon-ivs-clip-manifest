@@ -5,6 +5,10 @@ Finally, you can run the Web UI application component locally sto render your re
 
 The [AWS Serverless Application Model (AWS SAM)](https://aws.amazon.com/serverless/sam/) is an open-source framework for building serverless applications. Built on [AWS CloudFormation](https://aws.amazon.com/cloudformation/), AWS SAM provides shorthand syntax to declare serverless resources using JSON or YAML. During deployment, AWS SAM transforms the serverless resources into CloudFormation syntax, enabling you to build serverless applications faster. As a companion to AWS SAM, the [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-reference.html#serverless-sam-cli) is a command line tool that operates on AWS SAM templates.
 
+## Solution Architecture
+
+<img src="/doc/architecture.png" width=100%>
+
 ## Deployment Steps
 
 ### 1. Cloning the Git repository

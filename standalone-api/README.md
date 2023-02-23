@@ -1,6 +1,10 @@
 # Amazon IVS manifest clipping: Standalone API
 This steps deploys the standalone clipmanifest API **only**. This guide deploys the standalone clipmanifest API **only**. If you already have your application and would like to deploy the API, these are the correct steps you should follow.
 
+## Solution Architecture
+
+<img src="/doc/architecture.png" width=100%>
+
 ## 1. Cloning the Git repository
 
 Clone the git repository of the Clip Manifest API for Amazon IVS:
@@ -8,7 +12,6 @@ Clone the git repository of the Clip Manifest API for Amazon IVS:
 ```
 git clone https://github.com/aws-samples/amazon-ivs-clip-manifest.git
 ```
-
 
 ## Install the lambda packages
 ```sh
