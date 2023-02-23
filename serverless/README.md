@@ -115,6 +115,9 @@ npm install
 npm start
 ```
 
+<img src="/doc/UI-Sample-Clip.png" width=100%>
+
+
 ## Publishing and hosting the Web UI Application
 Congratulations on building the Amazon IVS clip manifest solution! With the base application complete with backend API and the local WebUI installed, it's time to choose if you want to demonstrate to a broader audience.
 
