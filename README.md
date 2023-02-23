@@ -27,29 +27,29 @@ This is a serverless web application leveraging [Amazon IVS](https://aws.amazon.
 - 2. Log into the [AWS console](https://console.aws.amazon.com/) *Note: If you are logged in as an IAM user, ensure your account has permissions to create and manage the necessary resources and components for this application.*
 
 
-### Getting Started
+## Getting Started
  ⚠️**IMPORTANT NOTE:** *Deploying this demo application in your AWS account will create and consume AWS resources, which will cost money.*
 
-### Deployment Options:
+**Deployment Options:**
 
-#### Option A - Deploy the complete solution (Web UI + APIs)
+### Option A - Deploy the complete solution (Web UI + APIs)
 This option implements the complete solution with the back-end APIs needed for retrieving the recorded streams from Amazon IVS, clipping, and listing the clips.
 **Application Web UI + APIs:** [Follow the Deployment Guide to deploy the complete solution](/serverless/README.md) 
 
-#### Option B - Deploy the standalone API
+### Option B - Deploy the standalone API
 This option implements only the clip manifest API. Therefore, it switches developers who already have an application to integrate with the clipmanifest API. 
 
 [Follow this Deployment Guide to deploy the backend severless app only](/standalone-api/README.md) to deploy the backend AWS Lambda functions [clipmanifest](/serverless/lambdas/clipmanifest/), [getclips](/serverless/lambdas/getclips/) and [getrecordings](/serverless/lambdas/getrecordings/).
 
 
-### Contributing guidelines
+## Contributing guidelines
 See [CONTRIBUTING](CONTRIBUTING.md) for more information.
 
-### License
+## License
 This library is licensed under the MIT-0 License. See the LICENSE file.
 
 
-### About Amazon IVS
+## About Amazon IVS
 * Amazon Interactive Video Service (Amazon IVS) is a managed live streaming solution that is quick and easy to set up, and ideal for creating interactive video experiences. [Learn more](https://aws.amazon.com/ivs/).
 * [Amazon IVS docs](https://docs.aws.amazon.com/ivs/)
 * [User Guide](https://docs.aws.amazon.com/ivs/latest/userguide/)
