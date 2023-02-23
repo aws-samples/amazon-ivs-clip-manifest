@@ -8,7 +8,7 @@ The solution offers two deployment options:
 
 This is a serverless web application leveraging [Amazon IVS](https://aws.amazon.com/ivs/), [Amazon API Gateway](https://aws.amazon.com/api-gateway/), [AWS Lambda](https://aws.amazon.com/lambda/), [Amazon S3](https://aws.amazon.com/s3/) and [Amazon CloudFront](https://aws.amazon.com/cloudfront/). The sample Web UI is an application page built using [React.js](https://reactjs.org/) and [VideoJS](https://videojs.com/). The back-end is built using [Node.js](https://nodejs.org/), Amazon API Gateway, and AWS Lambda function used to [list all Amazon IVS recordings](/serverless/lambdas/getrecordings/), to [clip/trim the recordings](/serverless/lambdas/clipmanifest/) and [list all clipped recordings](/serverless/lambdas/getclips/). It also uses [AWS Serverless Application Model (AWS SAM)](https://aws.amazon.com/serverless/sam/), an open-source framework for building serverless applications.
 
-## Solution Web Application UI
+## Solution Web Application GUI
 
 <img src="/doc/UI-Sample-Clip.png" width=100%>
 
@@ -17,10 +17,7 @@ This is a serverless web application leveraging [Amazon IVS](https://aws.amazon.
 - AWS CLI ([Installing or updating the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html))
 - AWS SAM CLI ([Installing the AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html))
 - NodeJS ([Installing Node.js](https://nodejs.org/))
-
-**AWS Account:**
-- 1. If you do not have an AWS account, please see [How do I create and activate a new Amazon Web Services account?](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
-- 2. Log into the [AWS console](https://console.aws.amazon.com/) *Note: If you are logged in as an IAM user, ensure your account has permissions to create and manage the necessary resources and components for this application.*
+- AWS Account: If you do not have an AWS account, please see [How do I create and activate a new Amazon Web Services account?](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
 
 
 ## Getting Started
