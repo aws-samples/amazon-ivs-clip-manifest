@@ -1,9 +1,9 @@
-# Amazon IVS manifest Clipping Solution
+# Amazon IVS manifest clipping solution
 The Amazon IVS manifest clipping solution offers a reference solution that demonstrates how you can use HTTP live streaming (HLS) Program-Date-Time (PDT) tags and HLS byte range manifest files to clip the recordings stored on [Amazon Simple Storage Service (Amazon S3)](https://aws.amazon.com/s3/) using the [Auto-Record to Amazon S3](https://docs.aws.amazon.com/ivs/latest/userguide/record-to-s3.html).
 
 The solution offers two deployment options: 
-**[A. Application Web UI + APIs:](#option-a---deploy-the-complete-solution-web-ui--apis)** A front-end UI with backend APIs that offers a complete set to clip the recordings.
-**[B. Standalone API:](#option-b---deploy-the-standalone-api)** For developers only needing a reference clip API.
+- **[A. Application Web UI + APIs:](#option-a---deploy-the-complete-solution-web-ui--apis)** A front-end UI with backend APIs that offers a complete set to clip the recordings.
+- **[B. Standalone API:](#option-b---deploy-the-standalone-api)** For developers only needing a reference clip API.
 
 
 This is a serverless web application leveraging [Amazon IVS](https://aws.amazon.com/ivs/), [Amazon API Gateway](https://aws.amazon.com/api-gateway/), [AWS Lambda](https://aws.amazon.com/lambda/), [Amazon S3](https://aws.amazon.com/s3/) and [Amazon CloudFront](https://aws.amazon.com/cloudfront/). The sample Web UI is an application page built using [React.js](https://reactjs.org/) and [VideoJS](https://videojs.com/). The back-end is built using [Node.js](https://nodejs.org/), Amazon API Gateway, and AWS Lambda function used to [list all Amazon IVS recordings](/serverless/lambdas/getrecordings/), to [clip/trim the recordings](/serverless/lambdas/clipmanifest/) and [list all clipped recordings](/serverless/lambdas/getclips/). It also uses [AWS Serverless Application Model (AWS SAM)](https://aws.amazon.com/serverless/sam/), an open-source framework for building serverless applications.
