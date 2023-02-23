@@ -32,14 +32,14 @@ This is a serverless web application leveraging [Amazon IVS](https://aws.amazon.
 
 **Deployment Options:**
 
-### Option A - Deploy the complete solution (Web UI + APIs)
+### Option A - Deploy the complete solution (Application Web UI + APIs)
 This option implements the complete solution with the back-end APIs needed for retrieving the recorded streams from Amazon IVS, clipping, and listing the clips.
-**Application Web UI + APIs:** [Follow the Deployment Guide to deploy the complete solution](/serverless/README.md) 
+- **[Application Web UI + APIs](/serverless/README.md)**
 
 ### Option B - Deploy the standalone API
 This option implements only the clip manifest API. Therefore, it switches developers who already have an application to integrate with the clipmanifest API. 
 
-[Follow this Deployment Guide to deploy the backend severless app only](/standalone-api/README.md) to deploy the backend AWS Lambda functions [clipmanifest](/serverless/lambdas/clipmanifest/), [getclips](/serverless/lambdas/getclips/) and [getrecordings](/serverless/lambdas/getrecordings/).
+- **[Standalone API:](/standalone-api/README.md)**: Deploy the backend AWS Lambda functions [clipmanifest](/serverless/lambdas/clipmanifest/), [getclips](/serverless/lambdas/getclips/) and [getrecordings](/serverless/lambdas/getrecordings/).
 
 
 ## Contributing guidelines
