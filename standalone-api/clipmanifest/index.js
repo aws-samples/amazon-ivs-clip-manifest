@@ -69,7 +69,6 @@ exports.handler = async (event) => {
         line.startsWith('#EXT-X-MEDIA-SEQUENCE') |
         line.startsWith('#EXT-X-TWITCH-ELAPSED-SECS')
     )
-    console.log('genericExt', genericExt)
     // add the media playlist files
     for (let i = 0; i < lines.length; i++) {
       let segment = {}
@@ -138,8 +137,6 @@ exports.handler = async (event) => {
   const newPlaylist = createPlaylistManifest(
     clipPlaylistbyPDT(rawPlaylistManifest, startTime, endTime)
   )
-
-  console.log('newPlaylist', newPlaylist)
 
   // (8) write to S3 the filtered Master Manifest
   if (rawMasterManifest) {

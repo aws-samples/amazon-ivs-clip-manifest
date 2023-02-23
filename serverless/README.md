@@ -1,8 +1,13 @@
-# Getting Started installing the backend API
+# Amazon IVS manifest clipping: Application Web UI + APIs
 
-The following steps show how to use AWS SAM to create a deployment build around Amazon Simple Storage Service (Amazon S3), Amazon API Gateway and AWS Lambda, Amazon CloudFront. It also attach the Amazon CloudFront distribution to the Amazon S3 bucket, and apply the required policies to both.
+The following steps show how to use AWS SAM to create a deployment build around Amazon Simple Storage Service (Amazon S3), Amazon API Gateway, and AWS Lambda, Amazon CloudFront. It also attaches the Amazon CloudFront distribution to the Amazon S3 bucket and applies the required policies.
+Finally, you can run the Web UI application component locally sto render your recordings and manage your clips.
 
 The [AWS Serverless Application Model (AWS SAM)](https://aws.amazon.com/serverless/sam/) is an open-source framework for building serverless applications. Built on [AWS CloudFormation](https://aws.amazon.com/cloudformation/), AWS SAM provides shorthand syntax to declare serverless resources using JSON or YAML. During deployment, AWS SAM transforms the serverless resources into CloudFormation syntax, enabling you to build serverless applications faster. As a companion to AWS SAM, the [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-reference.html#serverless-sam-cli) is a command line tool that operates on AWS SAM templates.
+
+## Solution Architecture
+
+<img src="/doc/architecture.png" width=85%>
 
 ## Deployment Steps
 
@@ -102,16 +107,18 @@ aws ivs create-channel --name my-ivs-channel --recording-configuration-arn "<you
 aws cloudformation describe-stacks --stack-name sample-clip-manifest --query 'Stacks[].Outputs' > ../manifest-clip-ui/src/config.json 
 ```
 
-### 6. Deploy the WebUI 
+### 6. Running the Web UI Application locally
 
 ```sh
-cd manifest-web-ui
+cd ../manifest-web-ui
 npm install
 npm start
 ```
 
-## Choose Your Own Adventure
+<img src="/doc/UI-Sample-Clip.png" width=100%>
 
-Congratulations on building ClipManifest solurion! With the base application complete with backend API and the local WebUI installed, it's time to choose if you want to to demonstrate the solution to a broader audience.
 
-- [Public Hosting](manifest-clip-ui/public-deploy/README.md) - Publish the web application to the Public internet. After completing this exension, you'll be able to share a URL with the complete solution.
+## Publishing and hosting the Web UI Application
+Congratulations on building the Amazon IVS clip manifest solution! With the base application complete with backend API and the local WebUI installed, it's time to choose if you want to demonstrate to a broader audience.
+
+- [Public Hosting](../manifest-clip-ui/public-deploy/README.md) - Publish the web application to the Public internet. After completing this exension, you'll be able to share a URL with the complete solution.
