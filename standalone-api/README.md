@@ -1,7 +1,7 @@
-## Deployment Steps
-This steps deploys the standalone clipmanifest API **only**. If you already have your application and just would like to deploy the API, these are the correct steps that you should follow.
+# Amazon IVS manifest clipping: Standalone API
+This steps deploys the standalone clipmanifest API **only**. This guide deploys the standalone clipmanifest API **only**. If you already have your application and would like to deploy the API, these are the correct steps you should follow.
 
-### 1. Cloning the Git repository
+## 1. Cloning the Git repository
 
 Clone the git repository of the Clip Manifest API for Amazon IVS:
 
@@ -10,7 +10,7 @@ git clone https://github.com/aws-samples/amazon-ivs-clip-manifest.git
 ```
 
 
-### Install the lambda packages
+## Install the lambda packages
 ```sh
 cd standalone-api
 cd clipmanifest
@@ -18,14 +18,14 @@ npm install
 cd ..
 ```
 
-### Create a deployment bucket or use an existing bucket
+## Create a deployment bucket or use an existing bucket
 If you already have a deployment bucket, jump this step.
 
 ```sh
 aws s3api create-bucket --bucket <my-bucket-name> --region <my-region>
 ```
 
-### Create the SAM package
+## Create the SAM package
 ```sh
 sam package \
 --template-file template.yaml \
@@ -33,7 +33,7 @@ sam package \
 --output-template-file packaged.yaml
 ```
 
-### Deploy the package 
+## Deploy the package 
 ```sh
 sam deploy \
 --template-file packaged.yaml \
@@ -41,7 +41,7 @@ sam deploy \
 --capabilities CAPABILITY_IAM
 ```
 
-### API Usage
+## API Usage
 
 #### Create clips API
 ```sh
@@ -81,7 +81,7 @@ Response Body:
 ```
 
 
-### 8. Testing the clipmanifest API 
+## 8. Testing the clipmanifest API 
 
 After completing a live transmission to your Amazon IVS RTMPS endpoint, navigate to the Amazon S3 Recording Bucket, and look for the .m3u8 manifest. The Amazon S3 path should look like the below:
 
@@ -92,7 +92,7 @@ After completing a live transmission to your Amazon IVS RTMPS endpoint, navigate
 <img src="../doc/playlist_input.png" width=50%>
 
 
-### 9. Using the create clips API
+## 9. Using the create clips API
 
 Make an HTTP Post call to the Amazon API Gateway endpoint.
 
@@ -100,28 +100,15 @@ Make an HTTP Post call to the Amazon API Gateway endpoint.
 curl -X POST <API Gateway Endpoint>/clipmanifest -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://<url of the ivs recording>\" \"byte_range\": true}"
 ```
 
-example: 
+Example: 
 ```sh
 curl -X POST https://nopxir0z9i.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/ -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://<cloudfront_dist_id>.cloudfront.net/ivs/v1/<account_id>/2rrcA103rn67/2022/10/15/2/11/X5JJ9FegmZiq/media/hls/master.m3u8\" \"byte_range\": true}" 
 ```
 
 ### 10. Test the clip
 
-The new manifest follows the the path URL of the recording with the object called clip_master.m3u8
-
+The new manifest follows the path URL of the recording with the object called clip_master.m3u8
 
 <img src="../doc/playlist_output.png" width=50%>
 
-
-### Other APIs Usage
-
-
-#### Get recordings API
-```sh
-curl -X GET <API Gateway Endpoint>/getrecordings
-```
-
-#### Get clips API
-```sh
-curl -X GET <API Gateway Endpoint>/getclips
-```
+[Return to home page of the solution](../README.md)

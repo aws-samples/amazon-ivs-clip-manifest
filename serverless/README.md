@@ -1,4 +1,4 @@
-# Amazon IVS clip manifest: Application Web UI + APIs
+# Amazon IVS manifest clipping: Application Web UI + APIs
 
 The following steps show how to use AWS SAM to create a deployment build around Amazon Simple Storage Service (Amazon S3), Amazon API Gateway, and AWS Lambda, Amazon CloudFront. It also attaches the Amazon CloudFront distribution to the Amazon S3 bucket and applies the required policies.
 Finally, you can run the Web UI application component locally sto render your recordings and manage your clips.
