@@ -3,7 +3,7 @@ This steps deploys the standalone clipmanifest API **only**. This guide deploys 
 
 ## Solution Architecture
 
-<img src="/doc/architecture.png" width=100%>
+<img src="/doc/architecture.png" width=85%>
 
 ## 1. Cloning the Git repository
 

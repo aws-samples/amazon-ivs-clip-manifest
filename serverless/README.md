@@ -7,7 +7,7 @@ The [AWS Serverless Application Model (AWS SAM)](https://aws.amazon.com/serverle
 
 ## Solution Architecture
 
-<img src="/doc/architecture.png" width=100%>
+<img src="/doc/architecture.png" width=85%>
 
 ## Deployment Steps
 
