@@ -92,7 +92,7 @@ After completing a live transmission to your Amazon IVS RTMPS endpoint, navigate
 /ivs/v1/<aws_account_id>/<channel_id>/<year>/<month>/<day>/<hours>/<minutes>/<recording_id>/media/hls/720p30/playlist.m3u8
 ````
 
-<img src="../doc/playlist_input.png">
+<img src="../doc/playlist_input.png" width=70%>
 
 
 ## 8. Using the create clips API
@@ -112,7 +112,7 @@ curl -X POST https://<unique_id>.execute-api.us-east-1.amazonaws.com/Prod/clipma
 
 The new manifest follows the path URL of the recording with the object called clip_master.m3u8
 
-<img src="../doc/playlist_output.png">
+<img src="../doc/playlist_output.png" width=70%>
 
 
 
