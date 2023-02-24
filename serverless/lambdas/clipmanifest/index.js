@@ -7,12 +7,23 @@ const s3Bucket = process.env.STORAGE_IVSRECORDINGS_BUCKETNAME
 
 exports.handler = async (event) => {
   // (1) parse event body and get the start and end time of the clip
-  const {
-    start_time: startTime,
-    end_time: endTime,
-    master_url: urlMaster,
-    byte_range: byteRange
-  } = JSON.parse(event.body)
+  let startTime, endTime, urlMaster, byteRange
+  try {
+    ;({
+      start_time: startTime,
+      end_time: endTime,
+      master_url: urlMaster,
+      byte_range: byteRange
+    } = JSON.parse(event.body))
+  } catch (error) {
+    console.log(error)
+    throw Object.assign(
+      new Error(
+        `JSON parse error ${error}, please check the API documentation`
+      ),
+      { statusCode: 400 }
+    )
+  }
 
   // validate input fields
   validateRequiredFields({ startTime, endTime, urlMaster, byteRange })
