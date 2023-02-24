@@ -16,9 +16,19 @@ export function createClipAPI(start_time, end_time, master_url, byte_range) {
       byte_range: byte_range
     })
   })
-    .then((data) => data.json())
+    .then((data) => {
+      console.log(data)
+      data.json()
+    })
     .catch((error) => {
+      if (byte_range === true) {
+        alert(
+          `Error, Check if this stream support byte range manifest, try again with byte range as false\n
+        ${error}`
+        )
+      } else alert(`Error, ${error}`)
       console.error('Error', error)
+
       return error
     })
 }
