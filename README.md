@@ -31,7 +31,7 @@ This option implements the complete solution with the back-end APIs needed for r
 Deploy the Application UI, back-end AWS Lambda functions [clipmanifest](/serverless/lambdas/clipmanifest/), [getclips](/serverless/lambdas/getclips/) and [getrecordings](/serverless/lambdas/getrecordings/).
 
 ### Option B - [Deploy the standalone API](/standalone-api/README.md)
-This option implements only the clip manifest API. Therefore, it switches developers who already have an application to integrate with the clipmanifest API. 
+This option implements only the clip manifest API. Therefore, it suits developers who already have an application to integrate with the clipmanifest API. 
 
 - **[Standalone API](/standalone-api/README.md)**  
 Deploy the backend AWS Lambda functions [clipmanifest](/serverless/lambdas/clipmanifest/).
@@ -40,7 +40,7 @@ Deploy the backend AWS Lambda functions [clipmanifest](/serverless/lambdas/clipm
 See [CONTRIBUTING](CONTRIBUTING.md) for more information.
 
 ## License
-This library is licensed under the MIT-0 License. See the LICENSE file.
+This library is licensed under the MIT-0 License. See the [LICENSE](LICENSE) file.
 
 
 ## About Amazon IVS
