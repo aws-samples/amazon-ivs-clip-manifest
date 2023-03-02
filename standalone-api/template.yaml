@@ -77,14 +77,14 @@ Resources:
         CorsRules : [
           {
             "AllowedMethods": [
-              "GET"
+              "GET", 
+              "HEAD"
             ],
             "AllowedOrigins": [
               "*"
             ],
             "AllowedHeaders": [
-              "Authorization",
-              "Content-Length"
+              "*"
             ],
             "MaxAge" : 3000
           }
