@@ -48,17 +48,21 @@ sam deploy \
 It will take approximately 5 minutes to complete the Stack deployment. Take notes of the following outputs as you will be using them later.
 
 ```
-ApiURLCreateClip
- API endpoint post create clips
- https://<your_API_id>.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/
+Key                 ApiURLCreateClip                                                            
+Description         API endpoint post create clips                                              
+Value               https://<unique-id>.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/   
 
-RecordConfiguration
-Recording Bucket Name
-my-new-ivs-recording-bucket-standalone-api<account_id>
- 
-CloudfrontDistribution
- Amazon CloudFront Domain Name
- https://<your_cloudfront_id>.cloudfront.net
+Key                 ApiURLGetRecordings                                                         
+Description         API endpoint get recordings available                                       
+Value               https://<unique-id>.execute-api.us-east-1.amazonaws.com/Prod/getrecordings/  
+
+Key                 ApiURLGetClips                                                              
+Description         API endpoint get clips available                                            
+Value               https://<unique-id>.execute-api.us-east-1.amazonaws.com/Prod/getclips/       
+
+Key                 CloudfrontDistribution                                                      
+Description         Amazon CloudFront Domain Name                                               
+Value               https://<unique-id>.cloudfront.net  
 
 ```
 
@@ -103,7 +107,7 @@ aws cloudformation describe-stacks --stack-name sample-clip-manifest --query 'St
 ### 8. Running the Web UI Application locally
 
 ```sh
-cd ../manifest-web-ui
+cd ../manifest-clip-ui
 npm install
 npm start
 ```
