@@ -1,25 +1,18 @@
+/* use viewport-relative units to cover page fully */
 body {
   margin: 0;
   padding: 0;
-}
-
-/* use viewport-relative units to cover page fully */
-body {
   height: 100vh;
   width: 100vw;
+  background: linear-gradient(0deg, rgba(34,163,195,1) 0%, rgba(196,45,253,0.6041010154061625) 94%);
 }
 
 
 .Home{
-  margin: auto;
-  margin: auto;
-  height: 100vh;
-  width: 100vw;
+  display: flex;
   justify-content: center;
   flex-direction: column;
   max-height: fit-content;
-  background: rgb(34,163,195);
-  background: linear-gradient(0deg, rgba(34,163,195,1) 0%, rgba(196,45,253,0.6041010154061625) 94%);
 }
 
 .page-container {
