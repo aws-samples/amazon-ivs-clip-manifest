@@ -145,6 +145,9 @@ Outputs:
   ApiURLCreateClip:
     Description: "API endpoint post create clips"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/clipmanifest/" 
+  RecordConfigurationBucket:
+    Description: "Recoding Bucket Name"
+    Value: !Ref IVSRecordingBucket
   CloudfrontDistribution:
     Description: "Amazon CloudFront Domain Name"
     Value: !Sub "https://${CloudfrontDistribution.DomainName}"

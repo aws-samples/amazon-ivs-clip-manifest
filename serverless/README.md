@@ -48,22 +48,30 @@ sam deploy \
 It will take approximately 5 minutes to complete the Stack deployment. Take notes of the following outputs as you will be using them later.
 
 ```
-Key                 ApiURLCreateClip                                                            
-Description         API endpoint post create clips                                              
-Value               https://<unique-id>.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/   
+loudFormation outputs from deployed stack
+-----------------------------------------------------------------------------------------------------------------------------------
+Outputs                                                                                                                           
+-----------------------------------------------------------------------------------------------------------------------------------
+Key                 ApiURLCreateClip                                                                                              
+Description         API endpoint post create clips                                                                                
+Value               https://<id>.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/                                     
 
-Key                 ApiURLGetRecordings                                                         
-Description         API endpoint get recordings available                                       
-Value               https://<unique-id>.execute-api.us-east-1.amazonaws.com/Prod/getrecordings/  
+Key                 ApiURLGetRecordings                                                                                           
+Description         API endpoint get recordings available                                                                         
+Value               https://<id>.execute-api.us-east-1.amazonaws.com/Prod/getrecordings/                                    
 
-Key                 ApiURLGetClips                                                              
-Description         API endpoint get clips available                                            
-Value               https://<unique-id>.execute-api.us-east-1.amazonaws.com/Prod/getclips/       
+Key                 ApiURLGetClips                                                                                                
+Description         API endpoint get clips available                                                                              
+Value               https://<id>.execute-api.us-east-1.amazonaws.com/Prod/getclips/                                         
 
-Key                 CloudfrontDistribution                                                      
-Description         Amazon CloudFront Domain Name                                               
-Value               https://<unique-id>.cloudfront.net  
+Key                 CloudfrontDistribution                                                                                        
+Description         Amazon CloudFront Domain Name                                                                                 
+Value               https://<id>.cloudfront.net                                                                         
 
+Key                 RecordConfigurationBucket                                                                                     
+Description         Recoding Bucket Name                                                                                          
+Value               my-new-ivs-recording-bucket-<account-number>                                                                      
+-----------------------------------------------------------------------------------------------------------------------------------
 ```
 
 
