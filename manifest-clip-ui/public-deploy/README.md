@@ -1,14 +1,20 @@
 # Amazon IVS manifest clipping: Publish the frontend
 If you would like to publish the Frontend manifest-clip-ui please follow the deployment steps bellow.
 
-## 1- Go to the publishing temple folder
+## 1- Go to the project folder and create the build
 
 ```sh
-cd aws-ivs-manifest-clip/manifest-clip-ui/public-deploy
+cd aws-ivs-manifest-clip/manifest-clip-ui
+npm run build
 ```
 
 ## 2- Now use SAM package to upload the template to the Amazon S3 Bucket
-You can use the same deployment bucket used in the backend deployment
+First go to the project template ```public-deploy````
+
+```sh
+cd public-deploy 
+```
+Then package the project: You can use the same deployment bucket used in the backend deployment
 
 ```sh
 sam package \
@@ -40,18 +46,11 @@ Value               https://<Distribution_id>.cloudfront.net
 ------------------------------------------------------------------------------------------------------------
 ```
 
-## 4- Now you can build your React project
-
-```sh
-cd ..
-npm run build
-```
-
 ## 5- Upload the build to the Amazon S3 hosting bucket 
 The hosting bucket information can be obtained in the output of the ```sam deploy``` step 3
 
 ```sh
-aws s3 sync build/ s3://hosting-ivs-manifest-clip<account-id>
+aws s3 sync ../build/ s3://hosting-ivs-manifest-clip<account-id>
 ```
 
 ## 6- Access the Amazon CloudFront Domain URL

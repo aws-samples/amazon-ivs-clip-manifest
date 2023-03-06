@@ -210,6 +210,16 @@ export default function HomePage(props) {
       )
       return
     }
+    if (
+      clipControls.byteRange === null ||
+      clipControls.byteRange === undefined
+    ) {
+      console.log('byteRange is null or undefined')
+      setClipControls({
+        ...clipControls,
+        byteRange: false
+      })
+    }
     await createClipAPI(
       clipControls.startTime,
       clipControls.endTime,
