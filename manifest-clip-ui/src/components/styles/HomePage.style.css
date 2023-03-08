@@ -9,7 +9,6 @@ body {
 
 
 .Home{
-  display: flex;
   justify-content: center;
   flex-direction: column;
   max-height: fit-content;

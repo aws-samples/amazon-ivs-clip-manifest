@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+
 import React, { useRef, useEffect, useState } from 'react'
 import './styles/HomePage.style.css'
 import VideoPlayer from './player/playerJS'
@@ -209,6 +212,16 @@ export default function HomePage(props) {
         `: Create Clip Error: Start time must be less than end time`
       )
       return
+    }
+    if (
+      clipControls.byteRange === null ||
+      clipControls.byteRange === undefined
+    ) {
+      console.log('byteRange is null or undefined')
+      setClipControls({
+        ...clipControls,
+        byteRange: false
+      })
     }
     await createClipAPI(
       clipControls.startTime,

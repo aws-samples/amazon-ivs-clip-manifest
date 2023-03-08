@@ -1,7 +1,10 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+
 import { POST_CLIPMANIFEST_API } from '../../config'
 
 export function createClipAPI(start_time, end_time, master_url, byte_range) {
-  //"start_time\": 1,\"end_time\": 15,\"master_url\":
+  if (byte_range === undefined || byte_range === null) byte_range = false
   console.log('data', start_time, end_time, master_url, byte_range)
   const url = `${POST_CLIPMANIFEST_API}`
   return fetch(url, {

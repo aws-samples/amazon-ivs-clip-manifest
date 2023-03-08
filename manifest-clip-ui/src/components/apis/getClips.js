@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+
 import { GET_CLIPS_API } from '../../config'
 
 export function getClipsAPI(pathfilter) {
