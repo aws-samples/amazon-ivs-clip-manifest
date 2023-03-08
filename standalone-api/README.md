@@ -100,12 +100,12 @@ After completing a live transmission to your Amazon IVS RTMPS endpoint, navigate
 Make an HTTP Post call to the Amazon API Gateway endpoint.
 
 ```sh
-curl -X POST <API Gateway Endpoint>/clipmanifest -H "Content-Type: application/json" -d "{\"start_time\": 20,\"end_time\": 70,\"master_url\": \"https://<url of the ivs recording>\" \"byte_range\": true}"
+curl -X POST <API Gateway Endpoint>/clipmanifest -H "Content-Type: application/json" -d "{\"start_time\": 20,\"end_time\": 70,\"master_url\": \"https://<url of the ivs recording>\", \"byte_range\": true}"
 ```
 
 Example: 
 ```sh
-curl -X POST https://<unique_id>.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/ -H "Content-Type: application/json" -d "{\"start_time\": 20,\"end_time\": 70,\"master_url\": \"https://<cloudfront_dist_id>.cloudfront.net/ivs/v1/<account_id>/2rrcA103rn67/2022/10/15/2/11/X5JJ9FegmZiq/media/hls/master.m3u8\" \"byte_range\": true}" 
+curl -X POST https://<unique_id>.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/ -H "Content-Type: application/json" -d "{\"start_time\": 20,\"end_time\": 70,\"master_url\": \"https://<cloudfront_dist_id>.cloudfront.net/ivs/v1/<account_id>/2rrcA103rn67/2022/10/15/2/11/X5JJ9FegmZiq/media/hls/master.m3u8\", \"byte_range\": true}" 
 ```
 
 ## 9. Test the clip
@@ -114,18 +114,5 @@ The new manifest follows the path URL of the recording with the object called cl
 
 <img src="../doc/playlist_output.png" width=70%>
 
-
-
-## API Usage
-
-#### Create clips API
-```sh
-curl -X POST <API Gateway Endpoint>/clipmanifest -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://<url of the ivs recording>\"  \"byte_range\": true}"
-```
-
-example: 
-```sh
-curl -X POST https://<unique_ID>.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/ -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://<unique_ID>.cloudfront.net/ivs/v1/<account_ID>/2rrcA103rn67/2022/10/15/2/11/X5JJ9FegmZiq/media/hls/master.m3u8\", \"byte_range\": true}" 
-```
 
 [Return to home page of the solution](../README.md)
