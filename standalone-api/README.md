@@ -125,7 +125,7 @@ curl -X POST <API Gateway Endpoint>/clipmanifest -H "Content-Type: application/j
 
 example: 
 ```sh
-curl -X POST https://<unique_ID>.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/ -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://<unique_ID>.cloudfront.net/ivs/v1/<account_ID>/2rrcA103rn67/2022/10/15/2/11/X5JJ9FegmZiq/media/hls/master.m3u8\" \"byte_range\": true}" 
+curl -X POST https://<unique_ID>.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/ -H "Content-Type: application/json" -d "{\"start_time\": 1,\"end_time\": 15,\"master_url\": \"https://<unique_ID>.cloudfront.net/ivs/v1/<account_ID>/2rrcA103rn67/2022/10/15/2/11/X5JJ9FegmZiq/media/hls/master.m3u8\", \"byte_range\": true}" 
 ```
 
 [Return to home page of the solution](../README.md)

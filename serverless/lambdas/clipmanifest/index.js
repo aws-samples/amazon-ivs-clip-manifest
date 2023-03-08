@@ -1,4 +1,6 @@
-/// Author: Osmar Bento da Silva Junior - osmarb@amazon.com
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+
 'use strict'
 const AWS = require('aws-sdk')
 const s3 = new AWS.S3()
