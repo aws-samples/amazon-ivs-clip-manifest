@@ -1,3 +1,6 @@
+// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: MIT-0
+
 import { POST_CLIPMANIFEST_API } from '../../config'
 
 export function createClipAPI(start_time, end_time, master_url, byte_range) {
