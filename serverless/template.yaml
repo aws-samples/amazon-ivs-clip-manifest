@@ -4,7 +4,7 @@ Description: Amazon IVS Clip Manisfest
 
 Globals:
   Function:
-    Runtime: nodejs12.x
+    Runtime: nodejs16.x
     Timeout: 40
     MemorySize: 128
     Environment:
@@ -28,7 +28,7 @@ Resources:
           Type: Api
           Properties:
             Path: /clipmanifest
-            Method: POST # Workaround for CORS; should be PUT method on '/'
+            Method: POST
   # Get recordings API
   GetRecordingsLambda:
     Type: 'AWS::Serverless::Function'
@@ -43,7 +43,7 @@ Resources:
           Type: Api
           Properties:
             Path: /getrecordings
-            Method: GET # Workaround for CORS; should be PUT method on '/'
+            Method: GET 
   # Get clips API
   GetClipsLambda:
     Type: 'AWS::Serverless::Function'
@@ -58,7 +58,7 @@ Resources:
           Type: Api
           Properties:
             Path: /getclips
-            Method: GET # Workaround for CORS; should be PUT method on '/'
+            Method: GET 
   ## CloudFront Block
   CloudFrontOriginAccessIdentity:
     Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'

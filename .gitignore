@@ -27,3 +27,6 @@ manifest-clip-ui/src/config.json
 serverless/.aws-sam/build.toml
 manifest-clip-ui/public-deploy/packaged.yaml
 standalone-api/packaged.yaml
+on-the-fly-standalone-api/*
+doc/sample-recs/2/9/22/55/Pd8MyZnzUAFl/media/validate.GOP.py
+doc/sample-recs/2/9/22/55/Pd8MyZnzUAFl/media/out.xml

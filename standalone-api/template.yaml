@@ -4,7 +4,7 @@ Description: Amazon IVS Clip Manisfest Standalone API
 
 Globals:
   Function:
-    Runtime: nodejs12.x
+    Runtime: nodejs16.x
     Timeout: 40
     MemorySize: 128
     Environment:
@@ -71,7 +71,7 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       # Change bucket name if you want to have a custom name
-      BucketName: !Sub "my-new-ivs-recording-bucket-standalone-api${AWS::AccountId}" ## add account is !GetAtt AWS::AccountId
+      BucketName: !Sub "my-new-ivs-recording-bucket-standalone-api${AWS::AccountId}"
        # S3 Bucket Cors Policy
       CorsConfiguration:
         CorsRules : [
