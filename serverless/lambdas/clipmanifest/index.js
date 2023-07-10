@@ -298,7 +298,7 @@ async function writeToS3(body, filename, location) {
     const data = await s3.putObject(params).promise()
     return data
   } catch (error) {
-    console.error(`Error uploading data to S3: ${err.message}`)
+    console.error(`Error uploading data to S3: ${error.message}`)
     throw error
   }
 }
