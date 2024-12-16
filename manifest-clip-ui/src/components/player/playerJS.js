@@ -27,15 +27,21 @@ function VideoJS(props) {
         console.log('player is ready')
         onReady && onReady(player)
 
-        videoElement.textTracks.addEventListener(
-          'addtrack',
-          function (addTrackEvent) {
-            var track = addTrackEvent.track
-            track.mode = 'hidden'
-            console.log('Track', track)
-            track.addEventListener('cuechange', cueChangeEvent)
-          }
-        )
+        // check if text track is available
+        if (!videoElement.textTracks) {
+          console.log('Text track not available')
+          return
+        } else {
+          videoElement.textTracks.addEventListener(
+            'addtrack',
+            function (addTrackEvent) {
+              var track = addTrackEvent.track
+              track.mode = 'hidden'
+              console.log('Track', track)
+              track.addEventListener('cuechange', cueChangeEvent)
+            }
+          )
+        }
 
         console.log('Text track detected', videoElement.textTracks)
       }))
