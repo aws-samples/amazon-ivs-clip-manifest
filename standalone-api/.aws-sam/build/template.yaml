@@ -1,0 +1,113 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Amazon IVS Clip Manisfest Standalone API
+Globals:
+  Function:
+    Runtime: nodejs22.x
+    Timeout: 40
+    MemorySize: 128
+    Environment:
+      Variables:
+        STORAGE_IVSRECORDINGS_BUCKETNAME:
+          Ref: IVSRecordingSAPIBucket
+        CLOUDFRONT_DOMAIN_NAME:
+          Fn::Sub: https://${CloudfrontDistribution.DomainName}
+        ACCOUNT_ID:
+          Ref: AWS::AccountId
+Resources:
+  ClipManifestLambdaStandAlone:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: ClipManifestLambdaStandAlone
+      Policies:
+      - S3CrudPolicy:
+          BucketName:
+            Ref: IVSRecordingSAPIBucket
+      Events:
+        Api1:
+          Type: Api
+          Properties:
+            Path: /clipmanifest
+            Method: POST
+    Metadata:
+      SamResourceId: ClipManifestLambdaStandAlone
+  CloudFrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: Serverless website OA
+  CloudfrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: Cloudfront distribution for IVS Manifest Clip Standalone API
+        DefaultRootObject: index.html
+        Enabled: true
+        HttpVersion: http2
+        Origins:
+        - Id: s3-website
+          DomainName:
+            Fn::GetAtt:
+            - IVSRecordingSAPIBucket
+            - DomainName
+          S3OriginConfig:
+            OriginAccessIdentity:
+              Fn::Sub: origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}
+        DefaultCacheBehavior:
+          Compress: 'true'
+          AllowedMethods:
+          - HEAD
+          - GET
+          - OPTIONS
+          ForwardedValues:
+            QueryString: false
+            Headers:
+            - Origin
+            - Access-Control-Request-Method
+            - Access-Control-Request-Headers
+          TargetOriginId: s3-website
+          ViewerProtocolPolicy: redirect-to-https
+  IVSRecordingSAPIBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName:
+        Fn::Sub: my-new-ivs-recording-bucket-standalone-api${AWS::AccountId}
+      CorsConfiguration:
+        CorsRules:
+        - AllowedMethods:
+          - GET
+          - HEAD
+          AllowedOrigins:
+          - '*'
+          AllowedHeaders:
+          - '*'
+          MaxAge: 3000
+  IVSRecordingSAPIBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: IVSRecordingSAPIBucket
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Action: s3:GetObject
+          Resource:
+          - Fn::Sub: arn:aws:s3:::${IVSRecordingSAPIBucket}/*
+          Principal:
+            AWS:
+              Fn::Sub: arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity
+                ${CloudFrontOriginAccessIdentity}
+Outputs:
+  ApiURLCreateClip:
+    Description: API endpoint post create clips
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/clipmanifest/
+  CloudfrontDistribution:
+    Description: Amazon CloudFront Domain Name
+    Value:
+      Fn::Sub: https://${CloudfrontDistribution.DomainName}
+  RecordConfiguration:
+    Description: Recoding Bucket Name
+    Value:
+      Ref: IVSRecordingSAPIBucket

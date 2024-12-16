@@ -14,6 +14,12 @@ git clone https://github.com/aws-samples/amazon-ivs-clip-manifest.git
 cd amazon-ivs-clip-manifest/standalone-api/
 ```
 
+## 2. Deploy using SAM:
+
+```sh
+sam deploy
+```
+
 ## 2. Create a deployment bucket or use an existing bucket
 If you already have a deployment bucket, jump this step.
 
@@ -55,7 +61,7 @@ CloudfrontDistribution
 
 ## 5. Amazon IVS Channel configuration
 
-If you already have an Amazon IVS channel created that you want to use, you can skip this step.
+**Note:If you already have an Amazon IVS channel created that you want to use, you can skip this step.**
 Copy from the AWS SAM deploy output the recording bucket name and replace the "Your Recording Bucket Name" below.
 
 ```
@@ -76,6 +82,7 @@ Take note of the RecordingConfiguration ARN, as it will be used to link your rec
                 "bucketName": "my-new-ivs-recording-bucket-standalone-api-my_account_id"
             }
         }
+}
 ```
 
 ## 6. Create the Amazon IVS Channel and link to your recording configuration*
@@ -107,6 +114,9 @@ Example:
 ```sh
 curl -X POST https://<unique_id>.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/ -H "Content-Type: application/json" -d "{\"start_time\": 20,\"end_time\": 70,\"master_url\": \"https://<cloudfront_dist_id>.cloudfront.net/ivs/v1/<account_id>/2rrcA103rn67/2022/10/15/2/11/X5JJ9FegmZiq/media/hls/master.m3u8\", \"byte_range\": true}" 
 ```
+
+**Note: The API Gateway unique_id can be found in the AWS SAM deploy output, as well as the CloudFront endpoint can be found in the AWS SAM deploy output.**
+
 
 ## 9. Test the clip
 
