@@ -109,7 +109,7 @@ aws ivs create-channel --name my-ivs-channel --recording-configuration-arn "<you
 ### 7. Extract the Outputs from the SAM package to pass as parameters to Web UI 
 
 ```sh
-aws cloudformation describe-stacks --stack-name sample-clip-manifest --query 'Stacks[].Outputs' > ../manifest-clip-ui/src/config.json 
+aws cloudformation describe-stacks --stack-name clip-manifest-ui --query 'Stacks[].Outputs' > ../manifest-clip-ui/src/config.json 
 ```
 
 ### 8. Running the Web UI Application locally

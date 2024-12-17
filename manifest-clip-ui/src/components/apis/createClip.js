@@ -21,7 +21,7 @@ export function createClipAPI(start_time, end_time, master_url, byte_range) {
   })
     .then((data) => {
       console.log(data)
-      data.json()
+      return data.json()
     })
     .catch((error) => {
       if (byte_range === true) {

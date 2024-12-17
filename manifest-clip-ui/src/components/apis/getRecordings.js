@@ -13,7 +13,10 @@ export function getRecordingsAPI() {
       Accept: 'application/json'
     })
   })
-    .then((response) => response.json())
+    .then((data) => {
+      console.log(data)
+      return data.json()
+    })
     .catch((error) => {
       console.error('Error', error)
       return error

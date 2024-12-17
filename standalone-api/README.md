@@ -17,7 +17,7 @@ cd amazon-ivs-clip-manifest/standalone-api/
 ## 2. Deploy using SAM:
 
 ```sh
-sam deploy
+sam deploy --guided
 ```
 
 ## 2. Create a deployment bucket or use an existing bucket

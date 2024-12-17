@@ -1,0 +1,49 @@
+.clips-container {
+    opacity: 0.7;
+    display: inline;
+    flex-direction: row;
+    white-space: nowrap;
+    max-height: 250px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+  
+  .clips-container:hover {
+    opacity: 1;
+  }
+  
+  .clips-inline {
+    display: flex;
+    white-space: nowrap;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    position: relative;
+    font-size: small;
+    padding: 15px;
+    gap: 15px;
+  }
+  
+  .card {
+    min-width: 200px;
+    transition: transform 0.2s ease;
+  }
+  
+  .card:hover {
+    transform: translateY(-2px);
+  }
+  
+  .card-overflow {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .clips-inline {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  .clips-inline::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
