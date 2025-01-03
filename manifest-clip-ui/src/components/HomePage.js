@@ -2,62 +2,59 @@
 // SPDX-License-Identifier: MIT-0
 
 import React, { useRef, useEffect, useState } from 'react'
-import './styles/HomePage.style.css'
+import './styles/HomePage.css'
 import VideoPlayer from './player/playerJS'
 import ClipPoster from './../img/clipposter.svg'
 import VODPoster from './../img/vodposter.svg'
 import { getClipsAPI } from './apis/getClips'
-import { createClipAPI } from './apis/createClip'
 import { getRecordingsAPI } from './apis/getRecordings'
+import { DebugProvider, useDebug, DebugLog } from './DebugLog'
+import ClipControls from './ClipControls'
+import ClipsGallery from './ClipsGallery'
+import { createClipAPI } from './apis/createClip'
+import ClipPlayerModal from './player/ClipPlayerModal'
 
-export default function HomePage(props) {
+// Wrap the main component to use debug context
+function HomePageContent() {
+  // Player states
   const [duration, setDuration] = useState(0)
   const [position, setPosition] = useState(0)
   const playerRef = useRef(null)
+  const [loaded, setLoaded] = useState(false)
+  const [playClip, setPlayingClip] = useState(false)
+
+  // Data states
   const [vodData, setvodData] = useState({ url: '', path: '' })
   const [listofRec, setListofRec] = useState([])
   const [listofClips, setListofClips] = useState([])
-  const [loaded, setLoaded] = useState(false)
-  const [clipControls, setClipControls] = useState({
-    startTime: null,
-    endTime: null,
-    byteRange: false
+
+  // Get debug context
+  const { addDebugLine } = useDebug()
+
+  const [clipModalData, setClipModalData] = useState({
+    isOpen: false,
+    url: '',
+    id: '',
+    clipData: null
   })
-  const [playClip, setPlayingClip] = useState(false)
 
   useEffect(() => {
     if (!vodData.url) handleRecodingData()
 
-    if (loaded) {
-      let curPlayer = document.querySelector('video')
-      curPlayer.addEventListener('canplay', () => {
-        curPlayer.addEventListener('timeupdate', () => {
-          setPosition(playerRef.current.currentTime())
-        })
-      })
+    if (loaded && playerRef.current) {
+      const timeUpdateHandler = () => {
+        setPosition(playerRef.current?.currentTime() || 0)
+      }
+
+      playerRef.current.on('timeupdate', timeUpdateHandler)
       return () => {
-        curPlayer.removeEventListener('timeupdate', () => {
-          setPosition(playerRef.current.currentTime())
-        })
+        playerRef.current.off('timeupdate', timeUpdateHandler)
       }
     }
-  }, [loaded])
-
-  const addDebugLine = (metadataTime, metadataText) => {
-    const domString = `
-          <span className="debug-data__time">${metadataTime}</span>
-          <span className="debug-data__value">${metadataText}</span>`.trim()
-
-    const dataLine = document.createElement('div')
-    dataLine.classList.add('className', 'data-line')
-    dataLine.innerHTML = domString
-
-    const debugData = document.querySelector('.debug-data')
-    debugData.appendChild(dataLine)
-  }
+  }, [loaded, vodData.url])
 
   const videoJsOptions = {
-    autoplay: 'muted', //mute audio when page loads, but auto play video
+    autoplay: 'muted',
     controls: true,
     responsive: true,
     fluid: true,
@@ -72,202 +69,177 @@ export default function HomePage(props) {
     ]
   }
 
-  function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms))
-  }
-
   const handleRecodingData = async () => {
-    await getRecordingsAPI().then((items) => {
+    try {
+      addDebugLine(Date.now(), 'Fetching available recordings...')
+      const items = await getRecordingsAPI()
       setListofRec(items)
-      setvodData({
-        url: items[0].master,
-        path: items[0].path
-      })
-      getClips(items[0].path)
-    })
+
+      if (items?.length > 0) {
+        const newVodData = {
+          url: items[0].master,
+          path: items[0].path
+        }
+        setvodData(newVodData)
+        addDebugLine(Date.now(), `Loading recording: ${items[0].assetID}`)
+        getClips(items[0].path)
+      } else {
+        addDebugLine(Date.now(), 'No recordings available')
+        setvodData({ url: '', path: '' })
+      }
+    } catch (error) {
+      console.error('Error fetching recordings:', error)
+      addDebugLine(Date.now(), `Error loading recordings: ${error.message}`)
+      setvodData({ url: '', path: '' })
+      setListofRec([])
+    }
   }
 
   const getClips = async (voddata) => {
-    console.log('vodData')
-    await getClipsAPI(voddata).then((items) => {
+    try {
+      addDebugLine(Date.now(), 'Fetching available clips...')
+      const items = await getClipsAPI(voddata)
+      addDebugLine(Date.now(), `Found ${items.length} clips`)
       setListofClips(items)
-    })
+    } catch (error) {
+      console.error('Error fetching clips:', error)
+      addDebugLine(Date.now(), `Error loading clips: ${error.message}`)
+      setListofClips([])
+    }
   }
 
   const handlePlayerReady = (player) => {
-    if (loaded === false) {
-      console.log('setting value!!!!!!')
+    if (!loaded) {
       setLoaded(true)
+      addDebugLine(Date.now(), 'Player initialized')
     }
 
     player.on('waiting', () => {
-      console.log('player is waiting')
-    })
-
-    player.on('dispose', () => {
-      console.log('player will dispose')
+      addDebugLine(Date.now(), 'Player buffering...')
     })
 
     player.on('playing', () => {
-      console.log('player is playing')
-      addDebugLine(Date.now(), ': Player playing')
-      console.log('Video Duration!', player.duration())
-      setDuration(player.duration().toFixed(0))
+      const newDuration = player.duration().toFixed(0)
+      setDuration(newDuration)
+      addDebugLine(Date.now(), `Player playing - Duration: ${newDuration}s`)
     })
 
     player.on('error', (err) => {
-      console.log('Play Error', err)
-      addDebugLine(Date.now(), `: Player ${err.type} ${err.target.innerText}`)
+      addDebugLine(Date.now(), `Player error: ${err.type} ${err.message || ''}`)
     })
 
     player.on('pause', () => {
-      console.log('Paused')
+      addDebugLine(Date.now(), 'Player paused')
     })
 
     playerRef.current = player
   }
 
-  const handleSliderSeekChangeStart = (newPosition) => {
-    console.log('New position', newPosition.target.value)
-    if (newPosition.target.value) {
-      setClipControls({ startTime: newPosition })
-      playerRef.current.currentTime(newPosition.target.value)
-    }
-  }
-
-  const handleSliderSeekChangeEnd = (newPosition) => {
-    console.log('New position', newPosition.target.value)
-    if (newPosition.target.value) {
-      setClipControls({ startTime: newPosition })
-      playerRef.current.currentTime(newPosition.target.value)
-    }
-  }
-
-  const handleSetStartTime = async (e) => {
-    e.preventDefault()
-    playerRef.current.pause()
-    console.log(position)
-    setClipControls({ startTime: position })
-    addDebugLine(Date.now(), `: Start time set to ${position}`)
-    await sleep(2000)
-    playerRef.current.play()
-  }
-
-  const handleSetEndTime = (e) => {
-    e.preventDefault()
-    playerRef.current.pause()
-    addDebugLine(Date.now(), `: End time set to ${position}`)
-    setClipControls({
-      startTime: clipControls.startTime,
-      endTime: position
-    })
-    console.log(clipControls)
-  }
-
   const handleVODChange = (event) => {
     event.preventDefault()
     setPlayingClip(false)
+    const path =
+      event.target.options[event.target.selectedIndex].getAttribute('data-path')
+    const assetId = event.target.options[event.target.selectedIndex].text
+
     setvodData({
       url: event.target.value,
-      path: event.target.options[event.target.selectedIndex].getAttribute(
-        'data-path'
-      )
+      path: path
     })
-    let newSrc = { src: event.target.value, type: 'application/x-mpegURL' }
-    playerRef.current.src(newSrc)
-    getClips(
-      event.target.options[event.target.selectedIndex].getAttribute('data-path')
-    )
-    setClipControls({ ...clipControls, startTime: null, endTime: null })
-    playerRef.current.currentTime(0)
-  }
 
-  const handlePlayClip = (event) => {
-    console.log(event)
-    setPlayingClip(true)
-    setvodData({ url: event })
-    let newSrc = { src: event, type: 'application/x-mpegURL' }
-    playerRef.current.src(newSrc)
-  }
+    addDebugLine(Date.now(), `Switching to VOD: ${assetId}`)
 
-  const eraseClipStartEnd = () => {
-    setClipControls({ ...clipControls, startTime: null, endTime: null })
-    playerRef.current.currentTime(0)
-    playerRef.current.play()
-  }
-
-  const createClip = async () => {
-    if (clipControls.startTime === null || clipControls.endTime === null) {
-      addDebugLine(
-        Date.now(),
-        `: Create Clip Error: Please select a start and end time`
-      )
-      alert('Please select a start and end time')
-      return
-    }
-    if (clipControls.startTime > clipControls.endTime) {
-      alert('Start time must be less than end time')
-      addDebugLine(
-        Date.now(),
-        `: Create Clip Error: Start time must be less than end time`
-      )
-      return
-    }
-    if (
-      clipControls.byteRange === null ||
-      clipControls.byteRange === undefined
-    ) {
-      console.log('byteRange is null or undefined')
-      setClipControls({
-        ...clipControls,
-        byteRange: false
+    if (playerRef.current) {
+      playerRef.current.src({
+        src: event.target.value,
+        type: 'application/x-mpegURL'
       })
+      playerRef.current.currentTime(0)
     }
-    await createClipAPI(
-      clipControls.startTime,
-      clipControls.endTime,
-      vodData.url,
-      clipControls.byteRange
-    ).then((response) => {
-      console.log('Response', response)
+
+    getClips(path)
+  }
+
+  const handlePlayClip = (clipUrl, item) => {
+    addDebugLine(Date.now(), `Opening clip: ${item.execution}`)
+    setClipModalData({
+      isOpen: true,
+      url: clipUrl,
+      id: item.execution,
+      clipData: {
+        year: item.year,
+        month: item.month,
+        day: item.day,
+        hour: item.hour,
+        minute: item.minute,
+        master: item.master
+      }
+    })
+  }
+
+  const handleCloseClipModal = () => {
+    addDebugLine(Date.now(), 'Closing clip player')
+    setClipModalData({ isOpen: false, url: '', id: '' })
+  }
+
+  const handleCreateClip = (startTime, endTime, byteRange) => {
+    return new Promise((resolve, reject) => {
+      if (startTime === null || endTime === null) {
+        const error = 'Please select a start and end time'
+        addDebugLine(Date.now(), `Create Clip Error: ${error}`)
+        alert(error)
+        reject(error)
+        return
+      }
+
+      if (startTime > endTime) {
+        const error = 'Start time must be less than end time'
+        addDebugLine(Date.now(), `Create Clip Error: ${error}`)
+        alert(error)
+        reject(error)
+        return
+      }
+
       addDebugLine(
         Date.now(),
-        `: Create Clip Success: New clip created at ${JSON.stringify(response)}`
+        `Creating clip... Start: ${startTime}, End: ${endTime}, ByteRange: ${byteRange}`
       )
+
+      return createClipAPI(startTime, endTime, vodData.url, byteRange)
+        .then((response) => {
+          addDebugLine(
+            Date.now(),
+            `Clip created successfully: ${JSON.stringify(response)}`
+          )
+          getClips(vodData.path)
+          resolve(response)
+        })
+        .catch((error) => {
+          console.error('Error:', error)
+          addDebugLine(Date.now(), `Clip creation failed: ${error.message}`)
+          reject(error)
+        })
     })
-    getClips(vodData.path)
   }
 
   return (
     <div className='Home'>
       <div className='page-container'>
-        <div className='selector-container '>
-          <form>
-            <div className='row'>
-              <div className='col-xl'>
-                <div className='form-group'>
-                  <select
-                    value={vodData.url}
-                    className='custom-select large'
-                    required
-                    onChange={handleVODChange}
-                  >
-                    {listofRec.map((items, index) => (
-                      <option
-                        key={index}
-                        value={items.master}
-                        data-path={items.path}
-                      >
-                        {' '}
-                        Select the VOD: {items.assetID}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-          </form>
+        <div className='selector-container'>
+          <select
+            value={vodData.url}
+            className='vod-select'
+            required
+            onChange={handleVODChange}
+          >
+            {listofRec.map((item, index) => (
+              <option key={index} value={item.master} data-path={item.path}>
+                Select the VOD: {item.assetID}
+              </option>
+            ))}
+          </select>
         </div>
+
         <div className='video-container'>
           {vodData.url ? (
             <VideoPlayer
@@ -282,159 +254,44 @@ export default function HomePage(props) {
             </div>
           )}
         </div>
+
         <div className='controls-container'>
-          Clip Controls {position}
-          <form>
-            <div className='form-group'>
-              <div className='row row-center'>
-                <div className='col col-small'>
-                  <button
-                    className='btn btn-primary control-btn'
-                    onClick={(e) => handleSetStartTime(e)}
-                    disabled={playClip}
-                  >
-                    Set Start
-                  </button>
-                </div>
-                <div className='col-large'>
-                  <input
-                    type='range'
-                    id='start'
-                    value={
-                      clipControls.startTime ? clipControls.startTime : position
-                    }
-                    className='form-control-range control-set'
-                    max={duration}
-                    disabled={playClip}
-                    onChange={(e) => handleSliderSeekChangeStart(e)}
-                    onClick={(e) => handleSetStartTime(e)}
-                  />
-                </div>
-                <div className='col col-small'>
-                  <input
-                    type='text'
-                    className='form-control clip-control'
-                    id='formGroupExampleInput2'
-                    value={clipControls.startTime ? clipControls.startTime : 0}
-                    disabled={true}
-                    //onChange={(e) => handleInputChangeStart(e)}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className='form-group'>
-              <div className='row row-center'>
-                <div className='col col-small'>
-                  <button
-                    className='btn btn-primary control-btn'
-                    onClick={(e) => handleSetEndTime(e)}
-                    disabled={playClip}
-                  >
-                    Set Stop
-                  </button>
-                </div>
-                <div className='col-large'>
-                  <input
-                    type='range'
-                    id='end'
-                    value={
-                      clipControls.endTime ? clipControls.endTime : position
-                    }
-                    max={duration}
-                    disabled={playClip}
-                    className='form-control-range control-set'
-                    onChange={(e) => handleSliderSeekChangeEnd(e)}
-                    onClick={(e) => handleSetEndTime(e)}
-                  />
-                </div>
-                <div className='col col-small'>
-                  <input
-                    type='text'
-                    className='form-control clip-control'
-                    id='formGroupExampleInput2'
-                    value={clipControls.endTime ? clipControls.endTime : 0}
-                    disabled={true}
-                    //onChange={(e) => handleInputChangeEnd(e)}
-                  />
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-        <div className='createclip-container'>
-          {clipControls.startTime && clipControls.endTime ? (
-            <div class='toast-body'>
-              Clips attributes has been defined, Start {clipControls.startTime},
-              End {clipControls.endTime}, click create clip or close.
-              <div class='mt-2 pt-2 border-top'>
-                <button
-                  type='button'
-                  className='btn btn-primary control-btn'
-                  onClick={(e) => createClip(e)}
-                >
-                  Create Clip
-                </button>
-                <button
-                  type='button'
-                  className='btn btn-secondary control-btn'
-                  onClick={() => eraseClipStartEnd()}
-                >
-                  Close
-                </button>
-                <div class='form-check'>
-                  <input
-                    type='checkbox'
-                    class='form-check-input'
-                    id='exampleCheck1'
-                    onChange={(e) =>
-                      setClipControls({
-                        ...clipControls,
-                        byteRange: e.target.checked
-                      })
-                    }
-                  />
-                  <label class='form-check-label'>
-                    Byte Range? Note: Byte range allows extra precision, up to
-                    one-second. It's only avaliable for VODs recorded after
-                    Amazon IVS byte range support.
-                  </label>
-                </div>
-              </div>
-              <hr className='solid'></hr>
-            </div>
-          ) : (
-            <></>
-          )}
-        </div>
-        <div className='clips-container'>
-          <div className='clips-inline'>
-            {listofClips.map((items, index) => (
-              <div
-                className='card col-sm-2'
-                key={index}
-                onClick={() => handlePlayClip(items.master)}
-              >
-                <img
-                  className='card-img-top'
-                  src={ClipPoster}
-                  alt={items.assetID}
-                  maxwidth='200'
-                  maxheight='150'
-                />
-                <div className='card-body'>
-                  <p className='card-text card-overflow'>
-                    ID: {items.execution}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <ClipControls
+            position={position}
+            duration={duration}
+            playerRef={playerRef}
+            disabled={playClip}
+            vodData={vodData}
+            onCreateClip={handleCreateClip} // Pass the handler instead of direct API call
+          />
         </div>
 
         <div className='debug-container'>
-          <div className='debug-data'> Debug data:</div>
+          <DebugLog />
         </div>
+
+        <div className='clips-container'>
+          <ClipsGallery clips={listofClips} onClipSelect={handlePlayClip} />
+        </div>
+
+        <ClipPlayerModal
+          isOpen={clipModalData.isOpen}
+          onClose={handleCloseClipModal}
+          clipUrl={clipModalData.url}
+          clipId={clipModalData.id}
+          clipData={clipModalData.clipData}
+          addDebugLine={addDebugLine}
+        />
       </div>
     </div>
+  )
+}
+
+// Wrap the component with DebugProvider
+export default function HomePage() {
+  return (
+    <DebugProvider>
+      <HomePageContent />
+    </DebugProvider>
   )
 }

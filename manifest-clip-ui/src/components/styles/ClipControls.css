@@ -1,0 +1,124 @@
+.clip-container {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 10px 0;
+  }
+  
+  .timeline-container {
+    position: relative;
+    margin: 30px 0 35px;
+    height: 6px;
+  }
+  
+  .range-input {
+    width: 100%;
+    cursor: pointer;
+    background: transparent;
+    position: relative;
+    z-index: 2;
+    margin: 0;
+    height: 6px;
+  }
+  
+  .time-display {
+    font-family: monospace;
+    padding: 5px 10px;
+    background: #e9ecef;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .progress-bar {
+    position: absolute;
+    height: 6px;
+    background-color: rgba(255, 49, 135, 0.5);
+
+    pointer-events: none;
+    border-radius: 3px;
+    z-index: 1;
+  }
+  
+  .marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    background-color: #007bff;
+    border-radius: 50%;
+    border: 2px solid white;
+    z-index: 3;
+    box-shadow: 0 0 0 1px #007bff;
+  }
+  
+  .marker-label.start {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: #007bff;
+    font-weight: bold;
+    z-index: 3;
+    bottom: 10px;
+  }
+
+  .marker-label.end {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: #007bff;
+    font-weight: bold;
+    z-index: 3;
+    bottom: 10px;
+  }
+  
+  .form-range {
+    -webkit-appearance: none;
+    background: transparent;
+  }
+  
+  .form-range::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 6px;
+    background: #dee2e6;
+    border-radius: 3px;
+    border: none;
+  }
+  
+  .form-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: none;
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+    background: #007bff;
+    margin-top: -3px;
+    cursor: pointer;
+  }
+  
+  .form-range:focus {
+    outline: none;
+  }
+  
+  .form-range::-webkit-slider-thumb:active {
+    transform: scale(1.2);
+  }
+  
+  /* Firefox specific styles */
+  .form-range::-moz-range-track {
+    width: 100%;
+    height: 6px;
+    background: #dee2e6;
+    border-radius: 3px;
+    border: none;
+  }
+  
+  .form-range::-moz-range-thumb {
+    border: none;
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+    background: #007bff;
+    cursor: pointer;
+  }

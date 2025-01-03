@@ -4,7 +4,7 @@ Description: Amazon IVS Clip Manisfest
 
 Globals:
   Function:
-    Runtime: nodejs16.x
+    Runtime: nodejs22.x
     Timeout: 40
     MemorySize: 128
     Environment:
@@ -101,7 +101,7 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       # Change bucket name if you want to have a custom name
-      BucketName: !Sub "my-new-ivs-recording-bucket-${AWS::AccountId}" ## add account is !GetAtt AWS::AccountId
+      BucketName: !Sub "my-new-ivs-recording-bucket-ui-${AWS::AccountId}" ## add account is !GetAtt AWS::AccountId
       CorsConfiguration:
         CorsRules : [
           {

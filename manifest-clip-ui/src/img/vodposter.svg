@@ -1,1 +1,57 @@
-<svg width="190" height="100" xmlns="http://www.w3.org/2000/svg"><g stroke="#ccc"><path fill="#2c8aa9" d="M0 1.5h199v148H0z" stroke="none"/><path stroke="null" fill="#ccc" d="m85.22 27 35.027 22.591-35.023 22.717-.08-45.31.075.001z"/><text xml:space="preserve" font-family="Noto Sans JP" font-size="8" stroke-width="0" y="90" x="6.117" fill="#fff">No VOD loaded or Waiting the API to load...</text><circle cy="50" cx="96.5" fill="none" r="30"/></g></svg>
+<svg width="190" height="100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Background gradient -->
+      <linearGradient id="vodBgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+      </linearGradient>
+  
+      <!-- Circle stroke gradient -->
+      <linearGradient id="loadingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:rgba(255,255,255,0.1)" />
+        <stop offset="50%" style="stop-color:rgba(255,255,255,0.3)" />
+        <stop offset="100%" style="stop-color:rgba(255,255,255,0.1)" />
+      </linearGradient>
+    </defs>
+  
+    <!-- Background rectangle -->
+    <rect x="0" y="0" width="190" height="100" rx="8" fill="url(#vodBgGradient)" />
+  
+    <!-- Spinning circle -->
+    <circle cx="95" cy="50" r="30"
+      stroke="url(#loadingGradient)"
+      stroke-width="4"
+      stroke-linecap="round"
+      fill="none">
+      <animateTransform
+        attributeName="transform"
+        type="rotate"
+        from="0 95 50"
+        to="360 95 50"
+        dur="2s"
+        repeatCount="indefinite" />
+    </circle>
+  
+    <!-- Play button (triangle icon) -->
+    <path d="M85 38 L85 62 L110 50 Z"
+      fill="white"
+      opacity="0.9" />
+  
+    <!-- Loading text -->
+    <text x="95" y="85"
+      font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+      font-size="8"
+      font-weight="500"
+      fill="white"
+      text-anchor="middle"
+      opacity="0.9">
+      Loading... or No Recordings Available
+    </text>
+  
+    <!-- Decorative elements -->
+    <circle cx="20" cy="15" r="2" fill="white" opacity="0.3" />
+    <circle cx="170" cy="80" r="2" fill="white" opacity="0.3" />
+    <circle cx="30" cy="85" r="2" fill="white" opacity="0.3" />
+    <circle cx="160" cy="20" r="2" fill="white" opacity="0.3" />
+  </svg>
+  

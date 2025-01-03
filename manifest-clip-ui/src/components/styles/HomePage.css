@@ -1,0 +1,123 @@
+/* Layout containers */
+.Home {
+  justify-content: center;
+  flex-direction: column;
+  max-height: fit-content;
+}
+
+.page-container {
+  margin: auto;
+  max-width: 80%;
+  max-height: 100%;
+  background-color: #fff;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 10px 60px rgba(0, 0, 0, 0.15);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Video section */
+.video-container {
+  position: relative;
+  background-color: #fff;
+  border: 0;
+}
+
+.video-player {
+  position: absolute;
+  max-width: 80%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.video-player-placeholder {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+/* Controls section */
+.controls-container {
+  padding: 2px 10px 0;
+  position: relative;
+}
+
+/* Selector styles */
+.selector-container {
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.vod-select {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23495057' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+.vod-select:hover {
+  border-color: #adb5bd;
+  box-shadow: 0 0 0 3px rgba(130, 138, 145, 0.1);
+}
+
+.vod-select:focus {
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.vod-select option {
+  padding: 12px;
+}
+
+/* Clips gallery */
+.clips-container {
+  opacity: 0.7;
+  display: inline;
+  flex-direction: row;
+  white-space: nowrap;
+  max-height: 250px;
+  cursor: pointer;
+}
+
+.clips-inline {
+  display: flex;
+  white-space: nowrap;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  position: relative;
+  font-size: small;
+}
+
+.card-overflow {
+  overflow: hidden;
+}
+
+/* Debug container - only container positioning */
+.debug-container {
+  width: 100%;
+  padding: 0 0 10px;
+  position: relative;
+  align-content: left;
+  justify-content: left;
+  
+}
+
+/* Media queries */
+@media (max-width: 600px) {
+  .page-container {
+    max-width: 95%;
+  }
+}
