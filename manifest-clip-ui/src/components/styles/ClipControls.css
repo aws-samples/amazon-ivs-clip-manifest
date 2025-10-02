@@ -54,20 +54,21 @@
   position: absolute;
   top: -10px;
   transform: translateX(-50%);
-  width: 12px;
-  height: 12px;
-  background: #667eea;
-  border: 2px solid white;
-  border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  width: 0;
+  height: 0;
+  z-index: 5;
 }
 
 .marker.start {
-  background: #28a745;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 12px solid #28a745;
 }
 
 .marker.end {
-  background: #dc3545;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 12px solid #dc3545;
 }
 
 .marker-label {
@@ -79,10 +80,15 @@
   padding: 2px 6px;
   border-radius: 4px;
   color: white;
+  z-index: 5;
 }
 
 .marker-label.start {
   background: #28a745;
+}
+
+.marker-label.end {
+  background: #dc3545;
 }
 
 .time-display {

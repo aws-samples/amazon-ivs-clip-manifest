@@ -93,18 +93,50 @@
     padding: 1rem;
   }
   
+  .ivs-info-title {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+  
   .ivs-info-value {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    padding: 0.5rem;
   }
   
   .ivs-info-value span {
     word-break: break-all;
+    font-size: 0.75rem;
+    line-height: 1.4;
   }
   
   .copy-btn, .toggle-btn {
-    align-self: flex-end;
-    min-width: 40px;
+    align-self: center;
+    min-width: 60px;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .ivs-info-item label {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ivs-info-container {
+    margin: 0.25rem;
+    padding: 0.75rem;
+    border-radius: 12px;
+  }
+  
+  .ivs-info-value span {
+    font-size: 0.7rem;
+  }
+  
+  .copy-btn, .toggle-btn {
+    min-width: 50px;
+    height: 32px;
+    font-size: 0.7rem;
   }
 }
