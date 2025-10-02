@@ -14,14 +14,6 @@ Deployed using [AWS SAM](https://aws.amazon.com/serverless/sam/) on serverless i
 
 <img src="/doc/UI-Sample-Clip.png" width=100%>
 
-## 🧭 Quick Navigation
-
-- **[📦 Serverless Backend](./serverless/README.md)** - Architecture & API documentation
-- **[🔧 Standalone API](./standalone-api/README.md)** - API-only deployment & integration
-- **[⚛️ Frontend UI](./manifest-clip-ui/README.md)** - React application & components
-- **[🎨 UI Deployment](./manifest-clip-ui/public-deploy/README.md)** - Public hosting setup
-- **[📋 Release Notes](./RELEASE_NOTES.md)** - Latest updates & improvements
-
 ## 🚀 Quick Start
 
 **Prerequisites:**
@@ -43,6 +35,14 @@ Select your deployment option:
 3. **Deploy Standalone API Only** - Just the clipping API (no UI support)
 4. **Deploy UI to Cloud** - Host the React UI on CloudFront (public access)
 5. **Full Solution (Backend + Local UI)** - Deploy backend with IVS channel and start local UI
+
+## 🧭 Quick Navigation
+
+- **[📦 Serverless Backend](./serverless/README.md)** - Architecture & API documentation
+- **[🔧 Standalone API](./standalone-api/README.md)** - API-only deployment & integration
+- **[⚛️ Frontend UI](./manifest-clip-ui/README.md)** - React application & components
+- **[🎨 UI Deployment](./manifest-clip-ui/public-deploy/README.md)** - Public hosting setup
+- **[📋 Release Notes](./RELEASE_NOTES.md)** - Latest updates & improvements
 
 ## 📋 What Gets Deployed
 
