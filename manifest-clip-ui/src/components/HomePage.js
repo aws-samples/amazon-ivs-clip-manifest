@@ -11,6 +11,7 @@ import { getRecordingsAPI } from './apis/getRecordings'
 import { DebugProvider, useDebug, DebugLog } from './DebugLog'
 import ClipControls from './ClipControls'
 import ClipsGallery from './ClipsGallery'
+import IVSChannelInfo from './IVSChannelInfo'
 import { createClipAPI } from './apis/createClip'
 import ClipPlayerModal from './player/ClipPlayerModal'
 
@@ -27,6 +28,7 @@ function HomePageContent() {
   const [vodData, setvodData] = useState({ url: '', path: '' })
   const [listofRec, setListofRec] = useState([])
   const [listofClips, setListofClips] = useState([])
+  const [config, setConfig] = useState(null)
 
   // Get debug context
   const { addDebugLine } = useDebug()
@@ -40,6 +42,7 @@ function HomePageContent() {
 
   useEffect(() => {
     if (!vodData.url) handleRecodingData()
+    if (!config) loadConfig()
 
     if (loaded && playerRef.current) {
       const timeUpdateHandler = () => {
@@ -51,7 +54,7 @@ function HomePageContent() {
         playerRef.current.off('timeupdate', timeUpdateHandler)
       }
     }
-  }, [loaded, vodData.url])
+  }, [loaded, vodData.url, config])
 
   const videoJsOptions = {
     autoplay: 'muted',
@@ -105,6 +108,17 @@ function HomePageContent() {
       console.error('Error fetching clips:', error)
       addDebugLine(Date.now(), `Error loading clips: ${error.message}`)
       setListofClips([])
+    }
+  }
+
+  const loadConfig = async () => {
+    try {
+      const configData = await import('../config.json')
+      setConfig(configData.default)
+      addDebugLine(Date.now(), 'Configuration loaded')
+    } catch (error) {
+      console.error('Error loading config:', error)
+      addDebugLine(Date.now(), 'No configuration file found')
     }
   }
 
@@ -232,7 +246,8 @@ function HomePageContent() {
             required
             onChange={handleVODChange}
           >
-            {listofRec.map((item, index) => (
+            <option value="">Select a recording...</option>
+            {Array.isArray(listofRec) && listofRec.map((item, index) => (
               <option key={index} value={item.master} data-path={item.path}>
                 Select the VOD: {item.assetID}
               </option>
@@ -250,7 +265,7 @@ function HomePageContent() {
             />
           ) : (
             <div className='video-player-placeholder'>
-              <img className='card-img-top' src={VODPoster} alt='Poster' />
+              <img className='placeholder-svg' src={VODPoster} alt='Select a recording to start' />
             </div>
           )}
         </div>
@@ -273,6 +288,8 @@ function HomePageContent() {
         <div className='clips-container'>
           <ClipsGallery clips={listofClips} onClipSelect={handlePlayClip} />
         </div>
+
+        <IVSChannelInfo config={config} />
 
         <ClipPlayerModal
           isOpen={clipModalData.isOpen}

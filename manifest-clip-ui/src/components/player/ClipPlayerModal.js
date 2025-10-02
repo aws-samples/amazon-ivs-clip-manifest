@@ -86,12 +86,10 @@ const ClipPlayerModal = ({
 
     if (isOpen) {
       document.addEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'hidden'
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'unset'
     }
   }, [isOpen, onClose])
 
@@ -101,39 +99,16 @@ const ClipPlayerModal = ({
     <div className='modal-overlay' onClick={onClose}>
       <div className='modal-content' onClick={(e) => e.stopPropagation()}>
         <div className='modal-header'>
-          <div className='modal-header-content'>
-            <div className='modal-title-row'>
-              <h5 className='modal-title'>Clip ID: {clipId}</h5>
-              <button
-                type='button'
-                className='btn-close'
-                onClick={onClose}
-                aria-label='Close'
-              />
-            </div>
-            {clipData && (
-              <div className='modal-info-row'>
-                <div className='info-item'>
-                  <span className='info-label'>Duration:</span>
-                  <span className='info-value'>{duration}</span>
-                </div>
-                <div className='info-item'>
-                  <span className='info-label'>Created:</span>
-                  <span className='info-value'>
-                    {formatTimestamp(clipData)}
-                  </span>
-                </div>
-                <div className='info-item'>
-                  <span className='info-label'>Location:</span>
-                  <span className='info-value'>{clipData.master}</span>
-                </div>
-              </div>
-            )}
-          </div>
+          <button
+            type='button'
+            className='btn-close'
+            onClick={onClose}
+            aria-label='Close'
+          >
+            ×
+          </button>
         </div>
-        <div className='modal-body'>
-          <VideoPlayer options={videoJsOptions} onReady={handlePlayerReady} />
-        </div>
+        <VideoPlayer options={videoJsOptions} onReady={handlePlayerReady} />
       </div>
     </div>
   )

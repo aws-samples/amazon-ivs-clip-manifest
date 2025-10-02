@@ -1,0 +1,15 @@
+{
+  "name": "amazon-ivs-clip-manifest",
+  "version": "1.0.0",
+  "description": "Amazon IVS manifest clipping solution with interactive installation",
+  "scripts": {
+    "deploy": "node install.js",
+    "cleanup": "node cleanup.js"
+  },
+  "dependencies": {
+    "inquirer": "^8.2.4",
+    "chalk": "^4.1.2"
+  },
+  "keywords": ["amazon-ivs", "video-clipping", "serverless", "aws"],
+  "license": "MIT-0"
+}

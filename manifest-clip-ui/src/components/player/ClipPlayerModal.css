@@ -4,100 +4,43 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.75);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  backdrop-filter: blur(5px);
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 9999;
 }
 
 .modal-content {
-  background: white;
+  position: absolute;
+  top: 60%;
+  left: 10%;
+  width: 80%;
+  height: 30%;
+  background: transparent;
   border-radius: 8px;
-  width: 90%;
-  max-width: 1000px;
-  position: relative;
-  animation: modalEnter 0.3s ease-out;
 }
 
 .modal-header {
-  padding: 1rem;
-  border-bottom: 1px solid #dee2e6;
-  background-color: #f8f9fa;
-  border-radius: 8px 8px 0 0;
-}
-
-.modal-header-content {
-  width: 100%;
-}
-
-.modal-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.modal-info-row {
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
-
-.info-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.info-label {
-  color: #6c757d;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.info-value {
-  color: #212529;
-  font-size: 0.9rem;
-  word-break: break-all;
-  overflow-wrap: break-word;
-  max-width: 300px;
-  line-height: 1.2;
-}
-
-.modal-title {
-  margin: 0;
-  font-size: 1.25rem;
-  color: #1a1a1a;
-}
-
-.modal-body {
-  padding: 1rem;
-  position: relative;
-  aspect-ratio: 16/9;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10000;
 }
 
 .btn-close {
-  padding: 1rem;
-  margin: -1rem -1rem -1rem auto;
-  background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
-  border: 0;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
   cursor: pointer;
-  opacity: .5;
+  font-size: 16px;
 }
 
-.btn-close:hover {
-  opacity: .75;
+.modal-body {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
 }
 
-@keyframes modalEnter {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+.modal-body video {
+  border-radius: 8px;
 }

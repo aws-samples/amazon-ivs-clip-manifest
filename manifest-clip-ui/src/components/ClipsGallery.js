@@ -6,6 +6,17 @@ import ClipPoster from './../img/clipposter.svg'
 import './styles/ClipsGallery.css'
 
 const ClipsGallery = ({ clips, onClipSelect }) => {
+  // Handle empty or non-array clips
+  if (!Array.isArray(clips) || clips.length === 0) {
+    return (
+      <div className='clips-container'>
+        <div className='clips-inline'>
+          <p className='text-muted'>No clips available. Create your first clip!</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className='clips-container'>
       <div className='clips-inline'>

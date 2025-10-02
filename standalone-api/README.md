@@ -1,53 +1,67 @@
-# Amazon IVS manifest clipping: Standalone API
-This steps deploys the standalone clipmanifest API **only**. This guide deploys the standalone clipmanifest API **only**. If you already have your application and would like to deploy the API, these are the correct steps you should follow.
+# Amazon IVS Clip Manifest - Standalone API
 
-## Solution Architecture
+Deploy only the clip manifest API for integration with existing applications.
 
-<img src="/doc/architecture.png" width=85%>
+## 🚀 Quick Deploy
 
-## 1. Cloning the Git repository
-
-Clone the git repository of the Clip Manifest API for Amazon IVS:
-
-```
-git clone https://github.com/aws-samples/amazon-ivs-clip-manifest.git
-cd amazon-ivs-clip-manifest/standalone-api/
-```
-
-## 2. Deploy using SAM:
-
-```sh
+```bash
 sam deploy --guided
 ```
 
-## 2. Create a deployment bucket or use an existing bucket
-If you already have a deployment bucket, jump this step.
+## 📡 API Reference
 
-```sh
-aws s3api create-bucket --bucket <my-bucket-name> --region <my-region>
+### POST /clipmanifest
+
+Creates a video clip from an IVS recording using manifest manipulation.
+
+**Request Body:**
+```json
+{
+  "start_time": 1640995200,
+  "end_time": 1640995260,
+  "master_url": "https://your-cloudfront-domain.net/ivs/v1/123456789/recording/path/master.m3u8",
+  "byte_range": true
+}
 ```
 
-## 3. Create the SAM package
-```sh
-sam package \
---template-file template.yaml \
---s3-bucket <my-bucket-name> \
---output-template-file packaged.yaml
+**Response:**
+```json
+{
+  "clip_url": "https://your-cloudfront-domain.net/clips/clip_1640995200_1640995260.m3u8",
+  "duration": 60,
+  "created_at": "2024-01-01T10:00:00Z"
+}
 ```
 
-## 4. Deploy the package 
-```sh
-sam deploy \
---template-file packaged.yaml \
---stack-name sample-clip-manifest \
---capabilities CAPABILITY_IAM
+## 🔧 Integration Example
+
+```javascript
+const response = await fetch('https://your-api-gateway-url/clipmanifest', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    start_time: Math.floor(startDate.getTime() / 1000),
+    end_time: Math.floor(endDate.getTime() / 1000),
+    master_url: recordingUrl,
+    byte_range: true
+  })
+});
+
+const clip = await response.json();
+console.log('Clip created:', clip.clip_url);
 ```
 
-It will take approximately 5 minutes to complete the stack deployment. Take notes of the following outputs because you will use them later.
+## 📋 What Gets Deployed
 
-```sh
-ApiURLCreateClip
- API endpoint post create clips
+- **Lambda Function** - Clip manifest processing
+- **API Gateway** - REST endpoint
+- **S3 Bucket** - Storage for clips and recordings
+- **CloudFront** - CDN for content delivery
+
+## 🔗 Related
+
+- [Full Solution with UI](../serverless/README.md)
+- [Frontend Components](../manifest-clip-ui/README.md)
  https://<your_API_id>.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/
 
 RecordConfiguration                                                            

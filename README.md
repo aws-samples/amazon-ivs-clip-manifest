@@ -1,40 +1,111 @@
-# Amazon IVS manifest clipping solution
-The Amazon IVS manifest clipping solution offers a reference solution that demonstrates how you can use HTTP live streaming (HLS) Program-Date-Time (PDT) tags and HLS byte range manifest files to clip the recordings stored on [Amazon Simple Storage Service (Amazon S3)](https://aws.amazon.com/s3/) using the [Auto-Record to Amazon S3](https://docs.aws.amazon.com/ivs/latest/userguide/record-to-s3.html).
+# Amazon IVS Manifest Clipping Solution
 
-The solution offers two deployment options: 
-- **[A. Application Web UI + APIs:](#option-a---deploy-the-complete-solution-application-web-ui--apis)** A front-end UI with backend APIs that offers a complete set to clip the recordings.
-- **[B. Standalone API:](#option-b---deploy-the-standalone-api)** For developers only needing a reference clip API.
+The Amazon IVS manifest clipping solution provides a reference implementation demonstrating how to create video clips from live stream recordings without video re-encoding. This solution leverages HTTP Live Streaming (HLS) [Program-Date-Time (PDT) tags](https://datatracker.ietf.org/doc/html/rfc8216#section-4.3.2.6) and [HLS byte-range requests](https://datatracker.ietf.org/doc/html/rfc8216#section-4.3.2.2) to efficiently extract video segments from recordings stored on [Amazon Simple Storage Service (Amazon S3)](https://aws.amazon.com/s3/) using [Amazon IVS Auto-Record to S3](https://docs.aws.amazon.com/ivs/latest/userguide/record-to-s3.html).
 
+This serverless solution leverages [Amazon IVS](https://aws.amazon.com/ivs/) HLS recordings with automatic PDT tags and byte-range support to enable precise video clipping. The frontend UI uses [React.js](https://reactjs.org/) with [Amazon IVS Player SDK](https://docs.aws.amazon.com/ivs/latest/userguide/player.html) and [Video.js](https://videojs.com/) for clip management and playback.
 
-This is a serverless web application leveraging [Amazon IVS](https://aws.amazon.com/ivs/), [Amazon API Gateway](https://aws.amazon.com/api-gateway/), [AWS Lambda](https://aws.amazon.com/lambda/), [Amazon S3](https://aws.amazon.com/s3/) and [Amazon CloudFront](https://aws.amazon.com/cloudfront/). The sample Web UI is an application page built using [React.js](https://reactjs.org/) and [VideoJS](https://videojs.com/). The back-end is built using [Node.js](https://nodejs.org/), Amazon API Gateway, and AWS Lambda function used to [list all Amazon IVS recordings](/serverless/lambdas/getrecordings/), to [clip/trim the recordings](/serverless/lambdas/clipmanifest/) and [list all clipped recordings](/serverless/lambdas/getclips/). It also uses [AWS Serverless Application Model (AWS SAM)](https://aws.amazon.com/serverless/sam/), an open-source framework for building serverless applications.
+Deployed using [AWS SAM](https://aws.amazon.com/serverless/sam/) on serverless infrastructure, this approach delivers fast, cost-effective clipping while preserving original video quality through HLS manifest manipulation.
 
-## Solution Web Application GUI
+**Key Benefits:**
+- **Zero Transcoding** - No video processing required, preserving quality and reducing costs
+- **Fast Processing** - Clips generated in seconds through manifest manipulation
+- **Serverless Architecture** - Auto-scaling, pay-per-use infrastructure
+- **Frame Accuracy** - Precise timing using HLS Program-Date-Time tags
 
 <img src="/doc/UI-Sample-Clip.png" width=100%>
 
-## Prerequisites
+## 🧭 Quick Navigation
 
-- AWS CLI ([Installing or updating the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html))
-- AWS SAM CLI ([Installing the AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html))
-- NodeJS ([Installing Node.js](https://nodejs.org/))
-- AWS Account: If you do not have an AWS account, please see [How do I create and activate a new Amazon Web Services account?](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
+- **[📦 Serverless Backend](./serverless/README.md)** - Architecture & API documentation
+- **[🔧 Standalone API](./standalone-api/README.md)** - API-only deployment & integration
+- **[⚛️ Frontend UI](./manifest-clip-ui/README.md)** - React application & components
+- **[🎨 UI Deployment](./manifest-clip-ui/public-deploy/README.md)** - Public hosting setup
+- **[📋 Release Notes](./RELEASE_NOTES.md)** - Latest updates & improvements
 
+## 🚀 Quick Start
 
-## Getting Started
- ⚠️**IMPORTANT NOTE:** *Deploying this demo application in your AWS account will create and consume AWS resources, which will cost money.*
+**Prerequisites:**
+- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) configured
+- [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html) installed
+- [Node.js](https://nodejs.org/) installed
 
-**Deployment Options:**
+**Interactive Installation:**
+```bash
+git clone https://github.com/aws-samples/amazon-ivs-clip-manifest.git
+cd amazon-ivs-clip-manifest
+npm install
+npm run deploy
+```
 
-### Option A - [Deploy the complete solution (Application Web UI + APIs)](/serverless/README.md)
-This option implements the complete solution with the back-end APIs needed for retrieving the recorded streams from Amazon IVS, clipping, and listing the clips.
-- **[Application Web UI + APIs](/serverless/README.md)**  
-Deploy the Application UI, back-end AWS Lambda functions [clipmanifest](/serverless/lambdas/clipmanifest/), [getclips](/serverless/lambdas/getclips/) and [getrecordings](/serverless/lambdas/getrecordings/).
+Select your deployment option:
+1. **Deploy Backend APIs (Full Solution)** - Complete serverless backend with IVS Channel
+2. **Start Local UI Server** - Run React UI locally (requires backend deployed)
+3. **Deploy Standalone API Only** - Just the clipping API (no UI support)
+4. **Deploy UI to Cloud** - Host the React UI on CloudFront (public access)
+5. **Full Solution (Backend + Local UI)** - Deploy backend with IVS channel and start local UI
 
-### Option B - [Deploy the standalone API](/standalone-api/README.md)
-This option implements only the clip manifest API. Therefore, it suits developers who already have an application to integrate with the clipmanifest API. 
+## 📋 What Gets Deployed
 
-- **[Standalone API](/standalone-api/README.md)**  
-Deploy the backend AWS Lambda functions [clipmanifest](/serverless/lambdas/clipmanifest/).
+**Backend Services:**
+- 🔧 **ClipManifest API** - Creates clips using HLS manifest manipulation
+- 📁 **GetRecordings API** - Lists available IVS recordings
+- 📋 **GetClips API** - Retrieves created clips
+- ☁️ **S3 + CloudFront** - Storage and CDN
+- 📺 **IVS Channel** - Automatically configured with recording
+
+**Frontend Application:**
+- ⚛️ **React UI** - Video player and clip management
+- 🎥 **Amazon IVS Player** - Optimized video playback
+- ✂️ **Clip Controls** - Visual timeline for clip creation
+- 🔗 **Auto-configured APIs** - Endpoints extracted from deployment
+
+## 🔧 Technical Details
+
+**Manifest Clipping Technology:**
+- **HLS Program-Date-Time (PDT) Tags** - Precise timestamp mapping for clip boundaries
+- **Byte-Range Requests** - Efficient segment extraction without re-encoding
+- **M3U8 Manipulation** - Dynamic playlist generation for clipped content
+- **Zero Transcoding** - Fast, cost-effective clipping using existing segments
+
+### How It Works
+
+**1. HLS Program-Date-Time (PDT) Tags**
+Amazon IVS automatically inserts PDT tags in HLS manifests, providing wall-clock timestamps for each segment:
+```m3u8
+#EXT-X-PROGRAM-DATE-TIME:2024-01-15T10:30:00.000Z
+#EXTINF:2.000,
+segment001.ts
+```
+
+**2. Byte-Range Manifest Clipping**
+Instead of re-encoding video, the solution creates new manifests referencing specific byte ranges:
+```m3u8
+#EXT-X-BYTERANGE:1024000@2048000
+segment001.ts
+```
+
+**3. Clip Generation Process**
+- Parse original manifest for PDT timestamps
+- Calculate segment boundaries for desired time range
+- Generate new manifest with filtered segments
+- Preserve original video quality and encoding
+
+The solution leverages HLS manifest files to create clips by referencing specific byte ranges and PDT timestamps, eliminating the need for video processing while maintaining frame-accurate timing.
+
+## ⚠️ Security Note
+
+**This is a reference solution** - The APIs are deployed without authentication for demonstration purposes. For production use, consider adding:
+- API Gateway API Keys
+- AWS Cognito authentication
+- IAM-based access control
+- VPC deployment for internal access
+
+## 🧹 Cleanup
+
+Remove all deployed resources:
+```bash
+npm run cleanup
+```
 
 ## Contributing guidelines
 See [CONTRIBUTING](CONTRIBUTING.md) for more information.

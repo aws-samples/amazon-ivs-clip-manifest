@@ -1,0 +1,110 @@
+.ivs-info-container {
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  border: 2px solid rgba(102, 126, 234, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin: 1rem;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.08),
+    0 3px 6px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+.ivs-info-title {
+  margin: 0 0 1.5rem 0;
+  color: #495057;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.ivs-info-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.ivs-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ivs-info-item label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ivs-info-value {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+  border-radius: 8px;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  font-size: 0.85rem;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.ivs-info-value span {
+  flex: 1;
+  word-break: break-all;
+  color: #495057;
+}
+
+.rtmps-url {
+  font-size: 0.8rem;
+}
+
+.copy-btn, .toggle-btn {
+  background: linear-gradient(145deg, #667eea, #764ba2);
+  border: none;
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.8rem;
+  min-width: 32px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-btn:hover, .toggle-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.toggle-btn {
+  background: linear-gradient(145deg, #6c757d, #495057);
+}
+
+.toggle-btn:hover {
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+@media (max-width: 768px) {
+  .ivs-info-container {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .ivs-info-value {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .ivs-info-value span {
+    word-break: break-all;
+  }
+  
+  .copy-btn, .toggle-btn {
+    align-self: flex-end;
+    min-width: 40px;
+  }
+}

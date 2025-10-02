@@ -117,20 +117,22 @@ const ClipControls = ({
       </div>
 
       <div className='timeline-container'>
-        <div
-          className='progress-bar'
-          style={{
-            left: `${startTime ? (startTime / duration) * 100 : 0}%`,
-            width: `${
-              startTime
-                ? (((endTime || currentValue) - startTime) / duration) * 100
-                : 0
-            }%`
-          }}
-        />
+        <div className='progress-track'>
+          <div
+            className='progress-fill'
+            style={{
+              left: `${startTime ? (startTime / duration) * 100 : 0}%`,
+              width: `${
+                startTime
+                  ? (((endTime || currentValue) - startTime) / duration) * 100
+                  : (currentValue / duration) * 100
+              }%`
+            }}
+          />
+        </div>
         <input
           type='range'
-          className='form-range range-input'
+          className='range-input'
           value={currentValue}
           min={0}
           max={duration}
@@ -142,34 +144,36 @@ const ClipControls = ({
           onTouchStart={() => setIsDragging(true)}
           onTouchEnd={() => setIsDragging(false)}
         />
-        {startTime !== null && (
-          <>
-            <div
-              className='marker'
-              style={{ left: `${(startTime / duration) * 100}%` }}
-            />
-            <div
-              className='marker-label start'
-              style={{ left: `${(startTime / duration) * 100}%` }}
-            >
-              START
-            </div>
-          </>
-        )}
-        {endTime !== null && (
-          <>
-            <div
-              className='marker'
-              style={{ left: `${(endTime / duration) * 100}%` }}
-            />
-            <div
-              className='marker-label end'
-              style={{ left: `${(endTime / duration) * 100}%` }}
-            >
-              END
-            </div>
-          </>
-        )}
+        <div className='timeline-markers'>
+          {startTime !== null && (
+            <>
+              <div
+                className='marker start'
+                style={{ left: `${(startTime / duration) * 100}%` }}
+              />
+              <div
+                className='marker-label start'
+                style={{ left: `${(startTime / duration) * 100}%` }}
+              >
+                START
+              </div>
+            </>
+          )}
+          {endTime !== null && (
+            <>
+              <div
+                className='marker end'
+                style={{ left: `${(endTime / duration) * 100}%` }}
+              />
+              <div
+                className='marker-label end'
+                style={{ left: `${(endTime / duration) * 100}%` }}
+              >
+                END
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {startTime !== null && endTime !== null && (

@@ -135,6 +135,34 @@ Resources:
             Principal:
               AWS: !Sub "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}"
 
+  ## IVS Recording Configuration
+  IVSRecordingConfiguration:
+    Type: AWS::IVS::RecordingConfiguration
+    Properties:
+      Name: "ivs-clip-recording-config"
+      DestinationConfiguration:
+        S3:
+          BucketName: !Ref IVSRecordingBucket
+      RecordingReconnectWindowSeconds: 60
+      ThumbnailConfiguration:
+        RecordingMode: INTERVAL
+        TargetIntervalSeconds: 30
+
+  ## IVS Channel
+  IVSChannel:
+    Type: AWS::IVS::Channel
+    Properties:
+      Name: "ivs-clip-channel"
+      RecordingConfigurationArn: !Ref IVSRecordingConfiguration
+      LatencyMode: LOW
+      Type: STANDARD
+
+  ## IVS Stream Key
+  IVSStreamKey:
+    Type: AWS::IVS::StreamKey
+    Properties:
+      ChannelArn: !Ref IVSChannel
+
 Outputs:
   ApiURLGetRecordings:
     Description: "API endpoint get recordings available"
@@ -151,3 +179,15 @@ Outputs:
   CloudfrontDistribution:
     Description: "Amazon CloudFront Domain Name"
     Value: !Sub "https://${CloudfrontDistribution.DomainName}"
+  IVSChannelArn:
+    Description: "IVS Channel ARN"
+    Value: !Ref IVSChannel
+  IVSChannelIngestEndpoint:
+    Description: "IVS Channel Ingest Endpoint"
+    Value: !GetAtt IVSChannel.IngestEndpoint
+  IVSChannelPlaybackUrl:
+    Description: "IVS Channel Playback URL"
+    Value: !GetAtt IVSChannel.PlaybackUrl
+  IVSStreamKey:
+    Description: "IVS Stream Key"
+    Value: !GetAtt IVSStreamKey.Value

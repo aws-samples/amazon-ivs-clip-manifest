@@ -1,9 +1,9 @@
-<svg width="190" height="100" xmlns="http://www.w3.org/2000/svg">
+<svg width="100%" height="100%" viewBox="0 0 190 100" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <!-- Background gradient -->
       <linearGradient id="vodBgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
-        <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
       </linearGradient>
   
       <!-- Circle stroke gradient -->
@@ -14,8 +14,8 @@
       </linearGradient>
     </defs>
   
-    <!-- Background rectangle -->
-    <rect x="0" y="0" width="190" height="100" rx="8" fill="url(#vodBgGradient)" />
+    <!-- Background rectangle without border radius -->
+    <rect x="0" y="0" width="190" height="100" fill="url(#vodBgGradient)" />
   
     <!-- Spinning circle -->
     <circle cx="95" cy="50" r="30"

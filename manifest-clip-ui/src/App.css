@@ -1,12 +1,54 @@
 .App {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-
-.align
-{
-  margin: 5px;
+/* Modern Navbar */
+.navbar {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: none;
+  padding: 1rem 2rem;
 }
 
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #ffffff !important;
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+
+.navbar-brand:hover {
+  color: #e3f2fd !important;
+}
+
+.btn-outline-info {
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.btn-outline-info:hover {
+  background-color: #ffffff;
+  color: #2a5298;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+}
+
+.align {
+  margin: 8px;
+}
+
+/* Smooth animations */
+* {
+  transition: all 0.2s ease;
+}
 
 @keyframes App-logo-spin {
   from {
