@@ -17,7 +17,7 @@ export default function App(props) {
   }, [])
 
   const openIVSdocs = () => {
-    window.location.href = 'https://docs.aws.amazon.com/ivs/' //Will take you to Google.
+    window.open('https://docs.aws.amazon.com/ivs/', '_blank')
   }
   return (
     <div className='App'>
