@@ -24,7 +24,12 @@ manifest-clip-ui/src/config.json
 .env.development.local
 .env.test.local
 .env.production.local
-serverless/.aws-sam/build.toml
+
+# AWS SAM build artifacts
+serverless/.aws-sam/
+standalone-api/.aws-sam/
+manifest-clip-ui/public-deploy/.aws-sam/
+
 manifest-clip-ui/public-deploy/packaged.yaml
 standalone-api/packaged.yaml
 on-the-fly-standalone-api/*
