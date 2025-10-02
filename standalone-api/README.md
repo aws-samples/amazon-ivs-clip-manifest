@@ -62,23 +62,31 @@ console.log('Clip created:', clip.clip_url);
 
 - [Full Solution with UI](../serverless/README.md)
 - [Frontend Components](../manifest-clip-ui/README.md)
- https://<your_API_id>.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/
+
+## 📋 Deployment Outputs
+
+After deployment, you'll receive these outputs:
+
+```
+ApiURLCreateClip
+https://<your_API_id>.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/
 
 RecordConfiguration                                                            
-  RecordingBucketName
-  my-new-ivs-recording-bucket-standalone-api<account_id>
+RecordingBucketName
+my-new-ivs-recording-bucket-standalone-api<account_id>
  
 CloudfrontDistribution
- Amazon CloudFront Domain Name
- https://<your_cloudfront_id>.cloudfront.net
+Amazon CloudFront Domain Name
+https://<your_cloudfront_id>.cloudfront.net
 ```
 
-## 5. Amazon IVS Channel configuration
+## 🎥 Amazon IVS Channel Configuration
 
-**Note:If you already have an Amazon IVS channel created that you want to use, you can skip this step.**
+**Note: If you already have an Amazon IVS channel created that you want to use, you can skip this step.**
+
 Copy from the AWS SAM deploy output the recording bucket name and replace the "Your Recording Bucket Name" below.
 
-```
+```bash
 aws ivs create-recording-configuration \
     --name "my-recording-config" \
     --recording-reconnect-window-seconds 60 \
@@ -88,55 +96,62 @@ aws ivs create-recording-configuration \
 
 Take note of the RecordingConfiguration ARN, as it will be used to link your recording configuration.
 
-```
-"recordingConfiguration": {
-        "arn": "arn:aws:ivs:us-east-1:my_account_id:recording-configuration/unique_id",
-        "destinationConfiguration": {
-            "s3": {
-                "bucketName": "my-new-ivs-recording-bucket-standalone-api-my_account_id"
-            }
-        }
+```json
+{
+  "recordingConfiguration": {
+    "arn": "arn:aws:ivs:us-east-1:my_account_id:recording-configuration/unique_id",
+    "destinationConfiguration": {
+      "s3": {
+        "bucketName": "my-new-ivs-recording-bucket-standalone-api-my_account_id"
+      }
+    }
+  }
 }
 ```
 
-## 6. Create the Amazon IVS Channel and link to your recording configuration*
+## 📺 Create the Amazon IVS Channel
+
+Link your channel to the recording configuration:
+
+```bash
+aws ivs create-channel --name my-ivs-channel --recording-configuration-arn "<your-recording-arn>"
+```
+
+## 🧪 Testing the ClipManifest API 
+
+After completing a live transmission to your Amazon IVS RTMPS endpoint, navigate to the Amazon S3 Recording Bucket, and look for the .m3u8 manifest. The Amazon S3 path should look like:
 
 ```
-aws ivs create-channel --name my-ivs-channel --recording-configuration-arn "<you-recording-arn>"
-```
-
-## 7. Testing the clipmanifest API 
-
-After completing a live transmission to your Amazon IVS RTMPS endpoint, navigate to the Amazon S3 Recording Bucket, and look for the .m3u8 manifest. The Amazon S3 path should look like the below:
-
-````
 /ivs/v1/<aws_account_id>/<channel_id>/<year>/<month>/<day>/<hours>/<minutes>/<recording_id>/media/hls/720p30/playlist.m3u8
-````
+```
 
 <img src="../doc/playlist_input.png" width=70%>
 
+## ✂️ Using the Create Clips API
 
-## 8. Using the create clips API
+Make an HTTP POST call to the Amazon API Gateway endpoint:
 
-Make an HTTP Post call to the Amazon API Gateway endpoint.
-
-```sh
-curl -X POST <API Gateway Endpoint>/clipmanifest -H "Content-Type: application/json" -d "{\"start_time\": 20,\"end_time\": 70,\"master_url\": \"https://<url of the ivs recording>\", \"byte_range\": true}"
+```bash
+curl -X POST <API Gateway Endpoint>/clipmanifest \
+  -H "Content-Type: application/json" \
+  -d '{"start_time": 20, "end_time": 70, "master_url": "https://<url of the ivs recording>", "byte_range": true}'
 ```
 
-Example: 
-```sh
-curl -X POST https://<unique_id>.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/ -H "Content-Type: application/json" -d "{\"start_time\": 20,\"end_time\": 70,\"master_url\": \"https://<cloudfront_dist_id>.cloudfront.net/ivs/v1/<account_id>/2rrcA103rn67/2022/10/15/2/11/X5JJ9FegmZiq/media/hls/master.m3u8\", \"byte_range\": true}" 
+**Example:**
+```bash
+curl -X POST https://<unique_id>.execute-api.us-east-1.amazonaws.com/Prod/clipmanifest/ \
+  -H "Content-Type: application/json" \
+  -d '{"start_time": 20, "end_time": 70, "master_url": "https://<cloudfront_dist_id>.cloudfront.net/ivs/v1/<account_id>/2rrcA103rn67/2022/10/15/2/11/X5JJ9FegmZiq/media/hls/master.m3u8", "byte_range": true}'
 ```
 
-**Note: The API Gateway unique_id can be found in the AWS SAM deploy output, as well as the CloudFront endpoint can be found in the AWS SAM deploy output.**
+**Note:** The API Gateway unique_id can be found in the AWS SAM deploy output, as well as the CloudFront endpoint.
 
+## ✅ Test the Clip
 
-## 9. Test the clip
-
-The new manifest follows the path URL of the recording with the object called clip_master.m3u8
+The new manifest follows the path URL of the recording with the object called `clip_master.m3u8`:
 
 <img src="../doc/playlist_output.png" width=70%>
 
+---
 
 [Return to home page of the solution](../README.md)
