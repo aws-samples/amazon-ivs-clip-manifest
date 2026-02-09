@@ -1,13 +1,23 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: MIT-0
 
-const { S3Client, ListObjectsCommand } = require('@aws-sdk/client-s3')
+const { S3Client, ListObjectsV2Command } = require('@aws-sdk/client-s3')
 
 const s3Client = new S3Client({ region: process.env.AWS_REGION })
 
 exports.handler = async (event, context) => {
   console.log('Initializing Function Get S3 Clips')
   const vodPath = event.queryStringParameters
+  if (!vodPath?.vod) {
+    return {
+      statusCode: 400,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': '*'
+      },
+      body: JSON.stringify({ error: 'Missing required query parameter: vod' })
+    }
+  }
   console.log(vodPath.vod)
   let clipjson = []
   const cfURL = process.env.CLOUDFRONT_DOMAIN_NAME
@@ -18,7 +28,7 @@ exports.handler = async (event, context) => {
       Prefix: `${vodPath.vod}/`
     }
     try {
-      const command = new ListObjectsCommand(params)
+      const command = new ListObjectsV2Command(params)
       const clips = await s3Client.send(command)
       return clips
     } catch (error) {

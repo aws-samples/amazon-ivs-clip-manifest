@@ -5,10 +5,55 @@ const {
   GetObjectCommand,
   PutObjectCommand
 } = require('@aws-sdk/client-s3')
-const url = require('url')
 const s3Bucket = process.env.STORAGE_IVSRECORDINGS_BUCKETNAME
 
 const s3Client = new S3Client({ region: process.env.AWS_REGION })
+
+function validateRequiredFields({ startTime, endTime, urlMaster, byteRange }) {
+  if (
+    !startTime ||
+    !endTime ||
+    !urlMaster ||
+    byteRange === undefined ||
+    byteRange === null ||
+    typeof byteRange !== 'boolean'
+  ) {
+    throw Object.assign(
+      new Error(
+        'start_time, end_time, master_url, and byte_range are required.'
+      ),
+      { statusCode: 400 }
+    )
+  }
+}
+
+function validateEndTime({ startTime, endTime }) {
+  if (endTime <= startTime || endTime === 0) {
+    throw Object.assign(
+      new Error('end_time must be greater than start_time.'),
+      { statusCode: 400 }
+    )
+  }
+}
+
+function validateNumericFields({ startTime, endTime }) {
+  if (isNaN(startTime) || isNaN(endTime)) {
+    throw Object.assign(
+      new Error('start_time and end_time must be numbers.'),
+      { statusCode: 400 }
+    )
+  }
+}
+
+function validateByteRange(rawMasterManifest, byteRange) {
+  if (rawMasterManifest === null && byteRange === true) {
+    throw Object.assign(
+      new Error('This stream does not support byte range manifest'),
+      { statusCode: 404 }
+    )
+  }
+  return null
+}
 
 exports.handler = async (event) => {
   // (1) parse event body and get the start and end time of the clip
@@ -36,56 +81,9 @@ exports.handler = async (event) => {
   validateNumericFields({ startTime, endTime })
 
   const executionTime = Date.now()
-  const masterURL = url.parse(urlMaster).pathname
+  const masterURL = new URL(urlMaster).pathname
   const pathName = masterURL.replace('/master.m3u8', '')
   const s3BucketFolder = s3Bucket + pathName
-  const excutionTime = Date.now()
-
-  // validation functions
-  function validateRequiredFields({
-    startTime,
-    endTime,
-    urlMaster,
-    byteRange
-  }) {
-    if (
-      !startTime ||
-      !endTime ||
-      !urlMaster ||
-      byteRange === undefined ||
-      byteRange === null ||
-      typeof byteRange !== 'boolean'
-    ) {
-      throw Object.assign(
-        new Error(
-          'start_time, end_time, master_url, and byte_range are required.'
-        ),
-        { statusCode: 400 }
-      )
-    }
-  }
-
-  function validateEndTime({ startTime, endTime }) {
-    if (endTime <= startTime || endTime === 0) {
-      throw Object.assign(
-        new Error('end_time must be greater than start_time.'),
-        {
-          statusCode: 400
-        }
-      )
-    }
-  }
-
-  function validateNumericFields({ startTime, endTime }) {
-    if (isNaN(startTime) || isNaN(endTime)) {
-      throw Object.assign(
-        new Error('start_time and end_time must be numbers.'),
-        {
-          statusCode: 400
-        }
-      )
-    }
-  }
 
   // (2) request the master manifest from S3 and return the raw manifest
   const rawMasterManifest = await getManifestfromS3(
@@ -96,14 +94,11 @@ exports.handler = async (event) => {
 
   validateByteRange(rawMasterManifest, byteRange)
 
-  function validateByteRange(rawMasterManifest, byteRange) {
-    if (rawMasterManifest === 404 && byteRange === true) {
-      throw Object.assign(
-        new Error('This stream does not support byte range manifest'),
-        { statusCode: 404 }
-      )
-    }
-    return null
+  if (rawMasterManifest === null) {
+    throw Object.assign(
+      new Error('Master manifest not found'),
+      { statusCode: 404 }
+    )
   }
 
   // (3) parse the master manifest and return the media playlists
@@ -140,7 +135,6 @@ exports.handler = async (event) => {
   const rawPlaylistManifest = await getPlaylistManifest(mediaPlaylists)
 
   // (5) parse the playlist manifest and return the segments
-  let genericExt = []
   function parsePlaylistwithPDT(playlist) {
     let lines = playlist.split('\n')
     let segments = []
@@ -152,7 +146,7 @@ exports.handler = async (event) => {
       '#EXT-X-MEDIA-SEQUENCE',
       '#EXT-X-TWITCH-ELAPSED-SECS'
     ]
-    genericExt = lines.filter((line) =>
+    const genericExt = lines.filter((line) =>
       filterConditions.some((condition) => line.startsWith(condition))
     )
     // add the media playlist files
@@ -172,12 +166,12 @@ exports.handler = async (event) => {
         segments.push(segment)
       }
     }
-    return segments
+    return { segments, genericExt }
   }
 
   // (6) filter the segments by the start and end time of the clip
   function clipPlaylistbyPDT(playlist, start, end) {
-    let segments = parsePlaylistwithPDT(playlist)
+    const { segments, genericExt } = parsePlaylistwithPDT(playlist)
     let filterSegments = []
     let streamStart = new Date(segments[0].pdt).getTime()
     let clipStartAt = Math.floor(start * 1000 + streamStart)
@@ -191,11 +185,11 @@ exports.handler = async (event) => {
         filterSegments.push(segment)
       }
     }
-    return filterSegments
+    return { segments: filterSegments, genericExt }
   }
 
   // (7) create the playlist manifest for the clip
-  function createPlaylistManifest(segments) {
+  function createPlaylistManifest(segments, genericExt) {
     const totalDuration = segments.reduce(
       (total, segment) => total + segment.duration,
       0
@@ -214,9 +208,12 @@ exports.handler = async (event) => {
     return playlist
   }
 
-  const newPlaylist = createPlaylistManifest(
-    clipPlaylistbyPDT(rawPlaylistManifest, startTime, endTime)
+  const { segments: filteredSegments, genericExt } = clipPlaylistbyPDT(
+    rawPlaylistManifest,
+    startTime,
+    endTime
   )
+  const newPlaylist = createPlaylistManifest(filteredSegments, genericExt)
 
   // (8) write to S3 the filtered Master Manifest
   let writePromises = []
@@ -225,10 +222,10 @@ exports.handler = async (event) => {
     let fileName = new RegExp(mediaPlaylists[0].filename, 'g')
     let newMaster = rawMasterManifest
       .toString()
-      .replace(fileName, `${excutionTime}_clip_playlist.m3u8`)
+      .replace(fileName, `${executionTime}_clip_playlist.m3u8`)
     const masterWritePromise = writeToS3(
       newMaster,
-      `${excutionTime}_clip_master.m3u8`,
+      `${executionTime}_clip_master.m3u8`,
       s3BucketFolder
     )
     writePromises.push(masterWritePromise)
@@ -240,7 +237,7 @@ exports.handler = async (event) => {
       const newLocation = `${s3BucketFolder}/${playlist.base}`
       const playlistWritePromise = writeToS3(
         newPlaylist,
-        `${excutionTime}_clip_playlist.m3u8`,
+        `${executionTime}_clip_playlist.m3u8`,
         newLocation
       )
       writePromises.push(playlistWritePromise)
@@ -252,11 +249,11 @@ exports.handler = async (event) => {
   // (10) return the response
   const responseBody = [
     {
-      execution: excutionTime,
+      execution: executionTime,
       path: pathName,
       bucket: s3Bucket,
-      clip_master: `${s3BucketFolder}/${excutionTime}_clip_master.m3u8`,
-      master_url: `${process.env.CLOUDFRONT_DOMAIN_NAME}${pathName}/${excutionTime}_clip_master.m3u8`
+      clip_master: `${s3BucketFolder}/${executionTime}_clip_master.m3u8`,
+      master_url: `${process.env.CLOUDFRONT_DOMAIN_NAME}${pathName}/${executionTime}_clip_master.m3u8`
     }
   ]
 
@@ -284,7 +281,7 @@ async function getManifestfromS3(key) {
     return streamToString
   } catch (error) {
     if (error.$metadata?.httpStatusCode === 404) {
-      return 404
+      return null
     }
     console.error(error)
     throw error
