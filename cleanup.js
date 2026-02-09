@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const fs = require('fs');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
@@ -65,7 +65,7 @@ async function cleanupResources(resources) {
     for (const channelArn of resources.ivsChannels) {
       try {
         console.log(chalk.blue(`Deleting IVS channel: ${channelArn}`));
-        execSync(`aws ivs delete-channel --arn "${channelArn}"`, { stdio: 'inherit' });
+        execFileSync('aws', ['ivs', 'delete-channel', '--arn', channelArn], { stdio: 'inherit' });
         console.log(chalk.green('✅ IVS channel deleted'));
       } catch (error) {
         console.error(chalk.red(`❌ Failed to delete IVS channel: ${error.message}`));
@@ -78,7 +78,7 @@ async function cleanupResources(resources) {
     for (const configArn of resources.recordingConfigs) {
       try {
         console.log(chalk.blue(`Deleting recording configuration: ${configArn}`));
-        execSync(`aws ivs delete-recording-configuration --arn "${configArn}"`, { stdio: 'inherit' });
+        execFileSync('aws', ['ivs', 'delete-recording-configuration', '--arn', configArn], { stdio: 'inherit' });
         console.log(chalk.green('✅ Recording configuration deleted'));
       } catch (error) {
         console.error(chalk.red(`❌ Failed to delete recording config: ${error.message}`));
@@ -91,7 +91,7 @@ async function cleanupResources(resources) {
     for (const stackName of resources.stacks) {
       try {
         console.log(chalk.blue(`Deleting CloudFormation stack: ${stackName}`));
-        execSync(`aws cloudformation delete-stack --stack-name "${stackName}"`, { stdio: 'inherit' });
+        execFileSync('aws', ['cloudformation', 'delete-stack', '--stack-name', stackName], { stdio: 'inherit' });
         console.log(chalk.green('✅ Stack deletion initiated'));
       } catch (error) {
         console.error(chalk.red(`❌ Failed to delete stack: ${error.message}`));

@@ -1,11 +1,20 @@
 #!/usr/bin/env node
 
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const inquirer = require('inquirer');
 const chalk = require('chalk');
 const { loadResources, saveResources } = require('./cleanup.js');
+
+const STACK_NAME_REGEX = /^[a-zA-Z0-9-]+$/;
+
+function validateStackName(name) {
+  if (!name || !STACK_NAME_REGEX.test(name)) {
+    return 'Stack name must only contain alphanumeric characters and hyphens (a-z, A-Z, 0-9, -)';
+  }
+  return true;
+}
 
 console.log(chalk.blue.bold('\n🎬 Amazon IVS Clip Manifest Solution\n'));
 
@@ -102,10 +111,11 @@ async function createIVSChannel() {
       type: 'input',
       name: 'stackName',
       message: 'Enter your backend stack name:',
-      default: 'clip-manifest-ui'
+      default: 'clip-manifest-ui',
+      validate: validateStackName
     }
   ]);
-  
+
   await setupIVSChannel(stackName);
 }
 
@@ -114,16 +124,33 @@ async function setupIVSChannel(stackName) {
   
   try {
     // Get bucket name from stack outputs
-    const stackOutput = execSync(`aws cloudformation describe-stacks --stack-name ${stackName} --query 'Stacks[0].Outputs[?OutputKey==\`RecordConfigurationBucket\`].OutputValue' --output text`, { encoding: 'utf8' }).trim();
+    const stackOutput = execFileSync('aws', [
+      'cloudformation', 'describe-stacks',
+      '--stack-name', stackName,
+      '--query', 'Stacks[0].Outputs[?OutputKey==`RecordConfigurationBucket`].OutputValue',
+      '--output', 'text'
+    ], { encoding: 'utf8' }).trim();
     
     console.log(chalk.blue('Creating IVS recording configuration...'));
-    const recordingConfig = execSync(`aws ivs create-recording-configuration --name "ivs-clip-recording-config" --recording-reconnect-window-seconds 60 --destination-configuration s3={bucketName=${stackOutput}} --thumbnail-configuration recordingMode="INTERVAL",targetIntervalSeconds=30 --output json`, { encoding: 'utf8' });
+    const recordingConfig = execFileSync('aws', [
+      'ivs', 'create-recording-configuration',
+      '--name', 'ivs-clip-recording-config',
+      '--recording-reconnect-window-seconds', '60',
+      '--destination-configuration', `s3={bucketName=${stackOutput}}`,
+      '--thumbnail-configuration', 'recordingMode=INTERVAL,targetIntervalSeconds=30',
+      '--output', 'json'
+    ], { encoding: 'utf8' });
     
     const recordingArn = JSON.parse(recordingConfig).recordingConfiguration.arn;
     console.log(chalk.green('✅ Recording configuration created'));
     
     console.log(chalk.blue('Creating IVS channel...'));
-    const channel = execSync(`aws ivs create-channel --name "ivs-clip-channel" --recording-configuration-arn "${recordingArn}" --output json`, { encoding: 'utf8' });
+    const channel = execFileSync('aws', [
+      'ivs', 'create-channel',
+      '--name', 'ivs-clip-channel',
+      '--recording-configuration-arn', recordingArn,
+      '--output', 'json'
+    ], { encoding: 'utf8' });
     
     const channelData = JSON.parse(channel);
     
@@ -156,7 +183,8 @@ async function deployStandalone() {
       type: 'input',
       name: 'stackName',
       message: 'Enter stack name:',
-      default: 'ivs-clip-standalone'
+      default: 'ivs-clip-standalone',
+      validate: validateStackName
     }
   ]);
   
@@ -170,7 +198,13 @@ async function deployStandalone() {
     execSync(`sam build`, { stdio: 'inherit' });
     
     console.log(chalk.blue('Deploying with SAM...'));
-    execSync(`sam deploy --stack-name ${stackName} --capabilities CAPABILITY_IAM --resolve-s3 --force-upload`, { stdio: 'inherit' });
+    execFileSync('sam', [
+      'deploy',
+      '--stack-name', stackName,
+      '--capabilities', 'CAPABILITY_IAM',
+      '--resolve-s3',
+      '--force-upload'
+    ], { stdio: 'inherit' });
     
     // Track the stack
     const resources = loadResources();
@@ -196,7 +230,8 @@ async function startLocalUI() {
       type: 'input',
       name: 'stackName',
       message: 'Enter your backend stack name:',
-      default: 'clip-manifest-ui'
+      default: 'clip-manifest-ui',
+      validate: validateStackName
     }
   ]);
 
@@ -207,7 +242,12 @@ async function startLocalUI() {
     execSync('npm install', { stdio: 'inherit' });
     
     console.log(chalk.blue('Extracting API endpoints from stack...'));
-    execSync(`aws cloudformation describe-stacks --stack-name ${stackName} --query 'Stacks[].Outputs' > src/config.json`, { stdio: 'inherit' });
+    const stackOutputs = execFileSync('aws', [
+      'cloudformation', 'describe-stacks',
+      '--stack-name', stackName,
+      '--query', 'Stacks[].Outputs'
+    ], { encoding: 'utf8' });
+    fs.writeFileSync(path.join('src', 'config.json'), stackOutputs);
     
     console.log(chalk.green('✅ Local UI setup complete!'));
     console.log(chalk.blue('🚀 Starting development server...'));
