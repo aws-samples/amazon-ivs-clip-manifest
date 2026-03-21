@@ -22,10 +22,10 @@ check() {
   local label="$1" http="$2" expect="$3"
   if [[ "$http" =~ ^($expect)$ ]]; then
     echo "  ✅ PASS — ${label}"
-    ((PASS++))
+    ((PASS++)) || true
   else
     echo "  ❌ FAIL — ${label} (expected ${expect}, got ${http})"
-    ((FAIL++))
+    ((FAIL++)) || true
   fi
 }
 
@@ -133,7 +133,7 @@ if [[ "$HTTP_CODE" == "200" ]]; then
   CLIP_PATH=$(echo "$BODY" | python3 -c "import sys,json; print(json.load(sys.stdin)[0]['path'])" 2>/dev/null || echo "")
 elif [[ "$HTTP_CODE" == "404" ]]; then
   echo "  ⚠️  SKIP — recording not found. Update MASTER_URL in test.conf."
-  ((SKIP++))
+  ((SKIP++)) || true
   CLIP_PATH=""
 else
   check "clip created" "$HTTP_CODE" "200"
@@ -154,7 +154,7 @@ if [[ -n "${CLIP_PATH:-}" ]]; then
   check "clip appears in listing" "$HTTP_CODE" "200"
 else
   echo "  ⚠️  SKIP — no clip created in previous test"
-  ((SKIP++))
+  ((SKIP++)) || true
 fi
 echo ""
 

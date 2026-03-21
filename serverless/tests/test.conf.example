@@ -3,7 +3,7 @@
 # or run ./setup.sh to auto-populate from CloudFormation outputs.
 
 STACK_NAME="clip-manifest-ui"
-AWS_REGION="us-east-1"
+AWS_REGION="us-west-2"
 
 # CloudFormation outputs (populated by setup.sh)
 API_RECORDINGS=""

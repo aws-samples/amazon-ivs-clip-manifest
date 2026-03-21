@@ -38,7 +38,7 @@ exports.handler = async (event, context) => {
   }
 
   const clips = await getClips()
-  if (clips) {
+  if (clips?.Contents) {
     clips.Contents.forEach((element) => {
       let file = element.Key.substring(element.Key.lastIndexOf('/') + 1)
       const target = new RegExp('clip_master*')
