@@ -77,7 +77,7 @@ Resources:
         # List of origins that Cloudfront will connect to
         Origins:
           - Id: s3-website
-            DomainName: !GetAtt IVSRecordingBucket.DomainName
+            DomainName: !GetAtt IVSRecordingBucket.RegionalDomainName
             S3OriginConfig:
               # Restricting Bucket access through an origin access identity
               OriginAccessIdentity: 
