@@ -41,11 +41,12 @@ npm run deploy
 ```
 
 Select your deployment option:
-1. **Deploy Backend APIs (Full Solution)** - Complete serverless backend with IVS Channel
-2. **Start Local UI Server** - Run React UI locally (requires backend deployed)
-3. **Deploy Standalone API Only** - Just the clipping API (no UI support)
-4. **Deploy UI to Cloud** - Host the React UI on CloudFront (public access)
-5. **Full Solution (Backend + Local UI)** - Deploy backend with IVS channel and start local UI
+1. **Local Development (Mock + UI)** - No AWS needed, runs with sample data
+2. **Deploy Backend APIs (Full Solution)** - Complete serverless backend with IVS Channel
+3. **Start Local UI (Connected to AWS)** - Run React UI locally (requires backend deployed)
+4. **Deploy Standalone API Only** - Just the clipping API (no UI support)
+5. **Deploy UI to Cloud** - Host the React UI on CloudFront (public access)
+6. **Full Solution (Backend + Local UI)** - Deploy backend with IVS channel and start local UI
 
 ### Available Scripts
 
