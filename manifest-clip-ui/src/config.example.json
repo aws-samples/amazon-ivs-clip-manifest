@@ -1,0 +1,11 @@
+[[
+  {"OutputKey": "ApiURLGetRecordings", "OutputValue": "http://localhost:3001/getrecordings/"},
+  {"OutputKey": "ApiURLGetClips", "OutputValue": "http://localhost:3001/getclips/"},
+  {"OutputKey": "ApiURLCreateClip", "OutputValue": "http://localhost:3001/clipmanifest/"},
+  {"OutputKey": "IVSChannelArn", "OutputValue": "arn:aws:ivs:us-east-1:000000000000:channel/mock-channel"},
+  {"OutputKey": "IVSChannelIngestEndpoint", "OutputValue": "localhost"},
+  {"OutputKey": "IVSChannelPlaybackUrl", "OutputValue": "http://localhost:3001/mock/master.m3u8"},
+  {"OutputKey": "IVSStreamKey", "OutputValue": "sk_mock_not_real"},
+  {"OutputKey": "CloudfrontDistribution", "OutputValue": "http://localhost:3001"},
+  {"OutputKey": "RecordConfigurationBucket", "OutputValue": "mock-bucket"}
+]]

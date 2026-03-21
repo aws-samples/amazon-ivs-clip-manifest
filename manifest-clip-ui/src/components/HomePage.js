@@ -113,9 +113,10 @@ function HomePageContent() {
 
   const loadConfig = async () => {
     try {
-      const configData = await import('../config.json')
-      setConfig(configData.default)
-      addDebugLine(Date.now(), 'Configuration loaded')
+      const { getFullConfig } = await import('../config')
+      const configData = getFullConfig()
+      setConfig(configData)
+      addDebugLine(Date.now(), configData ? 'Configuration loaded' : 'Running in mock mode')
     } catch (error) {
       console.error('Error loading config:', error)
       addDebugLine(Date.now(), 'No configuration file found')

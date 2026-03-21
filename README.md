@@ -14,7 +14,20 @@ Deployed using [AWS SAM](https://aws.amazon.com/serverless/sam/) on serverless i
 
 <img src="/doc/UI-Sample-Clip.png" width=100%>
 
-## 🚀 Quick Start
+## 🚀 Quick Start (No AWS Required)
+
+Run the UI locally with mock data — no AWS account needed:
+
+```bash
+git clone https://github.com/aws-samples/amazon-ivs-clip-manifest.git
+cd amazon-ivs-clip-manifest
+npm install
+npm run dev:mock
+```
+
+This starts a mock API server on port 3001 and the React UI on port 3000 with sample recordings.
+
+## ☁️ Deploy to AWS
 
 **Prerequisites:**
 - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) configured
@@ -23,8 +36,6 @@ Deployed using [AWS SAM](https://aws.amazon.com/serverless/sam/) on serverless i
 
 **Interactive Installation:**
 ```bash
-git clone https://github.com/aws-samples/amazon-ivs-clip-manifest.git
-cd amazon-ivs-clip-manifest
 npm install
 npm run deploy
 ```
@@ -35,6 +46,17 @@ Select your deployment option:
 3. **Deploy Standalone API Only** - Just the clipping API (no UI support)
 4. **Deploy UI to Cloud** - Host the React UI on CloudFront (public access)
 5. **Full Solution (Backend + Local UI)** - Deploy backend with IVS channel and start local UI
+
+### Available Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev:mock` | Start mock server + React UI (no AWS needed) |
+| `npm run dev` | Start React UI only (needs backend or mock running) |
+| `npm run mock` | Start mock API server only |
+| `npm run deploy` | Interactive AWS deployment wizard |
+| `npm run build` | Production build of the React UI |
+| `npm run cleanup` | Remove all deployed AWS resources |
 
 ## 🧭 Quick Navigation
 

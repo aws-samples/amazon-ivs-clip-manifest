@@ -24,6 +24,9 @@ manifest-clip-ui/src/config.json
 .env.development.local
 .env.test.local
 .env.production.local
+.claude
+.kiro
+.specs
 
 # AWS SAM build artifacts
 serverless/.aws-sam/

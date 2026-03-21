@@ -1,14 +1,28 @@
 {
   "name": "amazon-ivs-clip-manifest",
   "version": "1.0.0",
+  "private": true,
   "description": "Amazon IVS manifest clipping solution with interactive installation",
+  "workspaces": [
+    "manifest-clip-ui"
+  ],
   "scripts": {
     "deploy": "node install.js",
-    "cleanup": "node cleanup.js"
+    "cleanup": "node cleanup.js",
+    "dev": "npm start --workspace=manifest-clip-ui",
+    "dev:mock": "concurrently --kill-others \"node mock-server.js\" \"npm start --workspace=manifest-clip-ui\"",
+    "build": "npm run build --workspace=manifest-clip-ui",
+    "test": "npm run test --workspace=manifest-clip-ui",
+    "mock": "node mock-server.js"
   },
   "dependencies": {
     "inquirer": "^8.2.4",
     "chalk": "^4.1.2"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.0"
   },
   "keywords": ["amazon-ivs", "video-clipping", "serverless", "aws"],
   "license": "MIT-0"
