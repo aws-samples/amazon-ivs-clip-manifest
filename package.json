@@ -13,7 +13,8 @@
     "dev:mock": "concurrently --kill-others \"node mock-server.js\" \"npm start --workspace=manifest-clip-ui\"",
     "build": "npm run build --workspace=manifest-clip-ui",
     "test": "npm run test --workspace=manifest-clip-ui",
-    "mock": "node mock-server.js"
+    "mock": "node mock-server.js",
+    "export-config": "node export-config.js"
   },
   "dependencies": {
     "inquirer": "^8.2.4",
