@@ -84,7 +84,7 @@ Retrieves created clips.
 - Organized folder structure for recordings and clips
 
 **Lambda Functions:**
-- Node.js 22.x runtime
+- Node.js 24.x runtime
 - 128MB memory allocation
 - 40-second timeout
 - Environment variables for configuration
