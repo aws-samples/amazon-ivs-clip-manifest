@@ -163,6 +163,24 @@ Resources:
     Properties:
       ChannelArn: !Ref IVSChannel
 
+  # Sample colorbar upload — populates bucket with test HLS recording at deploy time
+  SampleColorbarUploadFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.handler
+      CodeUri: ../sample-colorbar/upload-lambda
+      Timeout: 60
+      MemorySize: 256
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref IVSRecordingBucket
+
+  SampleColorbarUpload:
+    Type: 'Custom::SampleColorbarUpload'
+    Properties:
+      ServiceToken: !GetAtt SampleColorbarUploadFunction.Arn
+      BucketName: !Ref IVSRecordingBucket
+
 Outputs:
   ApiURLGetRecordings:
     Description: "API endpoint get recordings available"
@@ -191,3 +209,6 @@ Outputs:
   IVSStreamKey:
     Description: "IVS Stream Key"
     Value: !GetAtt IVSStreamKey.Value
+  SampleRecordingMasterURL:
+    Description: "Sample colorbar recording master URL for testing"
+    Value: !Sub "https://${CloudfrontDistribution.DomainName}/ivs/v1/000000000000/TestChannel/2024/01/01/00/00/SampleColorBar/media/hls/master.m3u8"

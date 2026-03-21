@@ -41,3 +41,6 @@ doc/sample-recs/2/9/22/55/Pd8MyZnzUAFl/media/out.xml
 standalone-api/mergemanifest/index.js
 standalone-api/mergemanifest/index.test.js
 doc/sample-recs/*
+
+# Test config with real credentials/endpoints
+standalone-api/tests/test.conf

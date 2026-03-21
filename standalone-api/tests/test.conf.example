@@ -1,0 +1,17 @@
+# Standalone API Test Configuration
+# Copy this file to test.conf and fill in your values,
+# or run ./setup.sh to auto-populate from CloudFormation outputs.
+
+STACK_NAME="ivs-clip-manifest-standalone"
+AWS_REGION="us-west-2"
+
+# CloudFormation outputs (populated by setup.sh)
+API_URL=""
+CLOUDFRONT_DOMAIN=""
+S3_BUCKET=""
+
+# Test parameters — adjust to match a real recording in your bucket
+MASTER_URL=""
+START_TIME=2
+END_TIME=8
+BYTE_RANGE=false

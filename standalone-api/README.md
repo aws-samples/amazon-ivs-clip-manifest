@@ -152,6 +152,18 @@ The new manifest follows the path URL of the recording with the object called `c
 
 <img src="../doc/playlist_output.png" width=70%>
 
+## 🧰 Automated Test Suite
+
+A set of curl-based integration tests is available in the `tests/` folder:
+
+```bash
+cd tests
+./setup.sh              # fetch CFN outputs into test.conf
+./test-clipmanifest.sh  # run validation + clip creation tests
+```
+
+See [tests/README.md](./tests/README.md) for details.
+
 ---
 
 [Return to home page of the solution](../README.md)
