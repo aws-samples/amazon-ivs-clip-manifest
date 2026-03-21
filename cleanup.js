@@ -86,10 +86,33 @@ async function cleanupResources(resources) {
     }
   }
 
-  // Delete CloudFormation stacks
+  // Delete CloudFormation stacks (empty S3 buckets first)
   if (resources.stacks) {
     for (const stackName of resources.stacks) {
       try {
+        // Find and empty S3 buckets in the stack before deletion
+        try {
+          const buckets = execFileSync('aws', [
+            'cloudformation', 'describe-stack-resources',
+            '--stack-name', stackName,
+            '--query', 'StackResources[?ResourceType==`AWS::S3::Bucket`].PhysicalResourceId',
+            '--output', 'text'
+          ], { encoding: 'utf8' }).trim();
+
+          if (buckets && buckets !== 'None') {
+            for (const bucket of buckets.split(/\s+/)) {
+              console.log(chalk.blue(`  Emptying S3 bucket: ${bucket}`));
+              try {
+                execFileSync('aws', ['s3', 'rm', `s3://${bucket}`, '--recursive'], { stdio: 'inherit' });
+              } catch {
+                console.log(chalk.yellow(`  Could not empty bucket ${bucket} (may already be empty)`));
+              }
+            }
+          }
+        } catch {
+          // Stack might not exist or no buckets — continue with deletion
+        }
+
         console.log(chalk.blue(`Deleting CloudFormation stack: ${stackName}`));
         execFileSync('aws', ['cloudformation', 'delete-stack', '--stack-name', stackName], { stdio: 'inherit' });
         console.log(chalk.green('✅ Stack deletion initiated'));

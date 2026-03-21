@@ -152,6 +152,23 @@ The new manifest follows the path URL of the recording with the object called `c
 
 <img src="../doc/playlist_output.png" width=70%>
 
+## 🧹 Cleanup
+
+To delete the standalone API stack and its resources:
+
+```bash
+# Empty the S3 bucket first (CloudFormation can't delete non-empty buckets)
+aws s3 rm s3://<your-bucket-name> --recursive
+
+# Delete the stack
+aws cloudformation delete-stack --stack-name ivs-clip-manifest-standalone --region us-west-2
+
+# Wait for deletion to complete
+aws cloudformation wait stack-delete-complete --stack-name ivs-clip-manifest-standalone --region us-west-2
+```
+
+Replace `<your-bucket-name>` with the `RecordConfiguration` output from your deployment.
+
 ## 🧰 Automated Test Suite
 
 A set of curl-based integration tests is available in the `tests/` folder:
