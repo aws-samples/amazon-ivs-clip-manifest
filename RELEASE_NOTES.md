@@ -25,6 +25,20 @@ SMPTE color bar test fixture (12s, 720p, 6 segments with PDT tags) generated via
 - Lambda runtime upgraded from `nodejs22.x` to `nodejs24.x` (both templates)
 - Requires SAM CLI >= 1.156.0
 
+### 🔒 Migrate Frontend from CRA to Vite
+
+Replaced `react-scripts@5.0.1` (unmaintained since April 2022) with Vite 8, eliminating all 27 security vulnerabilities locked behind CRA's transitive dependencies.
+
+- 27 vulnerabilities → 0
+- 1,348 packages → 148
+- Build time: ~10s → ~300ms
+- `REACT_APP_*` env vars → `VITE_*` (`import.meta.env`)
+- `require()` config loading → `import.meta.glob` (gracefully handles missing `config.json`)
+- `.js` → `.jsx` for all files containing JSX
+- `index.html` moved to project root (Vite convention)
+- Output dir remains `build/` for deploy compatibility
+- `install.js` config bridge verified — no changes needed
+
 ---
 
 ## Version 1.2.0 - Developer Experience & Core Library Extraction
