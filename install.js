@@ -1,284 +1,409 @@
 #!/usr/bin/env node
 
-const { execSync, execFileSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const inquirer = require('inquirer');
-const chalk = require('chalk');
-const { loadResources, saveResources } = require('./cleanup.js');
+const { execSync, execFileSync } = require('child_process')
+const fs = require('fs')
+const path = require('path')
+const inquirer = require('inquirer')
+const chalk = require('chalk')
+const { loadResources, saveResources } = require('./cleanup.js')
 
-const STACK_NAME_REGEX = /^[a-zA-Z0-9-]+$/;
+const ROOT_DIR = __dirname
+const STACK_NAME_REGEX = /^[a-zA-Z0-9-]+$/
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
 function validateStackName(name) {
   if (!name || !STACK_NAME_REGEX.test(name)) {
-    return 'Stack name must only contain alphanumeric characters and hyphens (a-z, A-Z, 0-9, -)';
+    return 'Stack name must only contain alphanumeric characters and hyphens (a-z, A-Z, 0-9, -)'
   }
-  return true;
+  return true
 }
 
-console.log(chalk.blue.bold('\n🎬 Amazon IVS Clip Manifest Solution\n'));
+function run(cmd, opts = {}) {
+  return execSync(cmd, { stdio: 'inherit', cwd: ROOT_DIR, ...opts })
+}
+
+function runFile(cmd, args, opts = {}) {
+  return execFileSync(cmd, args, { stdio: 'inherit', cwd: ROOT_DIR, ...opts })
+}
+
+function runCapture(cmd, args, opts = {}) {
+  return execFileSync(cmd, args, { encoding: 'utf8', cwd: ROOT_DIR, ...opts }).trim()
+}
+
+function commandExists(cmd) {
+  try {
+    execFileSync('which', [cmd], { stdio: 'ignore' })
+    return true
+  } catch {
+    return false
+  }
+}
+
+function trackStack(stackName) {
+  const resources = loadResources()
+  if (!resources.stacks) resources.stacks = []
+  if (!resources.stacks.includes(stackName)) {
+    resources.stacks.push(stackName)
+    saveResources(resources)
+  }
+}
+
+function getStackOutputs(stackName, region) {
+  const regionArgs = region ? ['--region', region] : []
+  return runCapture('aws', [
+    'cloudformation', 'describe-stacks',
+    '--stack-name', stackName,
+    '--query', 'Stacks[].Outputs',
+    ...regionArgs
+  ])
+}
+
+// ---------------------------------------------------------------------------
+// Pre-flight checks
+// ---------------------------------------------------------------------------
+
+function preflight(needsAWS) {
+  const missing = []
+
+  if (!commandExists('node')) missing.push('node')
+  if (needsAWS) {
+    if (!commandExists('aws')) missing.push('aws (AWS CLI)')
+    if (!commandExists('sam')) missing.push('sam (AWS SAM CLI)')
+  }
+
+  if (missing.length > 0) {
+    console.log(chalk.red(`\n  Missing required tools: ${missing.join(', ')}`))
+    console.log(chalk.yellow('  Install them and try again.\n'))
+    process.exit(1)
+  }
+
+  if (needsAWS) {
+    try {
+      const identity = JSON.parse(runCapture('aws', ['sts', 'get-caller-identity']))
+      const region = runCapture('aws', ['configure', 'get', 'region']).trim() || 'not set'
+      console.log(chalk.blue(`  AWS Account: ${identity.Account}`))
+      console.log(chalk.blue(`  AWS Region:  ${region}\n`))
+    } catch {
+      console.log(chalk.red('\n  AWS credentials not configured. Run: aws configure\n'))
+      process.exit(1)
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Deploy actions
+// ---------------------------------------------------------------------------
+
+async function deployBackend() {
+  preflight(true)
+
+  const { stackName, region } = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'stackName',
+      message: 'Stack name:',
+      default: 'clip-manifest-ui',
+      validate: validateStackName
+    },
+    {
+      type: 'input',
+      name: 'region',
+      message: 'AWS region:',
+      default: runCapture('aws', ['configure', 'get', 'region']) || 'us-east-1'
+    }
+  ])
+
+  console.log(chalk.yellow('\n  Deploying Backend APIs...\n'))
+  console.log(chalk.blue(`  Stack:  ${stackName}`))
+  console.log(chalk.blue(`  Region: ${region}`))
+  console.log(chalk.blue(`  Dir:    serverless/\n`))
+
+  const samDir = path.join(ROOT_DIR, 'serverless')
+
+  run('sam build', { cwd: samDir })
+
+  runFile('sam', [
+    'deploy',
+    '--stack-name', stackName,
+    '--region', region,
+    '--capabilities', 'CAPABILITY_IAM',
+    '--resolve-s3',
+    '--force-upload'
+  ], { cwd: samDir })
+
+  trackStack(stackName)
+  console.log(chalk.green('\n  Backend deployed successfully!\n'))
+
+  return { stackName, region }
+}
+
+async function deployStandalone() {
+  preflight(true)
+
+  const { stackName, region } = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'stackName',
+      message: 'Stack name:',
+      default: 'ivs-clip-standalone',
+      validate: validateStackName
+    },
+    {
+      type: 'input',
+      name: 'region',
+      message: 'AWS region:',
+      default: runCapture('aws', ['configure', 'get', 'region']) || 'us-east-1'
+    }
+  ])
+
+  console.log(chalk.yellow('\n  Deploying Standalone API...\n'))
+  console.log(chalk.blue(`  Stack:  ${stackName}`))
+  console.log(chalk.blue(`  Region: ${region}`))
+  console.log(chalk.blue(`  Dir:    standalone-api/\n`))
+
+  const samDir = path.join(ROOT_DIR, 'standalone-api')
+
+  run('sam build', { cwd: samDir })
+
+  runFile('sam', [
+    'deploy',
+    '--stack-name', stackName,
+    '--region', region,
+    '--capabilities', 'CAPABILITY_IAM',
+    '--resolve-s3',
+    '--force-upload'
+  ], { cwd: samDir })
+
+  trackStack(stackName)
+  console.log(chalk.green('\n  Standalone API deployed successfully!\n'))
+
+  return { stackName, region }
+}
+
+async function startLocalUI(stackName, region) {
+  preflight(true)
+
+  if (!stackName) {
+    const answers = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'stackName',
+        message: 'Backend stack name:',
+        default: 'clip-manifest-ui',
+        validate: validateStackName
+      },
+      {
+        type: 'input',
+        name: 'region',
+        message: 'AWS region:',
+        default: runCapture('aws', ['configure', 'get', 'region']) || 'us-east-1'
+      }
+    ])
+    stackName = answers.stackName
+    region = answers.region
+  }
+
+  console.log(chalk.yellow('\n  Configuring UI from stack outputs...\n'))
+
+  const regionArgs = region ? ['--region', region] : []
+  const stackOutputs = runCapture('aws', [
+    'cloudformation', 'describe-stacks',
+    '--stack-name', stackName,
+    '--query', 'Stacks[].Outputs',
+    ...regionArgs
+  ])
+
+  const configPath = path.join(ROOT_DIR, 'manifest-clip-ui', 'src', 'config.json')
+  fs.writeFileSync(configPath, stackOutputs)
+  console.log(chalk.green('  config.json written from stack outputs'))
+
+  console.log(chalk.blue('\n  Starting development server...\n'))
+  run('npm start', { cwd: path.join(ROOT_DIR, 'manifest-clip-ui') })
+}
+
+async function startLocalMock() {
+  preflight(false)
+
+  console.log(chalk.yellow('\n  Starting mock server + UI (no AWS needed)...\n'))
+  run('npm run dev:mock')
+}
+
+async function deployUIToCloud(stackName, region) {
+  preflight(true)
+
+  if (!stackName) {
+    const answers = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'stackName',
+        message: 'Backend stack name (to extract API endpoints):',
+        default: 'clip-manifest-ui',
+        validate: validateStackName
+      },
+      {
+        type: 'input',
+        name: 'region',
+        message: 'AWS region:',
+        default: runCapture('aws', ['configure', 'get', 'region']) || 'us-east-1'
+      }
+    ])
+    stackName = answers.stackName
+    region = answers.region
+  }
+
+  // Write config.json so the build has API endpoints
+  const regionArgs = region ? ['--region', region] : []
+  const stackOutputs = runCapture('aws', [
+    'cloudformation', 'describe-stacks',
+    '--stack-name', stackName,
+    '--query', 'Stacks[].Outputs',
+    ...regionArgs
+  ])
+  const configPath = path.join(ROOT_DIR, 'manifest-clip-ui', 'src', 'config.json')
+  fs.writeFileSync(configPath, stackOutputs)
+  console.log(chalk.green('  config.json written from stack outputs'))
+
+  console.log(chalk.yellow('\n  Building React app...\n'))
+  run('npm run build', { cwd: path.join(ROOT_DIR, 'manifest-clip-ui') })
+
+  const { uiStackName } = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'uiStackName',
+      message: 'UI hosting stack name:',
+      default: 'clip-manifest-ui-hosting',
+      validate: validateStackName
+    }
+  ])
+
+  console.log(chalk.yellow('\n  Deploying UI to CloudFront...\n'))
+  const deployDir = path.join(ROOT_DIR, 'manifest-clip-ui', 'public-deploy')
+
+  run('sam build', { cwd: deployDir })
+
+  runFile('sam', [
+    'deploy',
+    '--stack-name', uiStackName,
+    '--region', region,
+    '--capabilities', 'CAPABILITY_IAM',
+    '--resolve-s3',
+    '--force-upload'
+  ], { cwd: deployDir })
+
+  trackStack(uiStackName)
+
+  // Sync build output to S3
+  try {
+    const uiOutputs = runCapture('aws', [
+      'cloudformation', 'describe-stacks',
+      '--stack-name', uiStackName,
+      '--query', 'Stacks[0].Outputs[?OutputKey==`S3Bucket`].OutputValue',
+      '--output', 'text',
+      ...regionArgs
+    ])
+
+    if (uiOutputs) {
+      console.log(chalk.blue(`\n  Syncing build to s3://${uiOutputs}...\n`))
+      runFile('aws', [
+        's3', 'sync',
+        path.join(ROOT_DIR, 'manifest-clip-ui', 'build'),
+        `s3://${uiOutputs}/`,
+        ...regionArgs
+      ])
+    }
+  } catch {
+    console.log(chalk.yellow('  Could not auto-sync build files. Sync manually with: aws s3 sync manifest-clip-ui/build/ s3://<bucket>/'))
+  }
+
+  console.log(chalk.green('\n  UI deployed to cloud successfully!\n'))
+}
+
+// ---------------------------------------------------------------------------
+// Main menu
+// ---------------------------------------------------------------------------
 
 const options = [
   {
-    name: '1. Deploy Backend APIs (Deploy the backend for the UI Solution)',
-    value: 'backend',
-    description: 'Deploy Lambda functions, API Gateway, S3, CloudFront, and IVS Channel'
+    name: '1. Local Development (Mock Server + UI)        No AWS needed',
+    value: 'mock'
   },
   {
-    name: '2. Start Local UI Server',
-    value: 'local-ui',
-    description: 'Run React UI locally (requires backend deployed)'
+    name: '2. Deploy Backend APIs                         Full serverless backend + IVS',
+    value: 'backend'
   },
   {
-    name: '3. Deploy Standalone API Only',
-    value: 'standalone',
-    description: 'Deploy only the clip manifest API (no UI support)'
+    name: '3. Start Local UI (Connected to AWS)           Requires backend deployed',
+    value: 'local-ui'
   },
   {
-    name: '4. Deploy UI to Cloud',
-    value: 'deploy-ui',
-    description: 'Host the React UI on CloudFront (public access)'
+    name: '4. Deploy Standalone API Only                  Clipping API only',
+    value: 'standalone'
   },
   {
-    name: '5. Full Solution (Backend + Local UI)',
-    value: 'complete',
-    description: 'Deploy backend with IVS channel and start local UI server'
+    name: '5. Deploy UI to Cloud                          Host on CloudFront',
+    value: 'deploy-ui'
+  },
+  {
+    name: '6. Full Solution (Backend + Local UI)          Deploy + start UI',
+    value: 'complete'
   }
-];
+]
 
 async function main() {
+  console.log(chalk.blue.bold('\n  Amazon IVS Clip Manifest Solution\n'))
+
   while (true) {
     const { choice } = await inquirer.prompt([
       {
         type: 'list',
         name: 'choice',
-        message: 'What would you like to install?',
-        choices: [...options, { name: 'Exit', value: 'exit' }]
+        message: 'What would you like to do?',
+        choices: [...options, new inquirer.Separator(), { name: 'Exit', value: 'exit' }]
       }
-    ]);
+    ])
 
     if (choice === 'exit') {
-      console.log(chalk.blue('\n👋 Goodbye!'));
-      break;
+      console.log(chalk.blue('\n  Goodbye!\n'))
+      break
     }
 
-    switch (choice) {
-      case 'backend':
-        await deployBackend();
-        break;
-      case 'local-ui':
-        await startLocalUI();
-        return; // Exit after starting UI server
-      case 'standalone':
-        await deployStandalone();
-        break;
-      case 'deploy-ui':
-        await deployUIToCloud();
-        break;
-      case 'complete':
-        await deployBackend();
-        process.chdir('..');
-        await startLocalUI();
-        return; // Exit after starting UI server
+    try {
+      switch (choice) {
+        case 'mock':
+          await startLocalMock()
+          return
+
+        case 'backend':
+          await deployBackend()
+          break
+
+        case 'local-ui':
+          await startLocalUI()
+          return
+
+        case 'standalone':
+          await deployStandalone()
+          break
+
+        case 'deploy-ui':
+          await deployUIToCloud()
+          break
+
+        case 'complete': {
+          const { stackName, region } = await deployBackend()
+          await startLocalUI(stackName, region)
+          return
+        }
+      }
+    } catch (error) {
+      console.error(chalk.red(`\n  Failed: ${error.message}\n`))
     }
-    
-    console.log(chalk.blue('\n🔄 Returning to main menu...\n'));
+
+    console.log('')
   }
 }
 
-async function deployBackend() {
-  console.log(chalk.yellow('\n📦 Deploying Backend APIs...\n'));
-  
-  try {
-    process.chdir('serverless');
-    
-    console.log(chalk.blue('Building and deploying with SAM...'));
-    execSync(`sam deploy --guided`, { stdio: 'inherit' });
-    
-    console.log(chalk.green('✅ Backend deployed successfully!'));
-    
-    process.chdir('..');
-  } catch (error) {
-    console.error(chalk.red('❌ Deployment failed:', error.message));
-  }
-}
-
-async function createIVSChannel() {
-  console.log(chalk.yellow('\n📺 Creating IVS Channel...\n'));
-  
-  const { stackName } = await inquirer.prompt([
-    {
-      type: 'input',
-      name: 'stackName',
-      message: 'Enter your backend stack name:',
-      default: 'clip-manifest-ui',
-      validate: validateStackName
-    }
-  ]);
-
-  await setupIVSChannel(stackName);
-}
-
-async function setupIVSChannel(stackName) {
-  console.log(chalk.yellow('\n📺 Setting up IVS Channel...\n'));
-  
-  try {
-    // Get bucket name from stack outputs
-    const stackOutput = execFileSync('aws', [
-      'cloudformation', 'describe-stacks',
-      '--stack-name', stackName,
-      '--query', 'Stacks[0].Outputs[?OutputKey==`RecordConfigurationBucket`].OutputValue',
-      '--output', 'text'
-    ], { encoding: 'utf8' }).trim();
-    
-    console.log(chalk.blue('Creating IVS recording configuration...'));
-    const recordingConfig = execFileSync('aws', [
-      'ivs', 'create-recording-configuration',
-      '--name', 'ivs-clip-recording-config',
-      '--recording-reconnect-window-seconds', '60',
-      '--destination-configuration', `s3={bucketName=${stackOutput}}`,
-      '--thumbnail-configuration', 'recordingMode=INTERVAL,targetIntervalSeconds=30',
-      '--output', 'json'
-    ], { encoding: 'utf8' });
-    
-    const recordingArn = JSON.parse(recordingConfig).recordingConfiguration.arn;
-    console.log(chalk.green('✅ Recording configuration created'));
-    
-    console.log(chalk.blue('Creating IVS channel...'));
-    const channel = execFileSync('aws', [
-      'ivs', 'create-channel',
-      '--name', 'ivs-clip-channel',
-      '--recording-configuration-arn', recordingArn,
-      '--output', 'json'
-    ], { encoding: 'utf8' });
-    
-    const channelData = JSON.parse(channel);
-    
-    // Track created resources
-    const resources = loadResources();
-    if (!resources.ivsChannels) resources.ivsChannels = [];
-    if (!resources.recordingConfigs) resources.recordingConfigs = [];
-    
-    resources.ivsChannels.push(channelData.channel.arn);
-    resources.recordingConfigs.push(recordingArn);
-    saveResources(resources);
-    
-    console.log(chalk.green('✅ IVS Channel created successfully!'));
-    console.log(chalk.yellow(`📺 Channel ARN: ${channelData.channel.arn}`));
-    console.log(chalk.yellow(`🔑 Stream Key: ${channelData.streamKey.value}`));
-    console.log(chalk.yellow(`📡 Ingest Endpoint: ${channelData.channel.ingestEndpoint}`));
-    console.log(chalk.yellow(`🔗 RTMPS URL: rtmps://${channelData.channel.ingestEndpoint}/live/${channelData.streamKey.value}`));
-    
-  } catch (error) {
-    console.error(chalk.red('❌ IVS setup failed:', error.message));
-    console.log(chalk.yellow('💡 You can create the IVS channel manually later'));
-  }
-}
-
-async function deployStandalone() {
-  console.log(chalk.yellow('\n📦 Deploying Standalone API...\n'));
-  
-  const { stackName } = await inquirer.prompt([
-    {
-      type: 'input',
-      name: 'stackName',
-      message: 'Enter stack name:',
-      default: 'ivs-clip-standalone',
-      validate: validateStackName
-    }
-  ]);
-  
-  try {
-    process.chdir('standalone-api');
-    
-    console.log(chalk.blue('Cleaning previous build...'));
-    execSync(`rm -rf .aws-sam`, { stdio: 'inherit' });
-    
-    console.log(chalk.blue('Building SAM application...'));
-    execSync(`sam build`, { stdio: 'inherit' });
-    
-    console.log(chalk.blue('Deploying with SAM...'));
-    execFileSync('sam', [
-      'deploy',
-      '--stack-name', stackName,
-      '--capabilities', 'CAPABILITY_IAM',
-      '--resolve-s3',
-      '--force-upload'
-    ], { stdio: 'inherit' });
-    
-    // Track the stack
-    const resources = loadResources();
-    if (!resources.stacks) resources.stacks = [];
-    if (!resources.stacks.includes(stackName)) {
-      resources.stacks.push(stackName);
-      saveResources(resources);
-    }
-    
-    console.log(chalk.green('✅ Standalone API deployed successfully!'));
-    
-    process.chdir('..');
-  } catch (error) {
-    console.error(chalk.red('❌ Deployment failed:', error.message));
-  }
-}
-
-async function startLocalUI() {
-  console.log(chalk.yellow('\n🎨 Starting Local UI Server...\n'));
-  
-  const { stackName } = await inquirer.prompt([
-    {
-      type: 'input',
-      name: 'stackName',
-      message: 'Enter your backend stack name:',
-      default: 'clip-manifest-ui',
-      validate: validateStackName
-    }
-  ]);
-
-  try {
-    process.chdir('manifest-clip-ui');
-    
-    console.log(chalk.blue('Installing dependencies...'));
-    execSync('npm install', { stdio: 'inherit' });
-    
-    console.log(chalk.blue('Extracting API endpoints from stack...'));
-    const stackOutputs = execFileSync('aws', [
-      'cloudformation', 'describe-stacks',
-      '--stack-name', stackName,
-      '--query', 'Stacks[].Outputs'
-    ], { encoding: 'utf8' });
-    fs.writeFileSync(path.join('src', 'config.json'), stackOutputs);
-    
-    console.log(chalk.green('✅ Local UI setup complete!'));
-    console.log(chalk.blue('🚀 Starting development server...'));
-    
-    execSync('npm start', { stdio: 'inherit' });
-    
-  } catch (error) {
-    console.error(chalk.red('❌ Local UI setup failed:', error.message));
-    console.log(chalk.yellow('💡 Make sure your backend is deployed first'));
-  }
-}
-
-async function deployUIToCloud() {
-  console.log(chalk.yellow('\n☁️ Deploying UI to Cloud...\n'));
-  
-  try {
-    process.chdir('manifest-clip-ui');
-    
-    console.log(chalk.blue('Building React app...'));
-    execSync('npm run build', { stdio: 'inherit' });
-    
-    process.chdir('public-deploy');
-    
-    console.log(chalk.blue('Deploying to CloudFront...'));
-    execSync('sam deploy --guided', { stdio: 'inherit' });
-    
-    console.log(chalk.green('✅ UI deployed to cloud successfully!'));
-    
-  } catch (error) {
-    console.error(chalk.red('❌ Cloud UI deployment failed:', error.message));
-  }
-}
-
-main().catch(console.error);
+main().catch(console.error)
