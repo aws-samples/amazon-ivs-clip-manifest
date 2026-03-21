@@ -1,10 +1,37 @@
 # Release Notes
 
+## Version 1.3.0 - Testing Infrastructure & Runtime Upgrade
+
+### 🧪 Integration Test Suites
+
+Added curl-based integration tests for both deployment modes, with auto-configuration from CloudFormation outputs:
+
+- `standalone-api/tests/` — 4 tests covering validation and clip creation
+- `serverless/tests/` — 8 tests covering all 3 APIs (getrecordings, getclips, clipmanifest)
+- `setup.sh` scripts fetch CFN outputs and write `test.conf` automatically
+- `test.conf.example` templates committed; real configs gitignored
+
+### 🎨 Sample Colorbar HLS Recording
+
+SMPTE color bar test fixture (12s, 720p, 6 segments with PDT tags) generated via ffmpeg and committed to `sample-colorbar/`. Enables end-to-end clip creation testing without a live IVS stream.
+
+- Custom resource Lambda uploads fixtures to S3 at deploy time
+- Cleans up on stack delete
+- Added to both standalone and serverless SAM templates
+- `SampleRecordingMasterURL` output auto-populates test config
+
+### ⬆️ Runtime Upgrade
+
+- Lambda runtime upgraded from `nodejs22.x` to `nodejs24.x` (both templates)
+- Requires SAM CLI >= 1.156.0
+
+---
+
 ## Version 1.2.0 - Developer Experience & Core Library Extraction
 
 ### 🚀 Zero-AWS Quick Start
 
-New developers can now run the full UI locally in ~30 seconds with no AWS account:
+New developers can now run the full UI locally in ~30 seconds:
 
 ```bash
 npm install
