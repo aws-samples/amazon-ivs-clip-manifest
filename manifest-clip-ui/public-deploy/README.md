@@ -67,5 +67,21 @@ Value               https://<Distribution_id>.cloudfront.net
 
 <img src="/docs/UI-Sample-Clip.png" width=100%>
 
+## 🧹 Cleanup (Optional)
+
+To remove the public UI hosting resources:
+
+```bash
+# Empty the hosting S3 bucket first
+aws s3 rm s3://hosting-ivs-manifest-clip<account-id> --recursive
+
+# Delete the CloudFormation stack
+aws cloudformation delete-stack --stack-name <your-ui-stack-name> --region <your-region>
+```
+
+Replace `<account-id>`, `<your-ui-stack-name>`, and `<your-region>` with your deployment values.
+
+If you deployed via `npm run deploy` (option 5), the stack is tracked automatically and `npm run cleanup` will handle it.
+
 [Return to home page of the solution](../../README.md)
 
