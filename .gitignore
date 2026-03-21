@@ -44,3 +44,4 @@ doc/sample-recs/*
 
 # Test config with real credentials/endpoints
 standalone-api/tests/test.conf
+serverless/tests/test.conf

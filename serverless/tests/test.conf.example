@@ -1,0 +1,19 @@
+# Serverless Backend Test Configuration
+# Copy this file to test.conf and fill in your values,
+# or run ./setup.sh to auto-populate from CloudFormation outputs.
+
+STACK_NAME="clip-manifest-ui"
+AWS_REGION="us-east-1"
+
+# CloudFormation outputs (populated by setup.sh)
+API_RECORDINGS=""
+API_CLIPS=""
+API_CLIPMANIFEST=""
+CLOUDFRONT_DOMAIN=""
+S3_BUCKET=""
+
+# Test parameters — auto-set by setup.sh when sample recording is deployed
+MASTER_URL=""
+START_TIME=2
+END_TIME=8
+BYTE_RANGE=false

@@ -103,3 +103,15 @@ Select option 1: "Deploy Backend APIs (Full Solution)"
 - [Standalone API Only](../standalone-api/README.md)
 - [Frontend UI](../manifest-clip-ui/README.md)
 - [Main Documentation](../README.md)
+
+## 🧰 Automated Test Suite
+
+A set of curl-based integration tests is available in the `tests/` folder:
+
+```bash
+cd tests
+./setup.sh      # fetch CFN outputs into test.conf
+./test-apis.sh  # run all 8 tests (recordings, clips, clipmanifest)
+```
+
+See [tests/README.md](./tests/README.md) for details.
