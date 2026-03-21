@@ -18,8 +18,8 @@ Resources:
   ClipManifestLambdaStandAlone:
     Type: 'AWS::Serverless::Function'
     Properties:
-      Handler: index.handler
-      CodeUri: clipmanifest
+      Handler: clipmanifest/index.handler
+      CodeUri: .
       Policies:
         - S3CrudPolicy:
             BucketName: !Ref IVSRecordingSAPIBucket
