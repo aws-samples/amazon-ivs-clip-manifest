@@ -65,7 +65,7 @@ Description         Amazon CloudFront Domain Name
 Value               https://<Distribution_id>.cloudfront.net      
 ```
 
-<img src="/doc/UI-Sample-Clip.png" width=100%>
+<img src="/docs/UI-Sample-Clip.png" width=100%>
 
 [Return to home page of the solution](../../README.md)
 

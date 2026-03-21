@@ -10,7 +10,7 @@ standalone-api/clipmanifest/node_modules
 */build
 
 # internal
-doc/internal
+docs/internal
 
 #config file
 manifest-clip-ui/src/config.json
@@ -35,11 +35,11 @@ manifest-clip-ui/public-deploy/.aws-sam/
 manifest-clip-ui/public-deploy/packaged.yaml
 standalone-api/packaged.yaml
 on-the-fly-standalone-api/*
-doc/sample-recs/2/9/22/55/Pd8MyZnzUAFl/media/validate.GOP.py
-doc/sample-recs/2/9/22/55/Pd8MyZnzUAFl/media/out.xml
+docs/sample-recs/2/9/22/55/Pd8MyZnzUAFl/media/validate.GOP.py
+docs/sample-recs/2/9/22/55/Pd8MyZnzUAFl/media/out.xml
 standalone-api/mergemanifest/index.js
 standalone-api/mergemanifest/index.test.js
-doc/sample-recs/*
+docs/sample-recs/*
 
 # Test config with real credentials/endpoints
 standalone-api/tests/test.conf

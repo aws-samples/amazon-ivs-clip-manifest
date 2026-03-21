@@ -4,7 +4,7 @@ Complete serverless solution with three APIs for managing IVS recordings and cli
 
 ## 🏗️ Architecture
 
-<img src="/doc/architecture.png" width=85%>
+<img src="/docs/architecture.png" width=85%>
 
 The solution uses AWS SAM to deploy a serverless architecture with:
 - **AWS Lambda** - Serverless compute for API processing

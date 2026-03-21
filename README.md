@@ -12,7 +12,7 @@ Deployed using [AWS SAM](https://aws.amazon.com/serverless/sam/) on serverless i
 - **Serverless Architecture** - Auto-scaling, pay-per-use infrastructure
 - **Frame Accuracy** - Precise timing using HLS Program-Date-Time tags
 
-<img src="/doc/UI-Sample-Clip.png" width=100%>
+<img src="/docs/UI-Sample-Clip.png" width=100%>
 
 ## 🚀 Quick Start (No AWS Required)
 
