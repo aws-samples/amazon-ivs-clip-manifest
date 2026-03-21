@@ -1,5 +1,60 @@
 # Release Notes
 
+## Version 1.2.0 - Developer Experience & Core Library Extraction
+
+### 🚀 Zero-AWS Quick Start
+
+New developers can now run the full UI locally in ~30 seconds with no AWS account:
+
+```bash
+npm install
+npm run dev:mock
+```
+
+- Added mock API server (`mock-server.js`) serving all 3 endpoints + HLS manifests
+- Added `config.example.json` with graceful fallback — UI no longer crashes without `config.json`
+- Added `.env.example` with `REACT_APP_*` env var overrides for the UI
+- Added npm workspaces for single-command dependency installation
+
+### 📦 Shared Library Extraction (`lib/`)
+
+Extracted pure HLS manifest clipping logic from Lambda handlers into `lib/` — a vendor-agnostic module with zero dependencies. Both `serverless/` and `standalone-api/` Lambdas now import from the shared library, eliminating code duplication.
+
+- `lib/parser.js` — M3U8 master + media playlist parsing
+- `lib/clipper.js` — PDT-based time-range filtering, manifest generation
+- `lib/validation.js` — Input validation
+
+### 🐛 Clipping Bug Fixes
+
+- **Multi-rendition corruption**: Master manifest now rewrites each rendition filename individually instead of a global regex on the first filename
+- **Crash on empty segments**: Proper error when playlist has no PDT tags instead of TypeError on `segments[0]`
+- **Byte-range parsing**: Scans forward for EXTINF/BYTERANGE/URI tags instead of assuming hardcoded line offsets
+- **Discontinuity tags dropped**: `#EXT-X-DISCONTINUITY` markers are now preserved in clipped manifests
+- **Empty clip result**: Returns a 400 error instead of an unplayable empty manifest
+- **1080p+ renditions ignored**: Regex now matches 4-digit resolutions (`{1,4}` instead of `{1,3}`)
+
+### 🔧 Installer Improvements
+
+- Pre-flight checks for `aws`, `sam`, `node` with detected account/region display
+- Single wizard flow — no more nested `sam deploy --guided` inside inquirer prompts
+- All deployed stacks now tracked for cleanup (backend deploy was previously untracked)
+- "Local Development" option added as menu item 1 (no AWS needed)
+- Removed dead `createIVSChannel()` function
+- All commands use `cwd` option instead of `process.chdir()` — no more broken state on errors
+
+### Available Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev:mock` | Mock server + React UI (no AWS needed) |
+| `npm run dev` | React UI only |
+| `npm run mock` | Mock API server only |
+| `npm run deploy` | Interactive AWS deployment |
+| `npm run build` | Production build |
+| `npm run cleanup` | Remove deployed AWS resources |
+
+---
+
 ## Version 1.1.0 - UI Enhancements & Configuration Improvements
 
 ### 🎨 User Interface Improvements
