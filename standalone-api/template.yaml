@@ -4,7 +4,7 @@ Description: Amazon IVS Clip Manisfest Standalone API
 
 Globals:
   Function:
-    Runtime: nodejs22.x
+    Runtime: nodejs24.x
     Timeout: 40
     MemorySize: 128
     Environment:
