@@ -51,16 +51,6 @@ function trackStack(stackName) {
   }
 }
 
-function getStackOutputs(stackName, region) {
-  const regionArgs = region ? ['--region', region] : []
-  return runCapture('aws', [
-    'cloudformation', 'describe-stacks',
-    '--stack-name', stackName,
-    '--query', 'Stacks[].Outputs',
-    ...regionArgs
-  ])
-}
-
 // ---------------------------------------------------------------------------
 // Pre-flight checks
 // ---------------------------------------------------------------------------
