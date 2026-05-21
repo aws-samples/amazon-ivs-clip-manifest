@@ -19,13 +19,22 @@ manifest-clip-ui/src/config.json
 .env.development.local
 .env.test.local
 .env.production.local
-.claude
-.kiro
+# Claude Code - ignore private/local, track shared rules
+.claude/steering/
+.claude/settings.json
+.claude/settings.local.json
+.claude/plans/
+
+.kiro/specs/
+.kiro/plans/
+.kiro/temp.md
+
 
 # AWS SAM build artifacts
 serverless/.aws-sam/
 standalone-api/.aws-sam/
 manifest-clip-ui/public-deploy/.aws-sam/
+realtime-recorder/.aws-sam/
 
 manifest-clip-ui/public-deploy/packaged.yaml
 standalone-api/packaged.yaml
