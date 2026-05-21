@@ -86,6 +86,48 @@ async function cleanupResources(resources) {
     }
   }
 
+  // Stop any active IVS Real-Time compositions before stack deletion
+  if (resources.stacks) {
+    for (const stackName of resources.stacks) {
+      try {
+        const stageArn = execFileSync('aws', [
+          'cloudformation', 'describe-stacks',
+          '--stack-name', stackName,
+          '--query', 'Stacks[0].Outputs[?OutputKey==`StageArn`].OutputValue',
+          '--output', 'text'
+        ], { encoding: 'utf8' }).trim()
+
+        if (stageArn && stageArn !== 'None') {
+          console.log(chalk.blue(`  Checking for active compositions on stage: ${stageArn}`))
+          try {
+            const compositions = execFileSync('aws', [
+              'ivs-realtime', 'list-compositions',
+              '--filter-by-stage-arn', stageArn,
+              '--query', 'compositions[?state==`ACTIVE`].arn',
+              '--output', 'text'
+            ], { encoding: 'utf8' }).trim()
+
+            if (compositions && compositions !== 'None') {
+              for (const arn of compositions.split(/\s+/)) {
+                console.log(chalk.blue(`  Stopping composition: ${arn}`))
+                try {
+                  execFileSync('aws', ['ivs-realtime', 'stop-composition', '--arn', arn], { stdio: 'inherit' })
+                  console.log(chalk.green('  Composition stopped'))
+                } catch {
+                  console.log(chalk.yellow(`  Could not stop composition ${arn}`))
+                }
+              }
+            }
+          } catch {
+            // No compositions or ivs-realtime not available
+          }
+        }
+      } catch {
+        // Stack might not have StageArn output — skip
+      }
+    }
+  }
+
   // Delete CloudFormation stacks (empty S3 buckets first)
   if (resources.stacks) {
     for (const stackName of resources.stacks) {
