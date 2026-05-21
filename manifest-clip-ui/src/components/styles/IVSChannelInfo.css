@@ -18,6 +18,12 @@
   text-align: center;
 }
 
+.ivs-info-title-rt {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(102, 126, 234, 0.15);
+}
+
 .ivs-info-grid {
   display: grid;
   gap: 1rem;

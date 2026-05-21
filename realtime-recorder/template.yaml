@@ -1,0 +1,217 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Amazon IVS Real-Time Recording Infrastructure
+
+Globals:
+  Function:
+    Runtime: nodejs24.x
+    Timeout: 30
+    MemorySize: 128
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,OPTIONS'"
+      AllowHeaders: "'Content-Type,Authorization'"
+      AllowOrigin: "'*'"
+
+Resources:
+  # S3 Bucket for recordings
+  RecordingBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "ivs-rt-recording-${AWS::AccountId}"
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods:
+              - GET
+              - HEAD
+            AllowedOrigins:
+              - "*"
+            AllowedHeaders:
+              - "*"
+            MaxAge: 3000
+
+  # Bucket policy: IVS service write + CloudFront read
+  RecordingBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref RecordingBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ivs.amazonaws.com
+            Action:
+              - 's3:PutObject'
+              - 's3:GetObject'
+              - 's3:GetBucketLocation'
+              - 's3:ListBucket'
+            Resource:
+              - !Sub "arn:aws:s3:::${RecordingBucket}"
+              - !Sub "arn:aws:s3:::${RecordingBucket}/*"
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+          - Effect: Allow
+            Action: 's3:GetObject'
+            Resource:
+              - !Sub "arn:aws:s3:::${RecordingBucket}/*"
+            Principal:
+              AWS: !Sub "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginAccessIdentity}"
+
+  # IVS Storage Configuration
+  StorageConfiguration:
+    Type: AWS::IVS::StorageConfiguration
+    DependsOn: RecordingBucketPolicy
+    Properties:
+      Name: !Sub "rt-clip-storage-${AWS::StackName}"
+      S3:
+        BucketName: !Ref RecordingBucket
+
+  # IVS Encoder Configuration (for composite recording)
+  EncoderConfiguration:
+    Type: AWS::IVS::EncoderConfiguration
+    Properties:
+      Name: !Sub "rt-clip-encoder-${AWS::StackName}"
+      Video:
+        Bitrate: 2500000
+        Framerate: 30
+        Height: 720
+        Width: 1280
+
+  # IVS Real-Time Stage with auto participant recording
+  Stage:
+    Type: AWS::IVS::Stage
+    Properties:
+      Name: !Sub "rt-clip-stage-${AWS::StackName}"
+      AutoParticipantRecordingConfiguration:
+        StorageConfigurationArn: !GetAtt StorageConfiguration.Arn
+        MediaTypes:
+          - AUDIO_VIDEO
+
+  # CloudFront for serving recordings
+  CloudFrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Sub "OAI for ${AWS::StackName} RT recordings"
+
+  CloudfrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: !Sub "CloudFront for ${AWS::StackName} RT recordings"
+        Enabled: true
+        HttpVersion: http2
+        Origins:
+          - Id: s3-recordings
+            DomainName: !GetAtt RecordingBucket.RegionalDomainName
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}"
+        DefaultCacheBehavior:
+          Compress: true
+          AllowedMethods:
+            - HEAD
+            - GET
+            - OPTIONS
+          ForwardedValues:
+            QueryString: false
+            Headers:
+              - Origin
+              - Access-Control-Request-Method
+              - Access-Control-Request-Headers
+          TargetOriginId: s3-recordings
+          ViewerProtocolPolicy: redirect-to-https
+
+  # Lambda: Create participant token
+  CreateTokenFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: create-token
+      Environment:
+        Variables:
+          STAGE_ARN: !GetAtt Stage.Arn
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - 'ivs:CreateParticipantToken'
+              Resource: !GetAtt Stage.Arn
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /token
+            Method: GET
+
+  # Lambda: Start/Stop composition
+  StartCompositionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      CodeUri: start-composition
+      Environment:
+        Variables:
+          STAGE_ARN: !GetAtt Stage.Arn
+          STORAGE_CONFIG_ARN: !GetAtt StorageConfiguration.Arn
+          ENCODER_CONFIG_ARN: !GetAtt EncoderConfiguration.Arn
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - 'ivs:*'
+                - 'ivsrealtime:*'
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - 's3:PutObject'
+                - 's3:GetObject'
+                - 's3:GetBucketLocation'
+                - 's3:ListBucket'
+              Resource:
+                - !Sub "arn:aws:s3:::${RecordingBucket}"
+                - !Sub "arn:aws:s3:::${RecordingBucket}/*"
+      Events:
+        Start:
+          Type: Api
+          Properties:
+            Path: /composition/start
+            Method: POST
+        Stop:
+          Type: Api
+          Properties:
+            Path: /composition/stop
+            Method: POST
+
+Outputs:
+  StageArn:
+    Description: IVS Real-Time Stage ARN
+    Value: !GetAtt Stage.Arn
+  TokenApiUrl:
+    Description: GET endpoint to create participant tokens
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/token"
+  CompositionStartApiUrl:
+    Description: POST endpoint to start composition
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/composition/start"
+  CompositionStopApiUrl:
+    Description: POST endpoint to stop composition
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/composition/stop"
+  CloudfrontDomain:
+    Description: CloudFront domain for recording playback
+    Value: !Sub "https://${CloudfrontDistribution.DomainName}"
+  RecordingBucket:
+    Description: S3 bucket for recordings
+    Value: !Ref RecordingBucket
+  StorageConfigArn:
+    Description: IVS Storage Configuration ARN
+    Value: !GetAtt StorageConfiguration.Arn
+  EncoderConfigArn:
+    Description: IVS Encoder Configuration ARN
+    Value: !GetAtt EncoderConfiguration.Arn

@@ -46,14 +46,14 @@ exports.handler = async (event) => {
     validateNumericFields({ startTime, endTime })
 
     const masterURL = new URL(urlMaster).pathname
-    const pathName = masterURL.replace('/master.m3u8', '')
+    const pathName = masterURL.substring(0, masterURL.lastIndexOf('/'))
     const s3BucketFolder = s3Bucket + pathName
     const executionTime = Date.now()
 
     // (2) Fetch master manifest from S3
     const rawMasterManifest = await getManifestFromS3(
       byteRange
-        ? masterURL.replace('master.m3u8', 'byte-range-multivariant.m3u8')
+        ? `${pathName}/byte-range-multivariant.m3u8`
         : masterURL
     )
 

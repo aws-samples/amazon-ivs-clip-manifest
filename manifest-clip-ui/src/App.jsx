@@ -3,7 +3,8 @@
 
 import React, { useEffect, useState } from 'react'
 import Home from './components/HomePage'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import RTPublisher from './components/RTPublisher'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import './App.css'
 
 export default function App(props) {
@@ -16,24 +17,22 @@ export default function App(props) {
     console.log('component mounted!')
   }, [])
 
-  const openIVSdocs = () => {
-    window.open('https://docs.aws.amazon.com/ivs/', '_blank')
-  }
   return (
     <div className='App'>
-      <nav className='navbar navbar-dark bg-dark'>
-        <a class='navbar-brand align' href='#'>
-          IVS Manifest Clipping
-        </a>
-        <button
-          id='openplayer'
-          className='btn btn-outline-info align'
-          onClick={openIVSdocs}
-        >
-          IVS Docs
-        </button>
-      </nav>
       <Router>
+        <nav className='navbar navbar-dark bg-dark'>
+          <Link className='navbar-brand align' to='/'>
+            IVS Manifest Clipping
+          </Link>
+          <div className='nav-links'>
+            <Link className='btn btn-outline-info align' to='/'>
+              Clip Editor
+            </Link>
+            <Link className='btn btn-outline-info align' to='/rt-publisher'>
+              Real-Time Publisher
+            </Link>
+          </div>
+        </nav>
         <Routes>
           <Route
             path='/'
@@ -45,6 +44,7 @@ export default function App(props) {
               />
             }
           />
+          <Route path='/rt-publisher' element={<RTPublisher />} />
         </Routes>
       </Router>
     </div>

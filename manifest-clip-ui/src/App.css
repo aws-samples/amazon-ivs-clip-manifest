@@ -45,6 +45,12 @@
   margin: 8px;
 }
 
+.nav-links {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 /* Smooth animations */
 * {
   transition: all 0.2s ease;

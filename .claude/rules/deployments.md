@@ -1,8 +1,10 @@
 ---
-inclusion: fileMatch
-fileMatchPattern: '**/template.yaml,**/samconfig.toml,install.js,cleanup.js,export-config.js'
-name: deployments
-description: SAM/AWS deployment procedures, stack management, and Lambda runtime rules
+description: Rules for deploying AWS resources via SAM CLI
+paths:
+  - "serverless/**"
+  - "standalone-api/**"
+  - "realtime-recorder/**"
+  - "install.js"
 ---
 
 # Deployment Rules
@@ -24,22 +26,9 @@ description: SAM/AWS deployment procedures, stack management, and Lambda runtime
 
 - If a stack is in `ROLLBACK_COMPLETE` state, it must be deleted before redeploying.
 - If a stack is in `ROLLBACK_IN_PROGRESS`, wait for completion before taking action.
-- S3 buckets must be emptied before stack deletion — the cleanup.js script handles this.
 - Check for orphaned resources (S3 buckets, IVS channels) from previous failed stacks before deploying.
 
 ## Lambda Runtime
 
 - Use `nodejs24.x` for all Lambda functions.
-- AWS SDK v3 is included in the runtime — no need for package.json dependencies.
-- Requires SAM CLI >= 1.156.0.
-
-## IVS Real-Time IAM Permissions
-
-- IVS Real-Time APIs require both `ivs:` and `ivsrealtime:` IAM action prefixes.
-- StartComposition also requires S3 write permissions on the destination bucket.
-- StorageConfiguration modifies the bucket policy — add `DependsOn: BucketPolicy` to avoid race conditions.
-
-## CloudFront Origins
-
-- Always use `!GetAtt Bucket.RegionalDomainName` (not `DomainName`) for S3 origins.
-- `DomainName` causes TemporaryRedirect for buckets outside us-east-1.
+- AWS SDK v3 is included in the runtime — no need for package.json dependencies for S3, IVS clients.

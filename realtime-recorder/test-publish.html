@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>IVS RT Stage - Test Publisher</title>
+  <style>
+    body { font-family: system-ui; max-width: 800px; margin: 40px auto; padding: 0 20px; background: #1a1a2e; color: #eee; }
+    h1 { color: #ff9900; }
+    button { background: #ff9900; border: none; color: #000; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 4px; margin: 5px; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button.danger { background: #e74c3c; color: #fff; }
+    #status { background: #16213e; padding: 15px; border-radius: 8px; margin: 20px 0; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+    video { width: 100%; max-width: 640px; border-radius: 8px; background: #000; }
+    .config { background: #16213e; padding: 15px; border-radius: 8px; margin: 10px 0; }
+    input { width: 100%; padding: 8px; margin: 5px 0; background: #0f3460; border: 1px solid #444; color: #eee; border-radius: 4px; font-family: monospace; }
+    label { font-size: 12px; color: #aaa; }
+  </style>
+</head>
+<body>
+  <h1>IVS Real-Time Test Publisher</h1>
+
+  <div class="config">
+    <label>Token API URL</label>
+    <input id="tokenUrl" value="https://9i7ub8ef58.execute-api.us-east-1.amazonaws.com/Prod/token" />
+    <label>Composition Start URL</label>
+    <input id="compUrl" value="https://9i7ub8ef58.execute-api.us-east-1.amazonaws.com/Prod/composition/start" />
+    <label>Composition Stop URL</label>
+    <input id="compStopUrl" value="https://9i7ub8ef58.execute-api.us-east-1.amazonaws.com/Prod/composition/stop" />
+  </div>
+
+  <div>
+    <button id="btnJoin" onclick="joinStage()">Join & Publish</button>
+    <button id="btnLeave" onclick="leaveStage()" disabled>Leave Stage</button>
+    <button id="btnStartComp" onclick="startComposition()">Start Composition</button>
+    <button id="btnStopComp" onclick="stopComposition()" disabled class="danger">Stop Composition</button>
+  </div>
+
+  <video id="preview" autoplay muted playsinline></video>
+  <div id="status">Ready. Click "Join & Publish" to start streaming.\n\nIndividual recording starts automatically when you publish.\nUse "Start Composition" for composite recording.</div>
+
+  <script src="https://web-broadcast.live-video.net/1.18.0/amazon-ivs-web-broadcast.js"></script>
+  <script>
+    let stage = null;
+    let compositionArn = null;
+
+    function log(msg) {
+      const el = document.getElementById('status');
+      const time = new Date().toLocaleTimeString();
+      el.textContent += `\n[${time}] ${msg}`;
+      el.scrollTop = el.scrollHeight;
+    }
+
+    async function joinStage() {
+      try {
+        document.getElementById('btnJoin').disabled = true;
+        log('Requesting token...');
+
+        const tokenUrl = document.getElementById('tokenUrl').value;
+        const res = await fetch(`${tokenUrl}?userId=test-${Date.now()}`);
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || 'Token request failed');
+        log(`Token received. Participant: ${data.participantId}`);
+        log(`Expires: ${data.expirationTime}`);
+
+        log('Requesting camera/mic access...');
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        document.getElementById('preview').srcObject = stream;
+        log('Camera/mic ready.');
+
+        const { Stage, LocalStageStream, SubscribeType, StageEvents } = IVSBroadcastClient;
+
+        const strategy = {
+          stageStreamsToPublish() {
+            return stream.getTracks().map(track => new LocalStageStream(track));
+          },
+          shouldPublishParticipant() { return true; },
+          shouldSubscribeToParticipant() { return SubscribeType.AUDIO_VIDEO; }
+        };
+
+        log('Joining stage...');
+        stage = new Stage(data.token, strategy);
+
+        stage.on(StageEvents.STAGE_CONNECTION_STATE_CHANGED, (state) => {
+          log(`Connection state: ${state}`);
+          if (state === 'connected') {
+            document.getElementById('btnLeave').disabled = false;
+            log('✓ Connected & publishing! Individual recording should start automatically.');
+          }
+        });
+
+        stage.on(StageEvents.STAGE_PARTICIPANT_JOINED, (participant) => {
+          log(`Participant joined: ${participant.userId || participant.id}`);
+        });
+
+        stage.on(StageEvents.STAGE_PARTICIPANT_LEFT, (participant) => {
+          log(`Participant left: ${participant.userId || participant.id}`);
+        });
+
+        await stage.join();
+      } catch (err) {
+        log(`ERROR: ${err.message}`);
+        document.getElementById('btnJoin').disabled = false;
+      }
+    }
+
+    async function leaveStage() {
+      if (stage) {
+        stage.leave();
+        stage = null;
+        log('Left stage.');
+      }
+      document.getElementById('btnJoin').disabled = false;
+      document.getElementById('btnLeave').disabled = true;
+      const video = document.getElementById('preview');
+      if (video.srcObject) {
+        video.srcObject.getTracks().forEach(t => t.stop());
+        video.srcObject = null;
+      }
+    }
+
+    async function startComposition() {
+      try {
+        const url = document.getElementById('compUrl').value;
+        log('Starting composition...');
+        const res = await fetch(url, { method: 'POST' });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || 'Start composition failed');
+
+        compositionArn = data.compositionArn;
+        log(`✓ Composition started: ${compositionArn}`);
+        log(`  State: ${data.state}`);
+        document.getElementById('btnStartComp').disabled = true;
+        document.getElementById('btnStopComp').disabled = false;
+      } catch (err) {
+        log(`ERROR: ${err.message}`);
+      }
+    }
+
+    async function stopComposition() {
+      try {
+        if (!compositionArn) { log('No active composition'); return; }
+        const url = document.getElementById('compStopUrl').value;
+        log('Stopping composition...');
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ compositionArn })
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || 'Stop composition failed');
+
+        log(`✓ Composition stopped.`);
+        compositionArn = null;
+        document.getElementById('btnStartComp').disabled = false;
+        document.getElementById('btnStopComp').disabled = true;
+      } catch (err) {
+        log(`ERROR: ${err.message}`);
+      }
+    }
+  </script>
+</body>
+</html>

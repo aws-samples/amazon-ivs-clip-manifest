@@ -1,5 +1,57 @@
 # Release Notes
 
+## Version 1.4.0 - IVS Real-Time Recording Support
+
+### IVS Real-Time Clipping
+
+The clipping solution now supports Amazon IVS Real-Time recordings alongside the existing low-latency support. A single `POST /clipmanifest` endpoint handles all recording formats transparently.
+
+**Supported formats:**
+
+| Format | Master Manifest | Segments | Clipping Method |
+|--------|----------------|----------|-----------------|
+| IVS Low-Latency | `master.m3u8` | MPEG-TS (`.ts`) | PDT per segment |
+| RT Composite | `multivariant.m3u8` | MPEG-TS (`.ts`) | Offset-based |
+| RT Individual | `multivariant.m3u8` | fMP4 (`.mp4`) + init segments | PDT + cumulative |
+
+### Real-Time Recorder Stack (`realtime-recorder/`)
+
+New minimal SAM deployment (option 7 in the install wizard) for producing IVS Real-Time recordings:
+
+- IVS Real-Time Stage with auto participant recording
+- Storage + Encoder configuration for composite recording
+- `GET /token` — create participant tokens to join the stage
+- `POST /composition/start` and `POST /composition/stop` — composite recording control
+- S3 bucket + CloudFront for playback
+
+### Parser & Clipper Enhancements (`lib/`)
+
+- `parseMaster()` — now parses `#EXT-X-STREAM-INF` tags properly instead of relying on filename regex. Handles all rendition naming styles (`720p30/`, `720p30-hash/`, `high/`).
+- `parsePlaylistWithPDT()` — supports `#EXT-X-MAP` init segments (fMP4), single-PDT-at-start playlists with computed per-segment timestamps, and playlists with no PDT at all.
+- `clipPlaylistByPDT()` — uses PDT-based filtering when available, falls back to offset-based (cumulative duration) for playlists without PDT tags.
+- `createPlaylistManifest()` — emits `#EXT-X-MAP` tags for fMP4 clips, uses HLS version 7 when init segments are present, preserves all discontinuity markers.
+- `rewriteMaster()` — uses full URI replacement for rendition paths (handles nested/hash-suffixed paths).
+
+### UI Updates
+
+- **RT Publisher page** (`/rt-publisher`) — join an IVS Real-Time stage, publish video, and start/stop composite recordings directly from the browser.
+- **Recording discovery** — `GET /getrecordings` now lists both standard and Real-Time recordings with `[RT Composite]` / `[RT Individual]` labels.
+- **IVS Channel Info** — updated to show both Low-Latency channel details and Real-Time stage information.
+- **Navigation** — top navbar with "Clip Editor" and "Real-Time Publisher" links.
+
+### Lambda Path Fix
+
+- `clipmanifest` Lambda now uses `lastIndexOf('/')` for path extraction instead of hardcoded `replace('/master.m3u8', '')`, supporting both `master.m3u8` and `multivariant.m3u8` URLs.
+
+### AI Agent Configuration
+
+- Added `.claude/rules/` with shared behavioral rules (error handling, deployments, code style, protected files).
+- Added `.claude/README.md` explaining the agent configuration for contributors.
+- Updated `.kiro/steering/` files to reflect Real-Time support.
+- Updated `.gitignore` to track shared `.claude/` config while ignoring private settings.
+
+---
+
 ## Version 1.3.0 - Testing Infrastructure & Runtime Upgrade
 
 ### 🧪 Integration Test Suites

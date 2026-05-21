@@ -311,6 +311,49 @@ async function deployUIToCloud(stackName, region) {
   console.log(chalk.green('\n  UI deployed to cloud successfully!\n'))
 }
 
+async function deployRealtime() {
+  preflight(true)
+
+  const { stackName, region } = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'stackName',
+      message: 'Stack name:',
+      default: 'ivs-rt-recorder',
+      validate: validateStackName
+    },
+    {
+      type: 'input',
+      name: 'region',
+      message: 'AWS region:',
+      default: runCapture('aws', ['configure', 'get', 'region']) || 'us-east-1'
+    }
+  ])
+
+  console.log(chalk.yellow('\n  Deploying Real-Time Recorder...\n'))
+  console.log(chalk.blue(`  Stack:  ${stackName}`))
+  console.log(chalk.blue(`  Region: ${region}`))
+  console.log(chalk.blue(`  Dir:    realtime-recorder/\n`))
+
+  const samDir = path.join(ROOT_DIR, 'realtime-recorder')
+
+  run('sam build', { cwd: samDir })
+
+  runFile('sam', [
+    'deploy',
+    '--stack-name', stackName,
+    '--region', region,
+    '--capabilities', 'CAPABILITY_IAM',
+    '--resolve-s3',
+    '--force-upload'
+  ], { cwd: samDir })
+
+  trackStack(stackName)
+  console.log(chalk.green('\n  Real-Time Recorder deployed successfully!\n'))
+
+  return { stackName, region }
+}
+
 // ---------------------------------------------------------------------------
 // Main menu
 // ---------------------------------------------------------------------------
@@ -339,6 +382,10 @@ const options = [
   {
     name: '6. Full Solution (Backend + Local UI)          Deploy + start UI',
     value: 'complete'
+  },
+  {
+    name: '7. Deploy Real-Time Recorder                   RT Stage + Recording',
+    value: 'realtime'
   }
 ]
 
@@ -380,6 +427,10 @@ async function main() {
 
         case 'deploy-ui':
           await deployUIToCloud()
+          break
+
+        case 'realtime':
+          await deployRealtime()
           break
 
         case 'complete': {
